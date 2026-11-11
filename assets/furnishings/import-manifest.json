@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "assets": [
+    {"id":"bed-single","title":"Single bed","pack":"furniture_set","crop":[-25.75,0.22,-15.72,-4.23,7.99,-4.28],"yaw":90,"sizeAxis":2,"size":2.0,"category":"bed","outdoor":false,"collision":"box","access":"side"},
+    {"id":"bed-double","title":"Double bed","pack":"furniture_set","crop":[-25.75,0.22,1.37,-4.23,7.99,18.65],"yaw":90,"sizeAxis":2,"size":2.0,"category":"bed","outdoor":false,"collision":"box","access":"side"},
+    {"id":"chest","title":"Wooden chest","pack":"furniture_set","crop":[5.17,0.27,-36.14,11.15,5.65,-23.88],"yaw":90,"sizeAxis":0,"size":1.1,"category":"storage","outdoor":true,"collision":"box","access":"front"},
+    {"id":"cupboard","title":"Cupboard","pack":"furniture_set","crop":[-2.34,0.25,23.99,3.0,11.01,33.80],"yaw":90,"sizeAxis":1,"size":1.55,"category":"storage","outdoor":false,"collision":"box","access":"front"},
+    {"id":"shelf","title":"Rustic shelving","pack":"rustic_furniture","nodes":[3],"nodeNames":["wooden shelf"],"sizeAxis":1,"size":1.5,"category":"shelf","outdoor":true,"collision":"box","access":"front"},
+    {"id":"table-small","title":"Small rustic table","pack":"rustic_furniture","nodes":[5],"nodeNames":["smallTable"],"sizeAxis":1,"size":0.75,"category":"table","outdoor":true,"collision":"table","access":"side","surface":0.75},
+    {"id":"table-large","title":"Large rustic table","pack":"rustic_furniture","nodes":[15],"nodeNames":["bigTable"],"sizeAxis":1,"size":0.75,"category":"table","outdoor":true,"collision":"table","access":"side","surface":0.75},
+    {"id":"chair","title":"Rustic chair","pack":"rustic_furniture","nodes":[19],"nodeNames":["rustic wooden chair.001"],"yaw":180,"sizeAxis":1,"size":0.9,"category":"seat","outdoor":true,"collision":"chair","access":"back"},
+    {"id":"counter","title":"Shop counter","pack":"rustic_furniture","nodes":[9],"nodeNames":["Large Mobile Gin Bar"],"yaw":90,"sizeAxis":1,"size":0.95,"category":"counter","outdoor":true,"collision":"box","access":"front"},
+    {"id":"display","title":"Tiered display","pack":"rustic_furniture","nodes":[7],"nodeNames":["MOBILE NATURAL 3-TIER"],"sizeAxis":1,"size":0.9,"category":"shelf","outdoor":true,"collision":"box","access":"front"},
+    {"id":"bench","title":"Tavern bench","pack":"tavern","nodes":[1460],"nodeNames":["Group197"],"sizeAxis":1,"size":0.45,"category":"seat","outdoor":true,"collision":"bench","access":"back"},
+    {"id":"barrel","title":"Tavern barrel","pack":"tavern","nodes":[3999],"nodeNames":["Group446"],"sizeAxis":1,"size":0.85,"category":"storage","outdoor":true,"collision":"box","access":"front"},
+    {"id":"meal","title":"Tavern food plate","pack":"tavern","nodes":[1514],"nodeNames":["Group208"],"sizeAxis":0,"size":0.25,"category":"clutter","outdoor":true},
+    {"id":"mug","title":"Tavern mug","pack":"tavern","nodes":[1603],"nodeNames":["Cylinder258"],"sizeAxis":1,"size":0.12,"category":"clutter","outdoor":true},
+    {"id":"bottle","title":"Tavern bottle","pack":"tavern","nodes":[1635],"nodeNames":["Group216"],"sizeAxis":1,"size":0.28,"category":"clutter","outdoor":true}
+  ],
+  "variants": [
+    {"base":"table-small","id":"table-small-set","items":[{"asset":"meal","offset":[-0.25,0.75,0]},{"asset":"mug","offset":[0.26,0.75,-0.12]}]},
+    {"base":"table-large","id":"table-large-set","items":[{"asset":"meal","offset":[-0.55,0.75,-0.2]},{"asset":"meal","offset":[0.55,0.75,0.2]},{"asset":"mug","offset":[-0.55,0.75,0.19]},{"asset":"mug","offset":[0.55,0.75,-0.19]},{"asset":"bottle","offset":[0,0.75,0]}]}
+  ],
+  "interiors": [
+    {"template":"settlement-mega-house-1","floor":[-2.70,-2.70,2.70,2.70],"outdoor":false},
+    {"template":"settlement-mega-house-2","floor":[-2.70,-3.70,2.70,3.70],"outdoor":false},
+    {"template":"settlement-mega-house-3","floor":[-3.70,-3.70,3.70,3.70],"outdoor":false},
+    {"template":"settlement-mega-house-4","floor":[-3.70,-4.70,3.70,4.70],"outdoor":false},
+    {"template":"settlement-seahill-house-1","floor":[-2.65,-2.65,2.65,2.65],"outdoor":false},
+    {"template":"settlement-seahill-house-2","floor":[-2.65,-3.65,2.65,3.65],"outdoor":false},
+    {"template":"settlement-seahill-house-3","floor":[-3.65,-3.65,3.65,3.65],"outdoor":false},
+    {"template":"settlement-seahill-house-4","floor":[-3.65,-4.65,3.65,4.65],"outdoor":false},
+    {"template":"settlement-desert-compound-1","floor":[-6,-6,6,6],"outdoor":true},
+    {"template":"settlement-desert-compound-2","floor":[-10,-6,10,6],"outdoor":true},
+    {"template":"settlement-desert-compound-3","floor":[-10,-10,10,10],"outdoor":true},
+    {"template":"settlement-desert-compound-4","floor":[-14,-10,14,10],"outdoor":true}
+  ]
+}

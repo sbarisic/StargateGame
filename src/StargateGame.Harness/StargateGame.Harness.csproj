@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../StargateGame.Testing/StargateGame.Testing.csproj" /></ItemGroup>
+<ItemGroup><ProjectReference Include="../StargateGame.Shared/StargateGame.Shared.csproj" /></ItemGroup>
+<ItemGroup><ProjectReference Include="../StargateGame.Building/StargateGame.Building.csproj" /></ItemGroup></Project>

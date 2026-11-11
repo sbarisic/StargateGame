@@ -1,0 +1,90 @@
+{
+  "RealisticTree_01": {
+    "min": [
+      -3.173306465148926,
+      -1.5308356285095215,
+      -3.062334105372429
+    ],
+    "max": [
+      3.4526939392089844,
+      7.088889837265015,
+      2.859995558857918
+    ],
+    "lods": [
+      "RealisticTree_01_Lod1",
+      "RealisticTree_01_Lod2",
+      "RealisticTree_01_Lod3"
+    ],
+    "lodDistances": [
+      40,
+      90,
+      180
+    ]
+  },
+  "RealisticTree_02": {
+    "min": [
+      -4.299586296081543,
+      -1.2748373746871948,
+      -4.800217688083649
+    ],
+    "max": [
+      3.7255581617355347,
+      7.4813491106033325,
+      4.315113008022308
+    ],
+    "lods": [
+      "RealisticTree_02_Lod1",
+      "RealisticTree_02_Lod2",
+      "RealisticTree_02_Lod3"
+    ],
+    "lodDistances": [
+      40,
+      90,
+      180
+    ]
+  },
+  "MoreRealisticTree_01": {
+    "min": [
+      -4.821343779563904,
+      -0.0007273703813552856,
+      -2.8344300985336304
+    ],
+    "max": [
+      4.191653728485107,
+      7.240212412551045,
+      4.16745388507843
+    ],
+    "lods": [
+      "MoreRealisticTree_01_Lod1",
+      "MoreRealisticTree_01_Lod2",
+      "MoreRealisticTree_01_Lod3"
+    ],
+    "lodDistances": [
+      40,
+      90,
+      180
+    ]
+  },
+  "MoreRealisticTree_02": {
+    "min": [
+      -2.9446316957473755,
+      -0.009537165984511375,
+      -3.26813206076622
+    ],
+    "max": [
+      3.391492247581482,
+      7.400017226114869,
+      2.6655103266239166
+    ],
+    "lods": [
+      "MoreRealisticTree_02_Lod1",
+      "MoreRealisticTree_02_Lod2",
+      "MoreRealisticTree_02_Lod3"
+    ],
+    "lodDistances": [
+      40,
+      90,
+      180
+    ]
+  }
+}

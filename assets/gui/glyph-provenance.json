@@ -1,0 +1,245 @@
+{
+  "version": 1,
+  "method": "Project source DHD glyph triangles into a padded GUI atlas; source files are read-only.",
+  "cell": 128,
+  "columns": 8,
+  "rows": 5,
+  "orientation": "key-local inward-up, unmirrored",
+  "glyphs": [
+    {
+      "id": 1,
+      "part": "SM_Key_01",
+      "sourceSha256": "bb0b28481e14f6390510cd2aa5570187eaa9a2e983d94fb4d8b23094fe83ba2e",
+      "triangles": 49
+    },
+    {
+      "id": 2,
+      "part": "SM_Key_02",
+      "sourceSha256": "88c715bcc0d7881e3d79c2e62805262c46eaddad574b6ccbc55e7fb8ee9fc228",
+      "triangles": 49
+    },
+    {
+      "id": 3,
+      "part": "SM_Key_03",
+      "sourceSha256": "03068e6ce247a4495cb9df4ea7af80da3648b581a4de3799237c58aa309f0adb",
+      "triangles": 87
+    },
+    {
+      "id": 4,
+      "part": "SM_Key_04",
+      "sourceSha256": "75eb85b2dc5a7c9b79f3fe69d78b56710ee3f9ed03375a60857d1188fd558aac",
+      "triangles": 32
+    },
+    {
+      "id": 5,
+      "part": "SM_Key_05",
+      "sourceSha256": "69b8a9d28ce9ff5953c1b1cdd29f52d06db23926358f230c2727e93080a042be",
+      "triangles": 66
+    },
+    {
+      "id": 6,
+      "part": "SM_Key_06",
+      "sourceSha256": "a94eadb55273dacac6e2ccdfd0ea6b87dfc3be3d8ee9bc59b3d476bf7bcc8a56",
+      "triangles": 40
+    },
+    {
+      "id": 7,
+      "part": "SM_Key_07",
+      "sourceSha256": "265dc364bb0e076e2835bc031200f10b6cdd06e21c6875a76afa4d44dd1f79c8",
+      "triangles": 46
+    },
+    {
+      "id": 8,
+      "part": "SM_Key_08",
+      "sourceSha256": "aa145a8f68d9139297bb8eedc23738739f07cecfd24399912f047fc6a256793d",
+      "triangles": 14
+    },
+    {
+      "id": 9,
+      "part": "SM_Key_09",
+      "sourceSha256": "6f961c6928f5b8aed0cbc9186539262017970670e9150dbcaed62344237ead1f",
+      "triangles": 79
+    },
+    {
+      "id": 10,
+      "part": "SM_Key_10",
+      "sourceSha256": "fecf81fd053037ab3f8242d69605a6fe0af610ac63394d521b9b7c126705fbc8",
+      "triangles": 59
+    },
+    {
+      "id": 11,
+      "part": "SM_Key_11",
+      "sourceSha256": "b0ffe1a077e7549d26a24be428581ad7150d7cf14a6a885d72570fd3773d548b",
+      "triangles": 32
+    },
+    {
+      "id": 12,
+      "part": "SM_Key_12",
+      "sourceSha256": "8180d56dba4d663e86fc563ec1c1ceeea10173447abce2e35ac5476e011f59ea",
+      "triangles": 73
+    },
+    {
+      "id": 13,
+      "part": "SM_Key_13",
+      "sourceSha256": "ef62959723966d080728dbbec2f8a1f3b83bcbc6fdc02a73f038d155b2651a0d",
+      "triangles": 52
+    },
+    {
+      "id": 14,
+      "part": "SM_Key_14",
+      "sourceSha256": "5d35c007c9201bcb191f311454a47eb7eba8cf7aec100872c424205ae75e1288",
+      "triangles": 47
+    },
+    {
+      "id": 15,
+      "part": "SM_Key_15",
+      "sourceSha256": "71fe87195ad43007dc70d93bd82468a0897e9601ca5b3b019bcdeda15f64c2ad",
+      "triangles": 51
+    },
+    {
+      "id": 16,
+      "part": "SM_Key_16",
+      "sourceSha256": "3bba1a9da015d59c3cabae16bd4b5f2326adc25ca083e83602e3b6d2e6131d58",
+      "triangles": 60
+    },
+    {
+      "id": 17,
+      "part": "SM_Key_17",
+      "sourceSha256": "30db668b1acfa586c25562e36550bfa3da3fdc5cdcbfae4ecc19edddf0d6ea2d",
+      "triangles": 37
+    },
+    {
+      "id": 18,
+      "part": "SM_Key_18",
+      "sourceSha256": "e41c4d7fa9c9525992f4bfe4c7d3e6dcb2d6f5ab81c29ca5fed75d5813b7d3e6",
+      "triangles": 79
+    },
+    {
+      "id": 19,
+      "part": "SM_Key_19",
+      "sourceSha256": "631458d502811db29b786d950836c011cdaf68e99c18a07cb56567982683e7e4",
+      "triangles": 77
+    },
+    {
+      "id": 20,
+      "part": "SM_Key_20",
+      "sourceSha256": "a4e5e219040bdfaed2f67de20850339e0e3791a536e6897d90f644c666c2ad69",
+      "triangles": 31
+    },
+    {
+      "id": 21,
+      "part": "SM_Key_21",
+      "sourceSha256": "13e66b80e58a020423148236775d2d4d86dc1904de11e781a9c8f95e732c2faf",
+      "triangles": 55
+    },
+    {
+      "id": 22,
+      "part": "SM_Key_22",
+      "sourceSha256": "8d241e3b75d00890a4ff6008b7486903f665fd54fb4bef9134afff250810fcb8",
+      "triangles": 67
+    },
+    {
+      "id": 23,
+      "part": "SM_Key_23",
+      "sourceSha256": "596b9892d384b29ac8cfad633904cde26a07bd0af0babfb8f3e392bb17867405",
+      "triangles": 18
+    },
+    {
+      "id": 24,
+      "part": "SM_Key_24",
+      "sourceSha256": "d616e1224a31826bd0f41bfa55da311874ae82f72ef0d06206a3ffd40f8a2a99",
+      "triangles": 28
+    },
+    {
+      "id": 25,
+      "part": "SM_Key_25",
+      "sourceSha256": "92bc6a26088b4324157f203b614ab1a17e2a788561b6128df2cfdbd96ec4b81d",
+      "triangles": 58
+    },
+    {
+      "id": 26,
+      "part": "SM_Key_26",
+      "sourceSha256": "8eaa345d36c125a8551a7a26f545b3ae7d159f70fa270e8897de48d0a8004fda",
+      "triangles": 78
+    },
+    {
+      "id": 27,
+      "part": "SM_Key_27",
+      "sourceSha256": "cd0a8e7a1e3aa362a464fee41b08a41bcc7eae4e33302b13dec58d2716119632",
+      "triangles": 58
+    },
+    {
+      "id": 28,
+      "part": "SM_Key_28",
+      "sourceSha256": "2151c3f2b630c33412d3303d5a0fc27e2809978e94d7abdeec1e950c4f17b5d5",
+      "triangles": 53
+    },
+    {
+      "id": 29,
+      "part": "SM_Key_29",
+      "sourceSha256": "1f66e3c9a3d2402a041db1eeb8cb619bb885d282cab6aa968e13b934b54e6770",
+      "triangles": 82
+    },
+    {
+      "id": 30,
+      "part": "SM_Key_30",
+      "sourceSha256": "83b325d87810ad0ef1dff13f541325fbf34b878f81ddaf830db3699029437712",
+      "triangles": 203
+    },
+    {
+      "id": 31,
+      "part": "SM_Key_31",
+      "sourceSha256": "9f13a122ec53a48d45f1dcf18a580d75328932723c3b59eb4e265ec21a59ac3f",
+      "triangles": 16
+    },
+    {
+      "id": 32,
+      "part": "SM_Key_32",
+      "sourceSha256": "8ac77784527ccb7cf851b7d731945e038cb4316dfc636974d42e75ec60750730",
+      "triangles": 73
+    },
+    {
+      "id": 33,
+      "part": "SM_Key_33",
+      "sourceSha256": "bde20038a21c0be167b8bb7f62f6aff8dad637b262fe23a70e65b849e09710d7",
+      "triangles": 66
+    },
+    {
+      "id": 34,
+      "part": "SM_Key_34",
+      "sourceSha256": "b9da82c05826cc1bd7528abe6d2e1fc9fded7387a80088a51cd913d696dc1238",
+      "triangles": 88
+    },
+    {
+      "id": 35,
+      "part": "SM_Key_35",
+      "sourceSha256": "24e521d6f190feff011b601649fc09b9e10a0f5a4eac735cfa7e4eb8c71fe1e1",
+      "triangles": 73
+    },
+    {
+      "id": 36,
+      "part": "SM_Key_36",
+      "sourceSha256": "0658a9c72a37b913e9015de3a5d48e650487d04e2a587dc5e27371d93810d644",
+      "triangles": 53
+    },
+    {
+      "id": 37,
+      "part": "SM_Key_37",
+      "sourceSha256": "a5dc3113ab62f98ed64fe9b8cd77a7772eab357f888f74d2d2a2eec13e203289",
+      "triangles": 39
+    },
+    {
+      "id": 38,
+      "part": "SM_Key_38",
+      "sourceSha256": "903422e23eeba3c7f1903acf1d418892177beba758e60650cb71dd9dd53d2265",
+      "triangles": 52
+    },
+    {
+      "id": 39,
+      "part": "SM_Key_39",
+      "sourceSha256": "96829d293f4960a2325a8d447dd602f208ce200521c89bfc7cf2a4d272f8f4fe",
+      "triangles": 58
+    }
+  ],
+  "sha256": "b13b1ef456c2f51658f3a4ee90f6b9395654055a38456dd047206664410ae8f4"
+}

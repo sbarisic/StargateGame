@@ -1,0 +1,212 @@
+{
+  "version": 1,
+  "sources": {
+    "assets/furnishings/import-manifest.json": "1a63e57272ed7bfcd6e873e93bf98c9fb4f689d14f6e26f0de86a3dde7d4f27a",
+    "assets_itch/furniture/furniture_set/scene.gltf": "9c088aa6399ced808aabb37c1263e5b0fe5a85334d0f7c35fd54bd6602399724",
+    "assets_itch/furniture/furniture_set/scene.bin": "18cda474b2c1158262f45adc1408d858d352d1f395b413de2f433758c06775a2",
+    "assets_itch/furniture/furniture_set/license.txt": "a439f8cff2f86b8aa94409de11ec5034b83696f75d25339c767cc173a19daba5",
+    "assets_itch/furniture/rustic_furniture/scene.gltf": "ef392f2f993716c5da3d04084f2d36531f91af207b6bd280af847e8e97be936e",
+    "assets_itch/furniture/rustic_furniture/scene.bin": "321ccc5d72c72650e5808a020eb8ac832f7f96f1ba888515864ae825fdcae096",
+    "assets_itch/furniture/rustic_furniture/license.txt": "db038969c86efbb06a2fb5c5d59a8948d4faffba59383ac558485ebbb4ca097a",
+    "assets_itch/furniture/tavern/scene.gltf": "c41b3796a46d764c5245bed7c8e6449f139869f3359119c9fad60920588edfef",
+    "assets_itch/furniture/tavern/scene.bin": "abd765648d8c680fd65083594ea56bee88d4eb5203272b144af7ea5b6c6544e3",
+    "assets_itch/furniture/tavern/license.txt": "0e9aa448a626fdae16b7c391008d7945991ff4a99444bc20d69d129cd5cf6cc7",
+    "assets_itch/furniture/furniture_set/textures/Material_texture01.dds_baseColor.jpeg": "e5c03c7b8c481745a00bf188915d29f19175f1b1d9ada28112257811f9e9d1b0",
+    "assets_itch/furniture/furniture_set/textures/Material_texture01.dds_normal.png": "e60b2eb58de99214daab30dc6dc393799ff89b9d9f078b040fffc755f3c4974f",
+    "assets_itch/furniture/furniture_set/textures/Material_texture01.dds_metallicRoughness.png": "b28065f25f57d88c94eeeb50c67efced7771375b8a2c2dedca6c3e941f34a90f",
+    "assets_itch/furniture/rustic_furniture/textures/woodenShelf.Material_baseColor.png": "9cd01379d9765cd68c58639e5290e39a6d913a6091b08e73f6c1e1237d691884",
+    "assets_itch/furniture/rustic_furniture/textures/woodenShelf.Material_normal.png": "6edce86e89efd6dfbf2e3f5aa11646c2ec2130351b70fe46661ed6117d3abfb0",
+    "assets_itch/furniture/rustic_furniture/textures/woodenShelf.Material_metallicRoughness.png": "380418a0f85f4fab45ef4f27771ce539221f9faf614f160f437b8111e4943897",
+    "assets_itch/furniture/rustic_furniture/textures/smallTable.Material_baseColor.png": "aa26cdab9d12daf3f6d61c8a7b71d569647030cd1e23e043a7c1c8001a97e9a3",
+    "assets_itch/furniture/rustic_furniture/textures/smallTable.Material_normal.png": "a94e6ee6d9b2242a6ad6765342190be8538cf06ae4bd345e8e668a9caff1dd2f",
+    "assets_itch/furniture/rustic_furniture/textures/smallTable.Material_metallicRoughness.png": "f1d17d8b287b4ff812312f7ecb5d0e30437781a5c91f632dc01d54a8ed267460",
+    "assets_itch/furniture/rustic_furniture/textures/bigTable.Material_baseColor.png": "825322f94a79641d6b5a5213c551c8a3a7ba6537036a46a833388ff81e35f10a",
+    "assets_itch/furniture/rustic_furniture/textures/bigTable.Material_normal.png": "eddcd2b65e7b29c2f7e758b21173e92b780a640ad1dd4991b6ad29b409d80272",
+    "assets_itch/furniture/rustic_furniture/textures/bigTable.Material_metallicRoughness.png": "abb626920d7c6a071018e79668d73c5a9102e6f643336c3ccd347bfada72870c",
+    "assets_itch/furniture/rustic_furniture/textures/rusticwoodenChair.Material_baseColor.png": "2d678fbe108996bd08cb343f78218ac2bd408b73d1239a0812e97e30a6ee8d8b",
+    "assets_itch/furniture/rustic_furniture/textures/rusticwoodenChair.Material_normal.png": "6d28844bf99bcdd3e5d79e0e381288aaf4d7ca0c5084acb0420012d60e7970b6",
+    "assets_itch/furniture/rustic_furniture/textures/rusticwoodenChair.Material_metallicRoughness.png": "342b4227a784ee0d462367bafe01df7b7e6aad8fd8a375c6f9cbfdb3d8de8b62",
+    "assets_itch/furniture/rustic_furniture/textures/LargeMobileGinBar.Material_baseColor.png": "e394768ceae3470dd855a5c8d080389be3d69bf1e4ad081b49896866d864175e",
+    "assets_itch/furniture/rustic_furniture/textures/LargeMobileGinBar.Material_normal.png": "eb019807dce9beb96afc20caf04d5267ca7d77fd13e9383589b34f783810511d",
+    "assets_itch/furniture/rustic_furniture/textures/LargeMobileGinBar.Material_metallicRoughness.png": "30d6d226bff246f6890a665e0cec64a4a4cb5064fbd28424b21555a7b49c983f",
+    "assets_itch/furniture/rustic_furniture/textures/MOBILE_ATURAL_-TIER.Material_baseColor.png": "cc3da9a57987af7c55a76c6dec8d29a0a4e492422dc2bb3c0b7e3f0fa70f62f4",
+    "assets_itch/furniture/rustic_furniture/textures/MOBILE_ATURAL_-TIER.Material_normal.png": "22f10ce160b611f6f406cde9f35f9055e3b6dbf776a8156cbe6f367232155f82",
+    "assets_itch/furniture/rustic_furniture/textures/MOBILE_ATURAL_-TIER.Material_metallicRoughness.png": "518952ae0423f34109dafd9d8bfaa5ebbeddb47c047a833cff44a767c22dd8de",
+    "assets_itch/furniture/tavern/textures/temn_goriz_baseColor.png": "961173a50259dc20dd59bc094bdd12efa419cf094201c32da2ec454d63c25472",
+    "assets_itch/furniture/tavern/textures/temn_vert_baseColor.png": "44b90fe0e8a2d2f6ae6e5919552ecb335890d80aa6b67f3ec52961393c322d99",
+    "assets_itch/furniture/tavern/textures/Material_175_baseColor.png": "4097e26e5110382554605b5179f98cef943e95f7c904c62fce23a8d0d88da215",
+    "assets_itch/furniture/tavern/textures/Material_188_baseColor.jpeg": "55b05f6bd1ec3b09ad8ce056e4783d82008b2d2c75f92eaeb215cd3c66766ca5",
+    "assets_itch/furniture/tavern/textures/Material_183_baseColor.jpeg": "fad64ee2d0f18ce8e1e860584fe3b3288f0342cd6214499aca517b1fb5b25812",
+    "assets_itch/furniture/tavern/textures/Material_189_baseColor.jpeg": "c11ef7f5bde7fc4185cf443cb11339bd2c45fd3f3217be4f26c68b66acc70707",
+    "assets/settlements/templates.json": "45a42027f0709c2e59fe56e2aaf7e9dfc24e73bfe4567ce0b16562d9d045bc78",
+    "assets/settlements/prefabs.json": "f96884515f65e0ecf38daccc88a83635055a9e31bcd01224db2c5b1eef648ea7",
+    "assets/building/prefabs.json": "17d2beb697ff67143b6cf5bf75cc9dfcd355d501e6da9efa514735ac10748dda"
+  },
+  "assets": [
+    {
+      "id": "bed-single",
+      "sourcePack": "furniture_set",
+      "scale": 0.09300262100262952,
+      "dimensions": [
+        1.0621497139324547,
+        0.7210893866807032,
+        2.0
+      ],
+      "triangles": 750
+    },
+    {
+      "id": "bed-double",
+      "sourcePack": "furniture_set",
+      "scale": 0.09300262100262952,
+      "dimensions": [
+        1.604722968476946,
+        0.7210894268702773,
+        2.0
+      ],
+      "triangles": 750
+    },
+    {
+      "id": "chest",
+      "sourcePack": "furniture_set",
+      "scale": 0.0898152168428447,
+      "dimensions": [
+        1.1,
+        0.4817794772221795,
+        0.5360658172027792
+      ],
+      "triangles": 702
+    },
+    {
+      "id": "cupboard",
+      "sourcePack": "furniture_set",
+      "scale": 0.14423658983254006,
+      "dimensions": [
+        1.4110694458806683,
+        1.5499999999999998,
+        0.7670452784272954
+      ],
+      "triangles": 1033
+    },
+    {
+      "id": "shelf",
+      "sourcePack": "rustic_furniture",
+      "scale": 0.9810987634166174,
+      "dimensions": [
+        1.7896111060832354,
+        1.5,
+        0.7436024771158392
+      ],
+      "triangles": 2672
+    },
+    {
+      "id": "table-small",
+      "sourcePack": "rustic_furniture",
+      "scale": 0.9099314967057666,
+      "dimensions": [
+        1.1931381324711667,
+        0.75,
+        0.6796944718085134
+      ],
+      "triangles": 1336
+    },
+    {
+      "id": "table-large",
+      "sourcePack": "rustic_furniture",
+      "scale": 0.8984740283806442,
+      "dimensions": [
+        2.0789676513774165,
+        0.75,
+        1.0182651845841122
+      ],
+      "triangles": 1268
+    },
+    {
+      "id": "chair",
+      "sourcePack": "rustic_furniture",
+      "scale": 1.0076616679357944,
+      "dimensions": [
+        0.4871885995865053,
+        0.9,
+        0.5033466805852904
+      ],
+      "triangles": 1080
+    },
+    {
+      "id": "counter",
+      "sourcePack": "rustic_furniture",
+      "scale": 0.9953662868771282,
+      "dimensions": [
+        2.505745027506939,
+        0.95,
+        1.597689868467735
+      ],
+      "triangles": 436
+    },
+    {
+      "id": "display",
+      "sourcePack": "rustic_furniture",
+      "scale": 1.8819217855019348,
+      "dimensions": [
+        0.5756246732950459,
+        0.9000000000000001,
+        0.977713988735776
+      ],
+      "triangles": 1580
+    },
+    {
+      "id": "bench",
+      "sourcePack": "tavern",
+      "scale": 0.004436567849767646,
+      "dimensions": [
+        1.7502254230814334,
+        0.45,
+        0.5181979388778859
+      ],
+      "triangles": 204
+    },
+    {
+      "id": "barrel",
+      "sourcePack": "tavern",
+      "scale": 0.006146983470366227,
+      "dimensions": [
+        0.6557029476539833,
+        0.85,
+        0.6568433481337816
+      ],
+      "triangles": 1264
+    },
+    {
+      "id": "meal",
+      "sourcePack": "tavern",
+      "scale": 0.005553630729795212,
+      "dimensions": [
+        0.25,
+        0.08379320687800229,
+        0.24999999999999023
+      ],
+      "triangles": 2016
+    },
+    {
+      "id": "mug",
+      "sourcePack": "tavern",
+      "scale": 0.004287538530805098,
+      "dimensions": [
+        0.08991433167351293,
+        0.12,
+        0.13722816245701486
+      ],
+      "triangles": 400
+    },
+    {
+      "id": "bottle",
+      "sourcePack": "tavern",
+      "scale": 0.0042654893800101075,
+      "dimensions": [
+        0.06064562875059831,
+        0.28,
+        0.060645628202422586
+      ],
+      "triangles": 476
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "sourceGame": "Stargate Network 4.0.0-a1",
+  "sourcePak": "SGN-WindowsNoEditor.pak",
+  "notice": "Extracted game content; no new license granted. See THIRD-PARTY-NOTICES.md.",
+  "textures": [
+    {
+      "file": "T_SmokeSubUV_8X8.png",
+      "source": "SGN/Content/Stargate/MilkywayV2/Materials/T_SmokeSubUV_8X8.uasset",
+      "sha256": "98ebd612bb6787fd680676ababd71605638af677a52b39313752470932f0cc4a",
+      "conversion": "UE Viewer -game=ue4.21 -export -png; original channel values retained",
+      "usage": "static cell 0 density",
+      "atlasPlayback": false
+    },
+    {
+      "file": "T_Smoke_Tiled_D.png",
+      "source": "SGN/Content/Stargate/MilkywayV2/Materials/T_Smoke_Tiled_D.uasset",
+      "sha256": "4c423e8ed9724be7dcd886b5226bb2782d0d4f8b9fe28df693121a332fe458a8",
+      "conversion": "UE Viewer -game=ue4.21 -export -png; original channel values retained",
+      "usage": "spray detail mask",
+      "atlasPlayback": false
+    },
+    {
+      "file": "T_Snow_fx.png",
+      "source": "SGN/Content/Master/temp/Textures/T_Snow_fx.uasset",
+      "sha256": "99342a3527b46b916339af9f45319de26ccaca210bcf10360004982256c48527",
+      "conversion": "UE Viewer -game=ue4.21 -export -png; original channel values retained",
+      "usage": "spray detail mask",
+      "atlasPlayback": false
+    }
+  ]
+}

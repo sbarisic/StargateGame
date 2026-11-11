@@ -1,0 +1,33 @@
+{
+  "rid": "linux-x64",
+  "sources": {
+    "joltc": "2bbcf73b1bec261e0351814662922f1b4784454c",
+    "JoltPhysics": "e77f175595e64cb44218cc9d9d56fc365ad0e36a"
+  },
+  "cmakeOptions": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCROSS_PLATFORM_DETERMINISTIC=ON",
+    "-DDOUBLE_PRECISION=OFF",
+    "-DJPH_SAMPLES=OFF",
+    "-DJPH_TESTS=OFF",
+    "-DINTERPROCEDURAL_OPTIMIZATION=OFF",
+    "-DJPH_USE_DX12=OFF",
+    "-DJPH_USE_VK=OFF",
+    "-DJPH_USE_MTL=OFF",
+    "-DFLOATING_POINT_EXCEPTIONS_ENABLED=OFF",
+    "-DUSE_SSE4_1=OFF",
+    "-DUSE_SSE4_2=OFF",
+    "-DUSE_AVX=OFF",
+    "-DUSE_AVX2=OFF",
+    "-DUSE_AVX512=OFF",
+    "-DUSE_LZCNT=OFF",
+    "-DUSE_TZCNT=OFF",
+    "-DUSE_F16C=OFF",
+    "-DUSE_FMADD=OFF",
+    "-DJOLT_PHYSICS_ROOT=/mnt/e/Projects/StargateGame/thirdparty/JoltPhysics",
+    "-DCMAKE_CXX_COMPILER=clang++",
+    "-DCMAKE_C_COMPILER=clang"
+  ],
+  "bridgeSha256": "3a97088282c566a1a3ecb771472736304db729a871e6216232a151623710c0e3",
+  "sha256": "ad947329fc9516e8ae91741091923da2ef7e1420c11b6125d977f5ce535a3f21"
+}

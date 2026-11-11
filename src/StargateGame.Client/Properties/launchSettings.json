@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "StargateGame.Client": {
+      "commandName": "Project",
+      "commandLineArgs": "--dev-assets artifacts/cooked/dev-override --water-style realistic",
+      "workingDirectory": "../../"
+    },
+    "Persistent universe": {
+      "commandName": "Project",
+      "commandLineArgs": "--connect --connect-retry-seconds 90 --dev-assets artifacts/cooked/dev-override --water-style realistic",
+      "workingDirectory": "../../"
+    },
+    "Gate pair fixture": {
+      "commandName": "Project",
+      "commandLineArgs": "--connect --port 17777 --connect-retry-seconds 90 --fixture gate-pair --time-of-day 10 --dev-assets artifacts/cooked/dev-override",
+      "workingDirectory": "../../"
+    }
+  }
+}

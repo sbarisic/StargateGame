@@ -1,0 +1,4 @@
+Pillow==12.2.0
+numpy==2.4.4
+Brotli==1.2.1
+ispc_texcomp==1.0.1

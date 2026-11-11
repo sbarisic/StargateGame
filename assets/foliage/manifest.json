@@ -1,0 +1,440 @@
+{
+  "version": 1,
+  "source": "assets_itch/foliage/some_foliage",
+  "sceneSha256": "c6839b1406aefd04fa1c2f7f29811cf7605317cd6da54ccbff56ae13602c9d9a",
+  "bufferSha256": "0da2de06e627a7f262e0f49e201f0a2c3fb1381cbff4a6033c5a42a6fdbbbc89",
+  "materials": [
+    {
+      "name": "Grass_A",
+      "file": "realistic-Grass_A.tpb.gz",
+      "alphaCutoff": 0.4,
+      "linearColorGain": [
+        0.6,
+        0.64,
+        0.62
+      ],
+      "sourceNormalConvention": "OpenGL (glTF)",
+      "source": {
+        "baseColor": {
+          "file": "assets_itch/foliage/realistic_grass_pack/textures/Grass_A_baseColor.png",
+          "sha256": "5b0503bf60a88f1018dce9c967149678bf61f434c8d884452b3eca739473ac34"
+        },
+        "normal": {
+          "file": "assets_itch/foliage/realistic_grass_pack/textures/Grass_A_normal.png",
+          "sha256": "a6509dba564ec71e11038972730d41a73cc5c90565c08790e96e9d1670dae06a"
+        }
+      },
+      "sha256": "7656ca1c04491d864e577b031c55309640e1d11d59e0f0a59c25aeec6e669f4a"
+    },
+    {
+      "name": "Ferns",
+      "file": "Ferns.tpb.gz",
+      "alphaCutoff": 0.4,
+      "source": {
+        "baseColor": {
+          "file": "assets_itch/foliage/some_foliage/textures/Ferns_baseColor.png",
+          "sha256": "49637b9d20a2fa67c8f7e2c39d45310808c2f25998012abd1c28e8d6d96e9b8b"
+        },
+        "normal": {
+          "file": "assets_itch/foliage/some_foliage/textures/Ferns_normal.png",
+          "sha256": "eb6fe6cca972a3939186caed22c1584a7fb3426e3dc2536d27a62c0c6a94ca4e"
+        },
+        "metallicRoughness": {
+          "file": "assets_itch/foliage/some_foliage/textures/Ferns_metallicRoughness.png",
+          "sha256": "2bba75bf50ce3b1f84e419c0f39a1e4813a7880fc004a05af8b8d015244e7832"
+        }
+      },
+      "sha256": "d6919b00d3c1e1ac5e2d39bdfbe5ff199f7fab27771c6193eb51ba1c9108fd5f"
+    },
+    {
+      "name": "Dead_Bush",
+      "file": "Dead_Bush.tpb.gz",
+      "alphaCutoff": 0.4,
+      "source": {
+        "baseColor": {
+          "file": "assets_itch/foliage/some_foliage/textures/Dead_Bush_baseColor.png",
+          "sha256": "ce8f67cc97612cb5f017af365d03c5bcab860e2cec727dd6fe385a7daab4cedb"
+        },
+        "normal": {
+          "file": "assets_itch/foliage/some_foliage/textures/Dead_Bush_normal.png",
+          "sha256": "cdb8f191e2f8acd8954b915cf233591ddb4e442da9dab6d91bc8551727714f22"
+        },
+        "metallicRoughness": {
+          "file": "assets_itch/foliage/some_foliage/textures/Dead_Bush_metallicRoughness.png",
+          "sha256": "259a420b2251e80c8d4bd3b49f893a3dc0d91a9fe0b258ec6cf458b38e2b7d2c"
+        }
+      },
+      "sha256": "b00e52550e1920fa1e0161f1a26d4fd0d9245ea280767d87ea7d85e628642ad6"
+    },
+    {
+      "name": "Grass_B",
+      "file": "realistic-Grass_B.tpb.gz",
+      "alphaCutoff": 0.4,
+      "linearColorGain": [
+        0.6,
+        0.64,
+        0.62
+      ],
+      "sourceNormalConvention": "OpenGL (glTF)",
+      "source": {
+        "baseColor": {
+          "file": "assets_itch/foliage/realistic_grass_pack/textures/Grass_B_baseColor.png",
+          "sha256": "f208554dded7c98828ffb52e809a099646f636cb846cc15866d0776aacbea666"
+        },
+        "normal": {
+          "file": "assets_itch/foliage/realistic_grass_pack/textures/Grass_B_normal.png",
+          "sha256": "38c1f1e784f845b304aa703aaa3b002da4349e47f597f4a8c36b893253c61f94"
+        }
+      },
+      "sha256": "a32715185fdf36ab932d9fec28972b1ac40a6640c051ba551dcd485c8d8ac668"
+    },
+    {
+      "name": "Grass_C",
+      "file": "realistic-Grass_C.tpb.gz",
+      "alphaCutoff": 0.4,
+      "linearColorGain": [
+        0.6,
+        0.64,
+        0.62
+      ],
+      "sourceNormalConvention": "OpenGL (glTF)",
+      "source": {
+        "baseColor": {
+          "file": "assets_itch/foliage/realistic_grass_pack/textures/Grass_C_baseColor.png",
+          "sha256": "f8995074901019c6332f381c9e971946f0482b7d74f804e9c8792c5cdc876949"
+        },
+        "normal": {
+          "file": "assets_itch/foliage/realistic_grass_pack/textures/Grass_C_normal.png",
+          "sha256": "983397a91c4fe8d44c1cc5cd73d6229ff921378259f18c33d8b1483bf6de7928"
+        }
+      },
+      "sha256": "9a5941f09aac680d9b7598ecb83d263ca14f79ae672c0e98979f80e68976a0be"
+    }
+  ],
+  "models": [
+    {
+      "name": "SM_DeadBush_01_Dead_Bush_0",
+      "kind": "bush",
+      "material": 2,
+      "sourceHeightMetres": 1.3075927352905274,
+      "min": [
+        -0.788097611632079,
+        0,
+        -0.7072761086861017
+      ],
+      "max": [
+        0.788097611632079,
+        1,
+        0.7072761086861017
+      ],
+      "lods": [
+        {
+          "file": "SM_DeadBush_01_Dead_Bush_0-lod0.mesh",
+          "triangles": 1208,
+          "sha256": "bf423931085e2acea06a5f2be72664c820f439cc4cd134e4f09c7cf8f2c1f5ca"
+        },
+        {
+          "file": "SM_DeadBush_01_Dead_Bush_0-lod1.mesh",
+          "triangles": 543,
+          "sha256": "08147ea03c9298fda3f553fbb902e19c4da86e0721c834f1767c2ef53f88bcbb"
+        }
+      ]
+    },
+    {
+      "name": "SM_DeadBush_02_Dead_Bush_0",
+      "kind": "bush",
+      "material": 2,
+      "sourceHeightMetres": 1.2516083240509033,
+      "min": [
+        -0.6353217175974715,
+        0,
+        -0.7545421008865051
+      ],
+      "max": [
+        0.6353217175974715,
+        1,
+        0.7545421008865051
+      ],
+      "lods": [
+        {
+          "file": "SM_DeadBush_02_Dead_Bush_0-lod0.mesh",
+          "triangles": 1436,
+          "sha256": "1aeee3003b166f50975b64bbbf7a9dae69599d1e6975039d8c3296cda42c5674"
+        },
+        {
+          "file": "SM_DeadBush_02_Dead_Bush_0-lod1.mesh",
+          "triangles": 645,
+          "sha256": "52c312ea4d949b7f481190ac8d7962ffa7d972ee32d32768769cca528413597f"
+        }
+      ]
+    },
+    {
+      "name": "SM_DeadBush_03_Dead_Bush_0",
+      "kind": "bush",
+      "material": 2,
+      "sourceHeightMetres": 0.4970351982116699,
+      "min": [
+        -2.8332269143982307,
+        0,
+        -2.5076900424149713
+      ],
+      "max": [
+        2.8332269143982307,
+        1,
+        2.5076900424149713
+      ],
+      "lods": [
+        {
+          "file": "SM_DeadBush_03_Dead_Bush_0-lod0.mesh",
+          "triangles": 1504,
+          "sha256": "30cbe7e3fcef36e66e3b5a86ecd6f5d72a3aa575468d90abf9d590cfbf670879"
+        },
+        {
+          "file": "SM_DeadBush_03_Dead_Bush_0-lod1.mesh",
+          "triangles": 676,
+          "sha256": "f2ebf4f4a3e32a605ed5ff0ebe9f0073f3478f8a778b083e4086d42ae4623089"
+        }
+      ]
+    },
+    {
+      "name": "SM_Fern_01_Ferns_0",
+      "kind": "fern",
+      "material": 1,
+      "sourceHeightMetres": 1.1817612075805664,
+      "min": [
+        -1.0898207992140265,
+        0,
+        -1.052192698181852
+      ],
+      "max": [
+        1.0898207992140265,
+        1,
+        1.052192698181852
+      ],
+      "lods": [
+        {
+          "file": "SM_Fern_01_Ferns_0-lod0.mesh",
+          "triangles": 384,
+          "sha256": "37cdcfb13493751cc1311302cf1abe13593a6a22fe53ece0eb65dc289cf72596"
+        },
+        {
+          "file": "SM_Fern_01_Ferns_0-lod1.mesh",
+          "triangles": 172,
+          "sha256": "e6c8fa538a3d415f2b3121a030b1bf4aaea8f7e9c99a365d5faab892689194f1"
+        }
+      ]
+    },
+    {
+      "name": "SM_Fern_02_Ferns_0",
+      "kind": "fern",
+      "material": 1,
+      "sourceHeightMetres": 0.91994549036026,
+      "min": [
+        -1.53528362043374,
+        0,
+        -1.3032226655270793
+      ],
+      "max": [
+        1.53528362043374,
+        1,
+        1.3032226655270793
+      ],
+      "lods": [
+        {
+          "file": "SM_Fern_02_Ferns_0-lod0.mesh",
+          "triangles": 960,
+          "sha256": "7e47d435ea85804c3e4da34e6013e1b38c249d2521c8ff951ce5130ee7a60c36"
+        },
+        {
+          "file": "SM_Fern_02_Ferns_0-lod1.mesh",
+          "triangles": 432,
+          "sha256": "f77a312c9780ded4f1d5a6d1df166cba0c9aa03b63006b12df15e4bf1f6f63e5"
+        }
+      ]
+    },
+    {
+      "name": "realistic-grass-5",
+      "kind": "grass",
+      "material": 0,
+      "sourceMesh": 5,
+      "sourceHeightMetres": 0.2782775852829218,
+      "min": [
+        -0.5845005226636477,
+        0.0,
+        -0.6793624067758194
+      ],
+      "max": [
+        0.5845005226636477,
+        1.0,
+        0.6793624067758194
+      ],
+      "lods": [
+        {
+          "file": "realistic-grass-5-lod0.mesh",
+          "triangles": 40,
+          "sha256": "068668081d604fae9399be922f89406a03701fd018cc3e8b81bcb804dd3be4b1"
+        },
+        {
+          "file": "realistic-grass-5-lod1.mesh",
+          "triangles": 20,
+          "sha256": "746ecd1dc0cd4b6b3dd39c4c168fd203a9cf2203073a5ef79dd9caecb668befb"
+        }
+      ]
+    },
+    {
+      "name": "realistic-grass-7",
+      "kind": "grass",
+      "material": 0,
+      "sourceMesh": 7,
+      "sourceHeightMetres": 0.3177088927477598,
+      "min": [
+        -0.7538039270437384,
+        0.0,
+        -0.7512172150871582
+      ],
+      "max": [
+        0.7538039270437384,
+        1.0,
+        0.7512172150871582
+      ],
+      "lods": [
+        {
+          "file": "realistic-grass-7-lod0.mesh",
+          "triangles": 30,
+          "sha256": "18328492daec92a1069ba42e6c2a0d10ef953ad93779fbe836b1f53e0c7201dc"
+        },
+        {
+          "file": "realistic-grass-7-lod1.mesh",
+          "triangles": 16,
+          "sha256": "dba60db490a777df17ad6fe9d7edc3fdae05768526ec59320196c8587d369a77"
+        }
+      ]
+    },
+    {
+      "name": "realistic-grass-6",
+      "kind": "grass",
+      "material": 3,
+      "sourceMesh": 6,
+      "sourceHeightMetres": 0.3700323891825974,
+      "min": [
+        -0.4845537758077807,
+        0.0,
+        -0.3969478725423707
+      ],
+      "max": [
+        0.4845537758077807,
+        1.0,
+        0.3969478725423707
+      ],
+      "lods": [
+        {
+          "file": "realistic-grass-6-lod0.mesh",
+          "triangles": 24,
+          "sha256": "7a4f8c6ac3923c17882a141134bc724b338db75195676b50c0f5125b81e4c748"
+        },
+        {
+          "file": "realistic-grass-6-lod1.mesh",
+          "triangles": 24,
+          "sha256": "7a4f8c6ac3923c17882a141134bc724b338db75195676b50c0f5125b81e4c748"
+        }
+      ]
+    },
+    {
+      "name": "realistic-grass-8",
+      "kind": "grass",
+      "material": 3,
+      "sourceMesh": 8,
+      "sourceHeightMetres": 0.3177088927477598,
+      "min": [
+        -0.756387710418251,
+        0.0,
+        -0.7569089315035434
+      ],
+      "max": [
+        0.7563877104182517,
+        1.0,
+        0.7569089315035438
+      ],
+      "lods": [
+        {
+          "file": "realistic-grass-8-lod0.mesh",
+          "triangles": 30,
+          "sha256": "a5f9fec1ebd6835e12d71bc99b11a05d4af241022819521fcb7a2fd23b2899be"
+        },
+        {
+          "file": "realistic-grass-8-lod1.mesh",
+          "triangles": 16,
+          "sha256": "6491d427e948a2c27d566ac0c2c7ff525edaeaf3455d227d86d3f7d036855f4a"
+        }
+      ]
+    },
+    {
+      "name": "realistic-grass-3",
+      "kind": "grass",
+      "material": 4,
+      "sourceMesh": 3,
+      "sourceHeightMetres": 0.22219863580539823,
+      "min": [
+        -0.5303623910505957,
+        0.0,
+        -0.45234662110166046
+      ],
+      "max": [
+        0.5303623910505957,
+        1.0,
+        0.45234662110166046
+      ],
+      "lods": [
+        {
+          "file": "realistic-grass-3-lod0.mesh",
+          "triangles": 50,
+          "sha256": "e628eefeebff785c13966ac0c770c7013630104d8cdb5ec1411ef306396a3fc6"
+        },
+        {
+          "file": "realistic-grass-3-lod1.mesh",
+          "triangles": 50,
+          "sha256": "e628eefeebff785c13966ac0c770c7013630104d8cdb5ec1411ef306396a3fc6"
+        }
+      ]
+    },
+    {
+      "name": "realistic-grass-4",
+      "kind": "grass",
+      "material": 4,
+      "sourceMesh": 4,
+      "sourceHeightMetres": 0.2488912744447589,
+      "min": [
+        -1.1446905169265094,
+        0.0,
+        -1.1597143955236486
+      ],
+      "max": [
+        1.1446905169265094,
+        1.0,
+        1.1597143955236486
+      ],
+      "lods": [
+        {
+          "file": "realistic-grass-4-lod0.mesh",
+          "triangles": 80,
+          "sha256": "3acd566168dcb66e6ab155c81e6163d7a8774bc536bbcab9cd9c877ffc4ef20a"
+        },
+        {
+          "file": "realistic-grass-4-lod1.mesh",
+          "triangles": 40,
+          "sha256": "a29ac6494a0176083736689e6e8aed06a6299a22b6442dc7fb64ccf30a2f32b8"
+        }
+      ]
+    }
+  ],
+  "changes": "Gallery transforms removed, unit-height Y-up meshes; Blender bottom-left UVs matching bottom-up texture rows; DirectX normals; alpha-preserving mipmaps; decimated distance LOD",
+  "realisticGrass": {
+    "source": "assets_itch/foliage/realistic_grass_pack",
+    "sceneSha256": "0cd80e1eb342efcade8609b18bb4f67be7501f57f68cd876fbead10cca4516d0",
+    "bufferSha256": "5fbd63b1f220329b00408936e401c66667ee9339eee490fb0c6fd04ab677f672",
+    "tool": "tools/import_realistic_grass.py",
+    "license": "CC-BY-4.0",
+    "author": "Nicholas-3D",
+    "changes": "Six non-wheat clumps; gallery transforms removed; unit-height Y-up; olive linear-space grade; alpha-tested, coverage-preserving mipmaps; whole-card distance LODs; matte nonmetallic surface"
+  }
+}

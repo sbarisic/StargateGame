@@ -1,0 +1,26 @@
+{
+  "source": "https://ambientcg.com/a/Foliage008",
+  "author": "ambientCG / Lennart Demes",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://docs.ambientcg.com/license/",
+  "technique": "Photometric Stereo",
+  "tool": "tools/import_grass_blades.py",
+  "version": 2,
+  "changes": "Seven centerline-normalized photographic blade scans; darker green linear-space grade; rotated normal channels; geometry provides outline and curvature",
+  "files": {
+    "Foliage008_2K-PNG_Color.png": "9df6d50f3914039e79a1f981809b5d33a0601e61214583571c34c47b30e02356",
+    "Foliage008_2K-PNG_NormalGL.png": "c993b7a0a9620dfda699dc314903320a78106bce6cf73aceb3481e4adb2b8a48",
+    "Foliage008_2K-PNG_Roughness.png": "6147bbe820c28e25a0ace46c687c5f4d98f6e55325b3687a8933d4fbb879ceec",
+    "Foliage008_2K-PNG_Opacity.png": "143a53e12f8db7150bab336d926bcd78cb5aadcedbdc9b23a206621fe4cdc535"
+  },
+  "outputs": {
+    "grass-blades.png": "8182aa703a5b8419a64c916988c19ad0c767468098c5a3e348476061c08ce83f",
+    "grass-blades-normal.png": "14f01f4ae1d7349ff4a15c668cd7548d5deffc9929987f9832d7caf5bc470276"
+  },
+  "variant": "dark-green",
+  "linearColorGain": [
+    0.42,
+    0.62,
+    0.48
+  ]
+}

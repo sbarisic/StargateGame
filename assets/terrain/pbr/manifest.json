@@ -1,0 +1,906 @@
+{
+  "version": 1,
+  "format": "TPB1: uint32 side, levels; each mip has RGBA8 albedo (sRGB), normal (DX), AO/roughness/height/metallic; bottom-up rows",
+  "materials": {
+    "crusted-snow2": {
+      "file": "crusted-snow2.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/crusted-snow2/Crusted_snow2_Base_Color.png",
+          "sha256": "e0f6d3d5730923d6802fbf52fc972b11708a7f50cb2e633919d6dc9c12112f1b"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/crusted-snow2/Crusted_snow2_Normal-ogl.png",
+          "sha256": "ce5968bfea87305cbafd196b55cebbd6841d64306076b895cd567c38e7f1d49a"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/crusted-snow2/Crusted_snow2_ao.png",
+          "sha256": "38dd13bbbff5790093cefa4d65f31bd7a69b75141aadeb7c64ef81d5e89dbfba"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/crusted-snow2/Crusted_snow2_Roughness.png",
+          "sha256": "6433348eedf1b1ba0d6609d3b5ebae5c9ed799c8b91aeea9e7dccfefa87e4463"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/crusted-snow2/Crusted_snow2_Height.png",
+          "sha256": "cef5159791b2d1dfb574d69c8be5c7a8d99a8f923d2834441ecde6f39cb4262b"
+        }
+      },
+      "sha256": "5ff533fbca3ffbad1cdc9697bd56ddb7b59d9e4acaf01dc3f3cf2902722c2726",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.025,
+      "grassCoverage": 0
+    },
+    "damp-rocky-ground": {
+      "file": "damp-rocky-ground.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/damp-rocky-ground/damp-rocky-ground1-albedo.png",
+          "sha256": "f9c1b6dab73147727b246edae0bb16e48f185c1a91989e36753cc785292fbe57"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/damp-rocky-ground/damp-rocky-ground1-Normal-ogl.png",
+          "sha256": "2a80d75c9171d578869646ce81ad4e296f631fa41fe5a691d16172b22765991d"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/damp-rocky-ground/damp-rocky-ground1-ao.png",
+          "sha256": "95b4df57ef2854f6c40af02fbed8e743b2ae72a763a2bc4ef0b6ef652f971e0e"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/damp-rocky-ground/damp-rocky-ground1-Roughness.png",
+          "sha256": "ff2cb753e9cbc1b8c5b73c5b939eca4fe3a7cfcf82182e45b4a84cea3fe45e57"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/damp-rocky-ground/damp-rocky-ground1-Height.png",
+          "sha256": "ed6ce0c3e5fb7d76cae233618816fdae7921dcbda909df65dc96639026ac7f19"
+        }
+      },
+      "sha256": "29ba437011870bd30a72c1e7e491ca2e9293d012fe00e60ddb1f0747f78544c4",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.07,
+      "grassCoverage": 0.5
+    },
+    "desert-rock1": {
+      "file": "desert-rock1.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/desert-rock1/desert-rocks1-albedo.png",
+          "sha256": "d741895ceede412cd10ceb7d46c50e3452f368ea617cff5ac0c55b5e1fdb33fb"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/desert-rock1/desert-rocks1-Normal-ogl.png",
+          "sha256": "a235514c0d5c20832c7a4a0cbdb2587eab5b53c048bd27e09ec96ab4f4983c22"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/desert-rock1/desert-rocks1-ao.png",
+          "sha256": "1fbe1b2b5afb0c780aa2f6d728d44e3fb295e6faec057990447ed5b507ae5605"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/desert-rock1/desert-rocks1-Roughness.png",
+          "sha256": "676a02c3f500ab9b87c3eca3e57a6cebfa49294fe6e78c5622d8a0fb3cd69236"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/desert-rock1/desert-rocks1-Height.png",
+          "sha256": "c6c0ad0b549c74ce8673451a4a79bb4901674b07d42621a0afab02c63eba9985"
+        }
+      },
+      "sha256": "693ef74e62f59dc4c7f19c9c86df52af2483c582452d85c5973e69e8b948ccba",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.1,
+      "grassCoverage": 0
+    },
+    "dry-brown-dirt-pbr-material": {
+      "file": "dry-brown-dirt-pbr-material.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "albedoGain": 1,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/dry-brown-dirt-pbr-material/dry-dirt1-albedo.png",
+          "sha256": "e8df08657dbf48bc8c91f102447e52686b29a15a1556ed691c62f8e5c2414f1a"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/dry-brown-dirt-pbr-material/dry-dirt1-normal2.png",
+          "sha256": "f1b130afafc0d1f0d4a659e70468a88f2ba53cc8b8c3c046adb7029753587cee"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/dry-brown-dirt-pbr-material/dry-dirt1-ao.png",
+          "sha256": "b9e2caecf48c3e5b2c83d81488bda6473e69aedee30e7ec78369a82e0876d036"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/dry-brown-dirt-pbr-material/dry-dirt1-roughness.png",
+          "sha256": "ae7e5c5fdccd17d5b695a96bd8004f854087cd7863bbbbb65d69a3c3e99d42fe"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/dry-brown-dirt-pbr-material/dry-dirt1-height2.png",
+          "sha256": "c7292fafbde163801d22e41549cbc4978a0ce7c3169c4bc7f644f9f6504392bc"
+        }
+      },
+      "sha256": "02493bdf0703be15b77d6e3834a4507dafb4b644a4c5e1537b0c018dc0abd774",
+      "sourceNormalConvention": "OpenGL",
+      "sourceNormalConventionEvidence": "Height-gradient correlation: normal X opposes image-column gradient; normal Y follows image-row gradient.",
+      "parallaxDepthMetres": 0.035,
+      "grassCoverage": 0
+    },
+    "dry_riverbed_rock": {
+      "file": "dry_riverbed_rock.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "albedoGain": 1,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/dry_riverbed_rock/assets/materials/dryRiverbedRock/dry_riverbed_rock_baseColor.jpg",
+          "sha256": "2df4f7fa92fe768e6e285835a1449412157aeaac93f33feb6700ea248b754b0f"
+        },
+        "normal": {
+          "path": "assets_itch/textures/dry_riverbed_rock/assets/materials/dryRiverbedRock/dry_riverbed_rock_normal.jpg",
+          "sha256": "c4b539baa57df0fb1aea925d3ea21e4815eb70b1324bed14281de06b47b58671"
+        },
+        "ao": {
+          "path": "assets_itch/textures/dry_riverbed_rock/assets/materials/dryRiverbedRock/dry_riverbed_rock_ao.jpg",
+          "sha256": "c61a6107efc24b4d6c2d806de0b916b72e0a1a07b8325befe1617cb59c7d2ddd"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/dry_riverbed_rock/assets/materials/dryRiverbedRock/dry_riverbed_rock_roughness.jpg",
+          "sha256": "c5ad10055c3b6d1d634159be6267dcce40245d6f99764198a2bbaf6e869257ea"
+        },
+        "height": {
+          "path": "assets_itch/textures/dry_riverbed_rock/assets/materials/dryRiverbedRock/dry_riverbed_rock_displacement.jpg",
+          "sha256": "aa0fecbdb691d25f5f76b7bc72d1f896fe79dc928a83045c0a988c4f1b1cac15"
+        }
+      },
+      "sha256": "caae529be6d61e5d60d29a04065b82698e389e5583b047b381cad54b95b40cfb",
+      "sourceNormalConvention": "OpenGL",
+      "license": "CC0-1.0",
+      "attribution": "# Credits\n\n- \"Dry Riverbed Rock\" by Amal Kumar (Poly Haven, https://polyhaven.com/a/dry_riverbed_rock), licensed CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Changed by Patch: 1K JPEG maps selected, credit added to each file.\n\nLicense: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Its full text is in LICENSES/.\nFrom Poly Haven: https://polyhaven.com/a/dry_riverbed_rock",
+      "sourceResolution": [
+        1024,
+        1024
+      ],
+      "sourceNormalConventionEvidence": "Height-gradient correlation: normal X opposes image-column gradient; normal Y follows image-row gradient.",
+      "parallaxDepthMetres": 0.035,
+      "grassCoverage": 0
+    },
+    "forest-floor1": {
+      "file": "forest-floor1.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/forest-floor1/forest_floor_albedo.png",
+          "sha256": "9b75086f779662cea2728a9368d18a6e7b3f8cda0aec9bf48238f6005c1df347"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/forest-floor1/forest_floor_Normal-ogl.png",
+          "sha256": "0c63c44305c10133c3af980f96ce55aefa8bfce962eb2baf6316d67378d97086"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/forest-floor1/forest_floor-ao.png",
+          "sha256": "efacfea0272e56ef456968e7445d83e2bb50c17ed3df780086ae3f9cc4bde5eb"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/forest-floor1/forest_floor_Roughness.png",
+          "sha256": "8ce5b55795d396c75cb342312f0532d747e75efff6acc0e55925ce58c108ef53"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/forest-floor1/forest_floor_Height.png",
+          "sha256": "c7489ed86a7b611ad8f21d1417cc5654bc7fe779a1f615c06471eaa99e19b2b5"
+        }
+      },
+      "sha256": "8c9aab7eebfe8467ac60e18ad7c5dbd6b8ed5be7a9f73f6981b33fe98c52b4fa",
+      "albedoGain": 1.3,
+      "parallaxDepthMetres": 0.035,
+      "grassCoverage": 1
+    },
+    "ground_sand": {
+      "file": "ground_sand.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "albedoGain": 1,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/ground_sand/assets/materials/ground055S/ground055s_baseColor.jpg",
+          "sha256": "cc836c9bcd8349a729b0d7abc3e079049b4c78f11338ea20368ba35a0815266f"
+        },
+        "normal": {
+          "path": "assets_itch/textures/ground_sand/assets/materials/ground055S/ground055s_normal.jpg",
+          "sha256": "366b571de3cb1bf36aa48043e1fbdd56d83f49e84ef32b5bf4242cfe49c650bc"
+        },
+        "ao": {
+          "path": "assets_itch/textures/ground_sand/assets/materials/ground055S/ground055s_ao.jpg",
+          "sha256": "565aff1d186cf1becd9137e660ad888e6f257ac8ba0102576b89bc3b23e81acf"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/ground_sand/assets/materials/ground055S/ground055s_roughness.jpg",
+          "sha256": "ae6eb53901c5f15a16703e3f0bc1887b864be02524280dae6bc3adb35a9d8b1d"
+        },
+        "height": {
+          "path": "assets_itch/textures/ground_sand/assets/materials/ground055S/ground055s_displacement.jpg",
+          "sha256": "1b8062bc34fb3ebb1cdce43fe4c59d07ba4a051dd41376d9d788910296a2264b"
+        }
+      },
+      "sha256": "7cbf98a535178a2457d93981b96cfb939aa53c85eb42fd6ebab3aa49f1735ab0",
+      "sourceNormalConvention": "OpenGL",
+      "license": "CC0-1.0",
+      "attribution": "# Credits\n\n- \"Ground 055 S\" by ambientCG (ambientCG, https://ambientcg.com/a/Ground055S), licensed CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Changed by Patch: 1K JPEG maps selected from the zip, credit added to each file.\n\nLicense: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Its full text is in LICENSES/.\nFrom ambientCG: https://ambientcg.com/a/Ground055S",
+      "sourceResolution": [
+        1024,
+        1024
+      ],
+      "sourceNormalConventionEvidence": "Height-gradient correlation: normal X opposes image-column gradient; normal Y follows image-row gradient.",
+      "parallaxDepthMetres": 0.015,
+      "grassCoverage": 0
+    },
+    "ground_snow": {
+      "file": "ground_snow.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "albedoGain": 1,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/ground_snow/assets/materials/snow002/snow002_baseColor.jpg",
+          "sha256": "7af4107cddb7d07d21a2596fc2d9eb32b19bf1ecdf5d4007c6b007949b2618a8"
+        },
+        "normal": {
+          "path": "assets_itch/textures/ground_snow/assets/materials/snow002/snow002_normal.jpg",
+          "sha256": "6a1e851d8bd224025298fc5b66bc7e2989de4bd01d57123fc10bc4ac9635ef10"
+        },
+        "ao": {
+          "constant": 1
+        },
+        "roughness": {
+          "path": "assets_itch/textures/ground_snow/assets/materials/snow002/snow002_roughness.jpg",
+          "sha256": "2c07154f641cbbc387d2276345aacf70e05da511326cc2e501aa8074d339a974"
+        },
+        "height": {
+          "path": "assets_itch/textures/ground_snow/assets/materials/snow002/snow002_displacement.jpg",
+          "sha256": "a986e25627d9dcc0cb9bc2004440d5d5a3f129e44e4d064330b36e1d6bdddf5f"
+        }
+      },
+      "sha256": "cbb0cad3b2b3de5f302ccb98b436e78b33a7bbfae33c7fa03bf7091b9285d43b",
+      "sourceNormalConvention": "OpenGL",
+      "license": "CC0-1.0",
+      "attribution": "# Credits\n\n- \"Snow 002\" by ambientCG (ambientCG, https://ambientcg.com/a/Snow002), licensed CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Changed by Patch: 1K JPEG maps selected from the zip, credit added to each file.\n\nLicense: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Its full text is in LICENSES/.\nFrom ambientCG: https://ambientcg.com/a/Snow002",
+      "sourceResolution": [
+        1024,
+        1024
+      ],
+      "sourceNormalConventionEvidence": "Height-gradient correlation: normal X opposes image-column gradient; normal Y follows image-row gradient.",
+      "parallaxDepthMetres": 0.02,
+      "grassCoverage": 0
+    },
+    "ice-field-pbr": {
+      "file": "ice-field-pbr.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/ice-field-pbr/ice_field_albedo.png",
+          "sha256": "7d40741d3914d2489c24c00718fa64f5b8b84a17abfad5ff416baf4cf0a11188"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/ice-field-pbr/ice_field_normal-ogl.png",
+          "sha256": "23209766b25b1dbabb021ac60cb34a95c141fdc813059f6c7ab1c5cb4d8cf1c2"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/ice-field-pbr/ice_field_ao.png",
+          "sha256": "18bce7cc3f31faca80740760d39c02e5ca70d98145f5cbadcf544eaec542c151"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/ice-field-pbr/ice_field_roughness.png",
+          "sha256": "529c12464afe52467b6567f01765ced119f6ff80cc7aa28b240c2cf84ec04fdf"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/ice-field-pbr/ice_field_height.png",
+          "sha256": "44a5dcb7f5820883ff7b3f3816e98ce233f8698ab59618560f9967612529cd87"
+        }
+      },
+      "sha256": "0e8e725e81871961ff400939769ba34b8eba78ada3a4f2cbad449d7e27e63604",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.01,
+      "grassCoverage": 0
+    },
+    "jagged-rocky-ground-pbr": {
+      "file": "jagged-rocky-ground-pbr.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "albedoGain": 1,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/jagged-rocky-ground-pbr/jagged-rocky-ground_albedo.png",
+          "sha256": "fe7ab74442ef33020fc75de389e7e12bc75121f006c8475bc1ac297de0c632ef"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/jagged-rocky-ground-pbr/jagged-rocky-ground_normal-ogl.png",
+          "sha256": "4047432261518da0e635d03dbb100b8673b6bcbfb1e03a096164d8ed6ef543a3"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/jagged-rocky-ground-pbr/jagged-rocky-ground_ao.png",
+          "sha256": "36c65677cf311673c17dd01a56643e5ac628906aba07ce9eb6274a2b1dd64d8e"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/jagged-rocky-ground-pbr/jagged-rocky-ground_roughness.png",
+          "sha256": "2e6df52dc4d455e6349ce3d3f5e2df7477d8e98f4d01e7f6709ce73e454d58b1"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/jagged-rocky-ground-pbr/jagged-rocky-ground_height.png",
+          "sha256": "d2d12f914569f81b01f62c49cbcd645dca74dd3da7d2ad61a1180fa2a39216e5"
+        }
+      },
+      "sha256": "dbe3ecb9f099600bafe6622d64265a2a333156fa530142b53d365e7643d14a5e",
+      "sourceNormalConvention": "OpenGL",
+      "parallaxDepthMetres": 0.08,
+      "grassCoverage": 0
+    },
+    "mossy-mud1": {
+      "file": "mossy-mud1.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/mossy-mud1/mossy_mud1_albedo.png",
+          "sha256": "938eb54ff5cadd654cba319965ab89a101be2ba110ed83ab2f8ea7925c886461"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/mossy-mud1/mossy_mud1_Normal-ogl.png",
+          "sha256": "ec9b36b6611bc57e0b578ddc63390f7168c97fd68e651c7ea676c3df29d039a8"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/mossy-mud1/mossy_mud1_ao.png",
+          "sha256": "086bec092d5df8d81a1baf228f2b60abf229bd40348719421fe9d4ce594aee7e"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/mossy-mud1/mossy_mud1_Roughness.png",
+          "sha256": "741a7835c376df5ea9ec63307539cb2b64bd31c0cf07a21df0cc6897465b2ce6"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/mossy-mud1/mossy_mud1_Height.png",
+          "sha256": "22c3fac4d3053e50ce404d2eeec592c8fef24459a8867857be3e36c7b979b7c1"
+        }
+      },
+      "sha256": "4cbcb701e28377928440bde50eaeef5583ac4c37b9f29f4a762b688c07f16813",
+      "albedoGain": 1.15,
+      "parallaxDepthMetres": 0.025,
+      "grassCoverage": 1
+    },
+    "mud-with-vegetation": {
+      "file": "mud-with-vegetation.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/mud-with-vegetation/mud_with_vegetation_albedo.png",
+          "sha256": "985b9671b123c4c35bba2c82ec895927dd63ea08b95e1221d6eb1f2b7516d815"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/mud-with-vegetation/mud_with_vegetation_Normal-ogl.png",
+          "sha256": "f5a8a9511b4fc510b851093d7c1c785d4230b3b60a5c5504a1fef7f4c2e3ef29"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/mud-with-vegetation/mud_with_vegetation_ao.png",
+          "sha256": "64f9408492f14375523561b970df078673751a6e6ab05b978b03c56adc0c455a"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/mud-with-vegetation/mud_with_vegetation_Roughness.png",
+          "sha256": "551ac089e3a9be0f3b8a76a9455c8d8da94efaae5a8e6010bbc81443110dc9b5"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/mud-with-vegetation/mud_with_vegetation_Height.png",
+          "sha256": "5809be53c1e859d7f8a327d32b9ec83845339da0d79cac9f62d7fca843f49bd5"
+        }
+      },
+      "sha256": "65b39469182064ab232f40c24a8a18cdadf37618ea4d89827f0af085297bd3cc",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.035,
+      "grassCoverage": 0.9
+    },
+    "pine-forest-ground": {
+      "file": "pine-forest-ground.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/pine-forest-ground/pine_forest_ground1_albedo.png",
+          "sha256": "4ba44468d753767b5e60042519cb80a7e4fe81abf2c35492e1ac5ce035300f9a"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/pine-forest-ground/pine_forest_ground1_Normal-ogl.png",
+          "sha256": "393a9060932c7a979e3ccc56b7372641c194d2088b802dd4287990ab6ebcd455"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/pine-forest-ground/pine_forest_ground1_ao.png",
+          "sha256": "23188492c1600c6ef6dd1a2a32287ca4a85f02fc3656e9f32646ccb209a50702"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/pine-forest-ground/pine_forest_ground1_Roughness.png",
+          "sha256": "c669fce6006654659e6b6e74ccd4a74dbf7a4f3b3738248ebda99576b8d0c96c"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/pine-forest-ground/pine_forest_ground1_Height.png",
+          "sha256": "11acd48ecaa150050970e9fb23215095d7272d8c50a65e6b16a3783bfa7d0801"
+        }
+      },
+      "sha256": "6311a93796baba0abe555a4a7099783bb59cf17bbfeceff398c8f318868ca2e9",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.03,
+      "grassCoverage": 0.75
+    },
+    "rocky-dunes1": {
+      "file": "rocky-dunes1.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-dunes1/rocky-dunes1_albedo.png",
+          "sha256": "09eee5bedf68ad84e53e3757ac7e95e717d749d0c956d0e1316236449d813d0f"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-dunes1/rocky-dunes1_normal-ogl.png",
+          "sha256": "8d9f8f7feb41329922ee31d4769a545689d6c836e36797f330c5c76b075cce8f"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-dunes1/rocky-dunes1_ao.png",
+          "sha256": "6ec984b04f38fe1553102e7a2772513703af2744c0541c43d116ef92fb6b130a"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-dunes1/rocky-dunes1_roughness.png",
+          "sha256": "a4eda6a1074687865dca39241feedf718d13d06602c5f21a032b5ff7118e1088"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-dunes1/rocky-dunes1_height.png",
+          "sha256": "59e5f723cf96679fe44389ea0d6bb010ae29eee30fd2a1d099e6551a6d6d1f48"
+        }
+      },
+      "sha256": "021484cab565c0b00e9904f58e389c3abf2e36e11fe16fd787de1844c3e3277d",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.08,
+      "grassCoverage": 0
+    },
+    "rocky-rugged-terrain-pbr": {
+      "file": "rocky-rugged-terrain-pbr.tpb.gz",
+      "normalConvention": "DirectX",
+      "sourceNormalConvention": "OpenGL",
+      "normalStrength": 0.7,
+      "albedoGain": 0.65,
+      "heightBlendStrength": 0.18,
+      "sourceUrl": "https://freepbr.com/",
+      "license": "See FreePBR-notice.txt",
+      "tool": "tools/import_meadow_ground.py",
+      "source": {
+        "albedo": {
+          "path": "assets_itch\\textures\\freepbr_ground\\rocky-rugged-terrain-pbr\\rocky-rugged-terrain_1_albedo.png",
+          "sha256": "0ac6e7f417e15c6d5ae084f3de5f9f280eb8668051ef783699b024d4992a035f"
+        },
+        "normal": {
+          "path": "assets_itch\\textures\\freepbr_ground\\rocky-rugged-terrain-pbr\\rocky-rugged-terrain_1_normal-ogl.png",
+          "sha256": "27f5a82e664a301a5dee50f2569e04cb8a1a8663afb70c3264c6c5791d84b701"
+        },
+        "ao": {
+          "path": "assets_itch\\textures\\freepbr_ground\\rocky-rugged-terrain-pbr\\rocky-rugged-terrain_1_ao.png",
+          "sha256": "490af4ca1f7a9daa331c18a2c2bdd8d70ac4654e6188a990ac3ebcbfe8e07977"
+        },
+        "roughness": {
+          "path": "assets_itch\\textures\\freepbr_ground\\rocky-rugged-terrain-pbr\\rocky-rugged-terrain_1_roughness.png",
+          "sha256": "4823ea44290edaa43fd053024717cd66b1db435a762a9c49cb00632566ba9238"
+        },
+        "height": {
+          "path": "assets_itch\\textures\\freepbr_ground\\rocky-rugged-terrain-pbr\\rocky-rugged-terrain_1_height.png",
+          "sha256": "cd90411b2284e3af4d39b47d2b9ba3e6176f241b361196da065f145bde05f886"
+        }
+      },
+      "sha256": "780148dffae337a5235487a638cceeafaf9d6e5db597912aafdae7684f15e97c",
+      "parallaxDepthMetres": 0.16,
+      "grassCoverage": 1
+    },
+    "rocky-snow-ice": {
+      "file": "rocky-snow-ice.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-snow-ice/rock-snow-ice1-2k_Base_Color.png",
+          "sha256": "1d5feae69fbfc552f8ead90899cf7ec929563654409c2d924b083970cb4a5c7e"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-snow-ice/rock-snow-ice1-2k_Normal-ogl.png",
+          "sha256": "57dce84dea1e6ba28cfd63e3f447fbcab9750da12ad25f4c15ecc97429c7c057"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-snow-ice/rock-snow-ice1-2k_Ambient_Occlusion.png",
+          "sha256": "be5ada71713f56195513c8a159c6fa3e44ff28f4f333643595bc719e35db01f7"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-snow-ice/rock-snow-ice1-2k_Roughness.png",
+          "sha256": "2644ff2888c7dcbf2c935ce12f440b902754d393494b0463e75c26f7ed80129f"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/rocky-snow-ice/rock-snow-ice1-2k_Height.png",
+          "sha256": "1898f91df77dba22a0229c784b152ba84c15826e00a65bc02004bdb244b82970"
+        }
+      },
+      "sha256": "76de093b1c9c584f9c73e44ebc8fc0c7a0038def49d2d268c1aca54f7a859fc8",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.06,
+      "grassCoverage": 0
+    },
+    "sand-dunes": {
+      "file": "sand-dunes.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/sand-dunes/sand-dunes1_albedo.png",
+          "sha256": "0d03d557438ec6e21ecadef1c52bdb5d27f0c1349d1af66fa780bcd879d8045c"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/sand-dunes/sand-dunes1_normal-ogl.png",
+          "sha256": "13d2c334afe022d160e78a8e6d00b9dd80c83563da6e86a186bcbac4fe1367cb"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/sand-dunes/sand-dunes1_ao.png",
+          "sha256": "5374ea7a18da7f3aee69311846b6453e3b4ac0815b9fcaa8aa0770331802996f"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/sand-dunes/sand-dunes1_roughness.png",
+          "sha256": "0b0b93f1bf0d81ef9bab793d0559c5d4427e195c91b95eab6ab2af212425c7dd"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/sand-dunes/sand-dunes1_height.png",
+          "sha256": "57add061f115dc887b5174a7331942ff4093b85a1fdd8d905510bb1145a6c779"
+        }
+      },
+      "sha256": "6a75058c1fd24940c3234128bc2e2591f5665a887b39d149c22ca204a24faf3e",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.015,
+      "grassCoverage": 0
+    },
+    "sandy-dry-soil-pbr-material": {
+      "file": "sandy-dry-soil-pbr-material.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/sandy-dry-soil-pbr-material/sandydrysoil-albedo.png",
+          "sha256": "23c42b8f00630b78868a03caf8762b61b7f9dba3047bb3d7f9ee3e7f56b0e295"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/sandy-dry-soil-pbr-material/sandydrysoil-normal-ogl.png",
+          "sha256": "5de517277e0658f3e3edc5befbdecdbe466007c64abb845ebcfa05d4ff5a26c9"
+        },
+        "ao": {
+          "constant": 1
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/sandy-dry-soil-pbr-material/sandydrysoil-roughness.png",
+          "sha256": "d4695b7a7dc00896d3f14ea46971e00275a48d19f2ba3c5426f384459efbe0ec"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/sandy-dry-soil-pbr-material/sandydrysoil-height.png",
+          "sha256": "4620bdabb21dd4fc833fc4af79d529715c0a71294be3d0fdf82971cc160c9173"
+        }
+      },
+      "sha256": "bd4d3414bd04bc4f3d32f96b6e464543c8588646f4ae9ac7cf9765b84dd9e702",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.015,
+      "grassCoverage": 0
+    },
+    "snow-packed-12": {
+      "file": "snow-packed-12.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/snow-packed-12/snow-packed12-albedo.png",
+          "sha256": "428f4712486417f7de0d5d2bb79d6ada41be1f69c2c295b470263e0b7885847d"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/snow-packed-12/snow-packed12-normal-ogl.png",
+          "sha256": "c3cec30350c95edda9bd8a0fd03adc2c613a9c86b3b6bd4b3c1fe8c75df961f1"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/snow-packed-12/snow-packed12-ao.png",
+          "sha256": "ecf357a9ac8d25816078a8d31ac0378ebaa07ff4ce9ea1f18c85b3a074477d90"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/snow-packed-12/snow-packed12-roughness.png",
+          "sha256": "d4efaaa6155a683dbd908302b8b4718ff30cdeca003b5bee7ac24b232ec5b881"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/snow-packed-12/snow-packed12-height.png",
+          "sha256": "55b710beda26807b474f08c675a95c08fffd5d651c590464fa9ebe256d105572"
+        }
+      },
+      "sha256": "e79f49b056f84e28e9c2430589788890eda30e40e97152b52f1fbb61db5352cc",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.02,
+      "grassCoverage": 0
+    },
+    "wet-stones-sand": {
+      "file": "wet-stones-sand.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/wet-stones-sand/wet-stones-with-sand1-albedo.png",
+          "sha256": "b08fea557e21db9247092c7e3e992ec982962fa762453a6f89ef8cfcf61a6a18"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/wet-stones-sand/wet-stones-with-sand1-normal-ogl.png",
+          "sha256": "6482da03d976c19e2f838c0d42dc8aed7797b3bac9861a02b1ad13f4426ca904"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/wet-stones-sand/wet-stones-with-sand1-ao.png",
+          "sha256": "66bfa962824215b499d1e6c5e53706e616010505570d98545ed8a0da537d2f13"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/wet-stones-sand/wet-stones-with-sand1-roughness.png",
+          "sha256": "491b3ece6bc9dbd6b45239db7e838f97265e39597aa50db40beccd287685c4c0"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/wet-stones-sand/wet-stones-with-sand1-height.png",
+          "sha256": "7d4eb095ed35d60d5c44fdb5bb4648309ce238ab01323211dedfecfd2cbc847c"
+        }
+      },
+      "sha256": "b9d8046f614ff5869288e8ab6af84c9dd30e9ab563a263d4288092be7d982379",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.07,
+      "grassCoverage": 0
+    },
+    "winding-desert-rock": {
+      "file": "winding-desert-rock.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.7,
+      "heightBlendStrength": 0.18,
+      "source": {
+        "albedo": {
+          "path": "assets_itch/textures/freepbr_ground/winding-desert-rock/winding-desert-rock_albedo.png",
+          "sha256": "9285f361c6ae0ac16c4cea124a66eb9e4af7bba2c6c55f4c40c44546d3a82acc"
+        },
+        "normal": {
+          "path": "assets_itch/textures/freepbr_ground/winding-desert-rock/winding-desert-rock_normal-ogl.png",
+          "sha256": "8071ec55801a8758e392efb86311c2884ee04624058d82273118e45e47d19ddc"
+        },
+        "ao": {
+          "path": "assets_itch/textures/freepbr_ground/winding-desert-rock/winding-desert-rock_ao.png",
+          "sha256": "eb6b1743295485b10a970837d2ced2faf387eff0dd522490103255016b50d8dd"
+        },
+        "roughness": {
+          "path": "assets_itch/textures/freepbr_ground/winding-desert-rock/winding-desert-rock_roughness.png",
+          "sha256": "6dcce868d2b2200c577fb1f0a370c170c4bfeff21419f616736950c248907872"
+        },
+        "height": {
+          "path": "assets_itch/textures/freepbr_ground/winding-desert-rock/winding-desert-rock_height.png",
+          "sha256": "1f7cdc6ed6f63d4eb9c7b6f215acaf655b3ecf8eff00cc0f4fab3420f9b50136"
+        }
+      },
+      "sha256": "1b9f9e28388e362c86c418d045207aa3bda2e446969c9e50a2740aeb12c9849d",
+      "albedoGain": 1,
+      "parallaxDepthMetres": 0.1,
+      "grassCoverage": 0
+    },
+    "leafy-grass2": {
+      "file": "leafy-grass2.tpb.gz",
+      "normalConvention": "DirectX",
+      "sourceNormalConvention": "OpenGL",
+      "normalStrength": 0.7,
+      "albedoGain": 0.65,
+      "heightBlendStrength": 0.18,
+      "sourceUrl": "https://freepbr.com/",
+      "license": "See FreePBR-notice.txt",
+      "tool": "tools/import_meadow_ground.py",
+      "source": {
+        "albedo": {
+          "path": "assets_itch\\textures\\freepbr_ground\\leafy-grass2\\leafy-grass2-albedo.png",
+          "sha256": "fd1546fb043067e951efc9407228b2c5122102756769e77fc97e5d45303b7409"
+        },
+        "normal": {
+          "path": "assets_itch\\textures\\freepbr_ground\\leafy-grass2\\leafy-grass2-normal-ogl.png",
+          "sha256": "72b44fead142029234698d1c1abe24b0e5130c8e395f11982bd1d7f962e55f75"
+        },
+        "ao": {
+          "path": "assets_itch\\textures\\freepbr_ground\\leafy-grass2\\leafy-grass2-ao.png",
+          "sha256": "60e32eb4862c0a7ff6c817ae40807d102b48934f612276e6c7b3dcde776b5f28"
+        },
+        "roughness": {
+          "path": "assets_itch\\textures\\freepbr_ground\\leafy-grass2\\leafy-grass2-roughness.png",
+          "sha256": "4eeed5a0a5532599b9892041ede990f28460ef48ecb2c0ff9f13f6d7bd8605c9"
+        },
+        "height": {
+          "path": "assets_itch\\textures\\freepbr_ground\\leafy-grass2\\leafy-grass2-height.png",
+          "sha256": "82c84089bd3191e05733e9a0164d6c042a7abff11daac4ab684980b8ad8b99b9"
+        }
+      },
+      "sha256": "aa5d4196985df69945143174abcefa37f0e007e7049c71c4ec8582687dfe6be7",
+      "parallaxDepthMetres": 0.015,
+      "grassCoverage": 1
+    },
+    "scanned-meadow": {
+      "file": "scanned-meadow.tpb.gz",
+      "normalConvention": "DirectX",
+      "normalStrength": 0.55,
+      "albedoGain": 0.4,
+      "heightBlendStrength": 0.1,
+      "sourceUrl": "https://ambientcg.com/a/Grass005",
+      "license": "CC0-1.0",
+      "tool": "tools/import_meadow_ground.py",
+      "source": {
+        "albedo": {
+          "path": "D:\\Games\\Stargate Network\\AssetSources\\StargateGame\\grass-blades\\Grass005\\Grass005_2K-PNG_Color.png",
+          "sha256": "c27fd2fb5bc29403545d08167fcb76271087c1fb1ffcbb63b9b3a4c47258f4f9"
+        },
+        "normal": {
+          "path": "D:\\Games\\Stargate Network\\AssetSources\\StargateGame\\grass-blades\\Grass005\\Grass005_2K-PNG_NormalDX.png",
+          "sha256": "dc9344a2ab6669c5d4b683af7dd675df23f81736695707fcfef8da93d1fe3c73"
+        },
+        "ao": {
+          "path": "D:\\Games\\Stargate Network\\AssetSources\\StargateGame\\grass-blades\\Grass005\\Grass005_2K-PNG_AmbientOcclusion.png",
+          "sha256": "efa6181b02fe9e1f1af52ee604e8ef890de6261ec6b4225d214c96acfef1a719"
+        },
+        "roughness": {
+          "path": "D:\\Games\\Stargate Network\\AssetSources\\StargateGame\\grass-blades\\Grass005\\Grass005_2K-PNG_Roughness.png",
+          "sha256": "2e05a1d2895ee51a013ed4e5915a1767ff08c6bb342463d723ae4483eb46d462"
+        },
+        "height": {
+          "path": "D:\\Games\\Stargate Network\\AssetSources\\StargateGame\\grass-blades\\Grass005\\Grass005_2K-PNG_Displacement.png",
+          "sha256": "574bfd9268212e30fdcfb6f06b561bd220c66d81178dadeeee66da3f777df3d0"
+        }
+      },
+      "sha256": "40c7b48014cdfa57e483dc813a6117c2e894d4e32c40f38a4e9e01097c095ef8",
+      "parallaxDepthMetres": 0.035,
+      "grassCoverage": 0
+    }
+  },
+  "palettes": {
+    "temperate": [
+      {
+        "material": "rocky-rugged-terrain-pbr",
+        "metres": 2,
+        "role": "meadow"
+      },
+      {
+        "material": "ground_sand",
+        "metres": 2,
+        "role": "beach"
+      },
+      {
+        "material": "rocky-rugged-terrain-pbr",
+        "metres": 2,
+        "role": "woodland"
+      },
+      {
+        "material": "rocky-rugged-terrain-pbr",
+        "metres": 2,
+        "role": "moss"
+      },
+      {
+        "material": "mud-with-vegetation",
+        "metres": 2,
+        "role": "bank-mud"
+      },
+      {
+        "material": "dry_riverbed_rock",
+        "metres": 2,
+        "role": "bank-stones"
+      },
+      {
+        "material": "dry-brown-dirt-pbr-material",
+        "metres": 2,
+        "role": "bare"
+      },
+      {
+        "material": "jagged-rocky-ground-pbr",
+        "metres": 8,
+        "role": "cliff"
+      }
+    ],
+    "desert": [
+      {
+        "material": "ground_sand",
+        "metres": 4,
+        "role": "sand"
+      },
+      {
+        "material": "sand-dunes",
+        "metres": 4,
+        "role": "sand"
+      },
+      {
+        "material": "sandy-dry-soil-pbr-material",
+        "metres": 2,
+        "role": "soil"
+      },
+      {
+        "material": "dry_riverbed_rock",
+        "metres": 2,
+        "role": "gravel"
+      },
+      {
+        "material": "rocky-dunes1",
+        "metres": 4,
+        "role": "rock-sand"
+      },
+      {
+        "material": "desert-rock1",
+        "metres": 2,
+        "role": "rock"
+      },
+      {
+        "material": "winding-desert-rock",
+        "metres": 6,
+        "role": "cliff"
+      },
+      {
+        "material": "wet-stones-sand",
+        "metres": 2,
+        "role": "wet-bank"
+      }
+    ],
+    "icy": [
+      {
+        "material": "ground_snow",
+        "metres": 2,
+        "role": "snow"
+      },
+      {
+        "material": "snow-packed-12",
+        "metres": 2,
+        "role": "snow"
+      },
+      {
+        "material": "crusted-snow2",
+        "metres": 2,
+        "role": "crust"
+      },
+      {
+        "material": "rocky-snow-ice",
+        "metres": 2,
+        "role": "snow-rock"
+      },
+      {
+        "material": "ice-field-pbr",
+        "metres": 2,
+        "role": "ice-ground"
+      },
+      {
+        "material": "jagged-rocky-ground-pbr",
+        "metres": 8,
+        "role": "cliff"
+      },
+      {
+        "material": "pine-forest-ground",
+        "metres": 2,
+        "role": "woodland"
+      },
+      {
+        "material": "damp-rocky-ground",
+        "metres": 2,
+        "role": "wet-bank"
+      }
+    ]
+  }
+}

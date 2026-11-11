@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "source": "Local Stargate Network terrain_library extraction",
+  "textures": [
+    {
+      "file": "grass-normal.png",
+      "source_relative_to_source_exports": "LandscapeAutoMaterial/Textures/Tiles/Grass01/Grass0072_N.png",
+      "sha256": "5e84044d737a8e6cfc1bdf82985fc67c9373703f54b005289ae2d9b381b8f4f5",
+      "conversion": "byte-for-byte copy; linear DirectX normal XY, green flipped and Z reconstructed in shader"
+    },
+    {
+      "file": "cliff-normal.png",
+      "source_relative_to_source_exports": "LandscapeAutoMaterial/Textures/Tiles/Cliff01/Cliff01_Normal___id_normal_.png",
+      "sha256": "9fca783155d174fb76246edb9e339829164051827b68bc5787e7b8e488ccd47d",
+      "conversion": "byte-for-byte copy; linear DirectX normal XY, green flipped and Z reconstructed in shader"
+    },
+    {
+      "file": "sand-normal.png",
+      "source_relative_to_source_exports": "LandscapeAutoMaterial/Textures/Tiles/Sand01/T_Sand_N2.png",
+      "sha256": "2e4fc7da624403d9e55a2ec2e4f4a932abacb26c52870f31dce22e22691b7b50",
+      "conversion": "byte-for-byte copy; linear DirectX normal XY, green flipped and Z reconstructed in shader"
+    },
+    {
+      "file": "snow-normal.png",
+      "source_relative_to_source_exports": "PhotoR_Landscape_4/Textures/snow_c_n.png",
+      "sha256": "adf6517ff901fb5786b947b12ebadd8e3b224361e593d1e80c912780bee2c2d9",
+      "conversion": "byte-for-byte copy; linear DirectX normal XY, green flipped and Z reconstructed in shader"
+    },
+    {
+      "file": "grass.png",
+      "source_relative_to_source_exports": "LandscapeAutoMaterial/Textures/Tiles/Grass01/Grass0072_D.png",
+      "sha256": "88183089a6e6cb2a4fbb642ea702ebb41eb63e6f5883ff51993dcb28056d843e",
+      "conversion": "byte-for-byte copy; RGB used for albedo; source alpha is not opacity"
+    },
+    {
+      "file": "cliff.png",
+      "source_relative_to_source_exports": "LandscapeAutoMaterial/Textures/Tiles/Cliff01/Cliff01_D_H.png",
+      "sha256": "475bbcceb7119c81f5b89794120d97f52708a1620dc35a823b3a7198c49a0f6a",
+      "conversion": "byte-for-byte copy; RGB used for albedo; source alpha is not opacity"
+    },
+    {
+      "file": "sand.png",
+      "source_relative_to_source_exports": "LandscapeAutoMaterial/Textures/Tiles/Sand01/T_Sand_D.png",
+      "sha256": "bfc647a7d701b214b3288ca7b198c69ce8753353736bdea64adff814710295e8",
+      "conversion": "byte-for-byte copy; RGB used for albedo; source alpha is not opacity"
+    },
+    {
+      "file": "snow.png",
+      "source_relative_to_source_exports": "PhotoR_Landscape_4/Textures/snow_c_d.png",
+      "sha256": "ef76d7b239f239169a3a3c6b6c2af7c30f538d6fda611cf67d1dc681d2d66d72",
+      "conversion": "byte-for-byte copy; RGB used for albedo; source alpha is not opacity"
+    }
+  ]
+}

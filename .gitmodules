@@ -1,0 +1,12 @@
+[submodule "thirdparty/joltc"]
+	path = thirdparty/joltc
+	url = https://github.com/amerkoleci/joltc.git
+[submodule "thirdparty/JoltPhysics"]
+	path = thirdparty/JoltPhysics
+	url = https://github.com/jrouwe/JoltPhysics.git
+[submodule "thirdparty/LayerProcGen"]
+	path = thirdparty/LayerProcGen
+	url = https://github.com/runevision/LayerProcGen.git
+[submodule "thirdparty/FastNoiseLite"]
+	path = thirdparty/FastNoiseLite
+	url = https://github.com/Auburn/FastNoiseLite.git

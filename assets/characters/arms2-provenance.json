@@ -1,0 +1,37 @@
+{
+  "source": "FPS pistol animations by Cransh (CC-BY-4.0); arms mesh only",
+  "url": "https://sketchfab.com/3d-models/fps-pistol-animations-0d7a343dcb6f401197a73c91aee93f6d",
+  "method": "Inverse-bind mesh; anatomical segment fitting to unchanged Retro rifle skeleton and clips",
+  "textures": "2048px Lanczos; sRGB colour; normalized OpenGL normals; linear R occlusion, G one-minus-gloss, B zero metallic",
+  "sources": [
+    {
+      "path": "assets_itch/characters/arms2/scene.gltf",
+      "sha256": "33fe4544b8a41ee8c6e07c3ff1c0098ed833ed2d4132ae7f33eb657d3d6776d6"
+    },
+    {
+      "path": "assets_itch/characters/arms2/scene.bin",
+      "sha256": "e9983a30c56d0fd7d098d4834717378658125b199932962197c47bde7071b466"
+    },
+    {
+      "path": "assets_itch/characters/arms2/license.txt",
+      "sha256": "0f4d01a92328020472f218dc65099ec6ac95de06dcbde1a36fcdefdf8842be79"
+    },
+    {
+      "path": "assets_itch/characters/arms2/textures/arms_diffuse.png",
+      "sha256": "509563581858ccab7c4ae806e893a418424dd7a461ed7baef582be77cc973250"
+    },
+    {
+      "path": "assets_itch/characters/arms2/textures/arms_normal.png",
+      "sha256": "4c50932d670f1e3c398222bfefdbb5cb0ea70cbb849d19e6243d40d6c318b977"
+    },
+    {
+      "path": "assets_itch/characters/arms2/textures/arms_occlusion.png",
+      "sha256": "603115cf9b6b7c867b630c1fee4376ecd9df69fa628aa39e84ed514522b7dbce"
+    },
+    {
+      "path": "assets_itch/characters/arms2/textures/arms_specularGlossiness.png",
+      "sha256": "1ce24df7f3069b141432085b255e4de3da995129ae0aca3c0088e34ef3a6c3ea"
+    }
+  ],
+  "importer": "20733c6a2a37141f3230aba940e93cee425287983ee3e47b0581bdf5ac39d4e0"
+}

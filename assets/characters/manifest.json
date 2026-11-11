@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "path": "assets/characters/retro-arms-detail.png",
+      "sha256": "5a413bf2aa104fa66f19fa19691eed6bffa5027f4d39da9358cc2222a536c3cd"
+    },
+    {
+      "path": "assets_itch/RetroWeaponPack/RetroWeaponsPack/FP_Arms/BlendFiles/FP_Arms_Rifle_01_Anims.blend",
+      "sha256": "2c31e7b35162c32f11f58969b6df4aea21c0603af9f73a8c0c4c2403104d93a2"
+    },
+    {
+      "path": "assets_itch/RetroWeaponPack/RetroWeaponsPack/Guns/Rifle_01/BlendFile/Rifle_01.blend",
+      "sha256": "1f63a8ff1170eae75df6f8aeb67f0f1314ceff574add07058c492675a3991214"
+    },
+    {
+      "path": "assets_itch/RetroWeaponPack/RetroWeaponsPack/Guns/Rifle_01/Fbx_Files/Rifle_01_AdditionalMeshes.fbx",
+      "sha256": "20430cddd80d3ac2bbaaa7c2836e048ac5d77523e1aee90e9ba1e5115c827a1d"
+    },
+    {
+      "path": "assets_itch/RetroWeaponPack/RetroWeaponsPack/Guns/Rifle_01/Textures/Rifle_01_Albedo.png",
+      "sha256": "45cfb16bab1f80b9f3d03d00167278de37db4a7c7b2e4849210196197edf439e"
+    },
+    {
+      "path": "assets_itch/Universal Animation Library[Standard]/Unreal-Godot/UAL1_Standard.glb",
+      "sha256": "69591853d817488edaa8fd9bf8fc1d821eaeaf789f8627b3cd23b41c4ed67997"
+    },
+    {
+      "path": "assets_itch/characters/arms2/license.txt",
+      "sha256": "0f4d01a92328020472f218dc65099ec6ac95de06dcbde1a36fcdefdf8842be79"
+    },
+    {
+      "path": "assets_itch/characters/arms2/scene.bin",
+      "sha256": "e9983a30c56d0fd7d098d4834717378658125b199932962197c47bde7071b466"
+    },
+    {
+      "path": "assets_itch/characters/arms2/scene.gltf",
+      "sha256": "33fe4544b8a41ee8c6e07c3ff1c0098ed833ed2d4132ae7f33eb657d3d6776d6"
+    },
+    {
+      "path": "assets_itch/characters/arms2/textures/arms_diffuse.png",
+      "sha256": "509563581858ccab7c4ae806e893a418424dd7a461ed7baef582be77cc973250"
+    },
+    {
+      "path": "assets_itch/characters/arms2/textures/arms_normal.png",
+      "sha256": "4c50932d670f1e3c398222bfefdbb5cb0ea70cbb849d19e6243d40d6c318b977"
+    },
+    {
+      "path": "assets_itch/characters/arms2/textures/arms_occlusion.png",
+      "sha256": "603115cf9b6b7c867b630c1fee4376ecd9df69fa628aa39e84ed514522b7dbce"
+    },
+    {
+      "path": "assets_itch/characters/arms2/textures/arms_specularGlossiness.png",
+      "sha256": "1ce24df7f3069b141432085b255e4de3da995129ae0aca3c0088e34ef3a6c3ea"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/scene.bin",
+      "sha256": "4eb0facabca21d687940fd16f7a8029edd84902ac1963e5e7a8b92364a6bc1ed"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/scene.gltf",
+      "sha256": "1cf82e1ac2372acc2822effb25509cd82dc9bad1ff80a8fe3dd296b24b7dc8b6"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/GreenCap_baseColor.png",
+      "sha256": "06262234c2528cb325331fefcd25b791c306bedbc5bfd1e4655cc2e83830bbda"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/GreenCap_normal.png",
+      "sha256": "c0f022a046560e793be6761f46f50b6679111c0d2bf5264f13ca19074d569214"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/HeadphonesT_baseColor.jpeg",
+      "sha256": "b7012cef68fd24371dfa5781552953565de021697b1d3b5969b2624055e3660c"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/HeadphonesT_metallicRoughness.png",
+      "sha256": "3a7f87eebf3a3e2635426704a1aefb956cdd4e796a11d40b6aa99589eb3b1420"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/HeadphonesT_normal.png",
+      "sha256": "8200a1960f6fe2cbd1842771803b167015855c3681c7037957c00b004c09cee8"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_Pads__R5_baseColor.png",
+      "sha256": "434218c67cb3b9add2676cc75d19cd7cdd85445062d20fc517b937f4159a4e4d"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_Pads__R5_normal.png",
+      "sha256": "8ee054f7f8a8d695cb07d73715b8a0525e882e304907b9cde02821a60e8e6ca8"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_Head_baseColor.png",
+      "sha256": "cf897f19ccecb331ae4ac401f33275a1620b2ccbb70cd438f8a5391191112636"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_Head_metallicRoughness.png",
+      "sha256": "796a5c17a6b2c691a0169d8dc55d17aa56a900da7bb4bbff698e2f7461dfd411"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_Head_normal.png",
+      "sha256": "eb14700a52e2479612039b7ad2d1d98eec5765daf384602046f7b82dc0ab8b3a"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_Puches_baseColor.jpeg",
+      "sha256": "b4c15c7651f35518c12477506793b678559b856b24f1a618416cb5499fcc4e64"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_Puches_metallicRoughness.png",
+      "sha256": "d486e9ef094b3b25e79b00153b83c411c514ac01d18543611c16fa56b58e9d4f"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_Puches_normal.png",
+      "sha256": "c2ec14cbf6ada8c5906e06618d25b242946a581c066064666559bb04b2cf9b0b"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5__Plate_baseColor.jpeg",
+      "sha256": "577ad00693d1e81386a29643c68e7dd4a26f4f39ecdc8b96e3584f2a36994415"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5__Plate_metallicRoughness.png",
+      "sha256": "d5c744ff0b4b79a4ed7c0c255a58b5711e962cc1e096928573bca8131167c045"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5__Plate_normal.png",
+      "sha256": "5fc86d7541c0da03a28a6d50bfc19b0330d945d71a8cfdf0e0816846d536b733"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_baseColor.png",
+      "sha256": "db8f2e591eaf20630187683209e9a1a239dccb23b45a851e30e65bd800690a62"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_metallicRoughness.png",
+      "sha256": "264ff9938a36a46d11137bd36df07e6b173bec348ca1b51a5e31c67b4400b226"
+    },
+    {
+      "path": "assets_itch/characters/military_tactical/textures/Mil_Suit_R5_normal.png",
+      "sha256": "d1b42036d03ceb216ea1d3692268003c070ee5443183d2abd232831a78c907d2"
+    }
+  ],
+  "packages": [
+    "retro-rifle.sga.gz",
+    "military.sga.gz"
+  ],
+  "notes": [
+    "Original source files preserved. Centimetres converted to metres.",
+    "Military headset reattached to head. Military locomotion retargeted from in-place Universal Animation Library."
+  ],
+  "viewmodelArms": "arms2-provenance.json"
+}

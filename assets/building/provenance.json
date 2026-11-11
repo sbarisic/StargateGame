@@ -1,0 +1,1548 @@
+{
+  "version": 1,
+  "conversion": "Native metres; Y up; original UVs; DirectX normal green; textures capped at 2048; material batching; authored triangle collision; stair rise +Z; separate generated 2m foundation; Cycles 12-sample thumbnails",
+  "tools": [
+    "tools/export_building_kit.py",
+    "tools/import_building_kit.py"
+  ],
+  "pieces": [
+    "kit-wall-unevenbrick-straight",
+    "kit-stone-foundation",
+    "kit-wall-unevenbrick-door-flat",
+    "kit-wall-unevenbrick-window-wide-flat",
+    "kit-wall-plaster-straight",
+    "kit-floor-brick",
+    "kit-floor-wooddark",
+    "kit-door-1-flat",
+    "kit-doorframe-flat-brick",
+    "kit-stair-interior-simple",
+    "kit-stairs-exterior-straight",
+    "kit-roof-modular-roundtiles",
+    "kit-roof-roundtiles-6x6",
+    "kit-roof-front-brick6",
+    "kit-corner-exterior-brick",
+    "kit-window-wide-flat1",
+    "kit-stairs-exterior-platform",
+    "fort-solid-wall",
+    "fort-firing-window-wall",
+    "fort-corner-wall",
+    "fort-parapet",
+    "fort-landing",
+    "fort-stairs",
+    "fort-swing-gate",
+    "fort-sliding-gate",
+    "fort-road-barrier",
+    "fort-bollard",
+    "fort-gate-control"
+  ],
+  "sources": [
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Balcony_Cross_Corner.bin",
+      "sha256": "e6cb9a01979aed4e7a688845e5f0b79cf9ce1d7520eec893a0a708583388ee90"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Balcony_Cross_Corner.gltf",
+      "sha256": "7029b4722a0565f1583c6018c1f0402f485ed56ae21a0a95e2107bb61609719d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Balcony_Cross_Straight.bin",
+      "sha256": "82388737bc03af86030ec4e569df62b14ace74c1767c2ee006dc7a1130abf2a3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Balcony_Cross_Straight.gltf",
+      "sha256": "4a7f10317c672de0309fea51d1911e5df6d61b6c5ab08093389b8588cf8826c9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Balcony_Simple_Corner.bin",
+      "sha256": "f13fd88cf5bb6a31a0da4e46423ab0216d699d9e21077cfeffc3141c091bb3cb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Balcony_Simple_Corner.gltf",
+      "sha256": "10abdc6beb85b336c22425c829320d228475ebb33bd94936bd6477d4e0d7c2ed"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Balcony_Simple_Straight.bin",
+      "sha256": "1b74ba722dfd97e4511a630cb709e1be73bb08070cd4ad8c5d59c62f55bd51a2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Balcony_Simple_Straight.gltf",
+      "sha256": "00b028b35860ca9a8c6af8e4b1946ca39a4b6cac29a8d283164f41f1d27f0360"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Exterior_Brick.bin",
+      "sha256": "0800f8ef9585be5632eb1446289bfee125c112ba3c16dbba1cd1c4f19f5db6f8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Exterior_Brick.gltf",
+      "sha256": "5021a098ff1c69eb388b62ed73183d7db4ddfc7cf944e0dc24c48532567cc443"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Exterior_TopDown.bin",
+      "sha256": "90be41ed0739f0441a1bc48575c9a90500af37e1bc8b7cd3690a0104224b656e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Exterior_TopDown.gltf",
+      "sha256": "2eaec44e5d0e0dd9a63690b04192190fc21257543647a5ab539e848c67071f07"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Exterior_TopOnly.bin",
+      "sha256": "38448842d7aeda882ed17566d652306b67b654dbadb510e2138c74c30ced4c78"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Exterior_TopOnly.gltf",
+      "sha256": "ed020e537b10f81be3185e42bc07c208d03c498a1a423ad988a19d4cceb34fd5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Exterior_Wood.bin",
+      "sha256": "f3eaa2714897338fabee249e32e4be6846bac86081fee4576df0cac8d8ab6bbc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Exterior_Wood.gltf",
+      "sha256": "8f1ad0c8d0cb656601be4b6a48ca1ed5574d182c814ff27508bc91c81d0959a0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_ExteriorWide_Brick.bin",
+      "sha256": "d8c48b4d51dd9bc6f1812311f1ae53b758bb7dae7f723911b0cbb0a24bd8d96a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_ExteriorWide_Brick.gltf",
+      "sha256": "7db9618e10db78fc1d8b1bfe0b917a5df3db95ca41b9e2f7225934914d237df3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_ExteriorWide_Wood.bin",
+      "sha256": "bbf1257db408d84f5e304eb2832d39e5b6340153e14bc57dbe14673180ddfaa6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_ExteriorWide_Wood.gltf",
+      "sha256": "b3304d8f85b7ab4deac439051a56a379b851d613b332264d5e89fc47b31fc108"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Interior_Big.bin",
+      "sha256": "8292df9c44d87a75b91ec5a4a1b308ef59a28f6f8280d7b8ede3af46727bcb8d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Interior_Big.gltf",
+      "sha256": "7893bddbfde2a4904b51e799a87dfc3ae342512bc04cc88c417279cba2ea3036"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Interior_Small.bin",
+      "sha256": "6c1c14e9bc8ec8ba98a81bbb82cb3d0a36ccc24ecd62d4cc8e6c65319e84d6d4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Corner_Interior_Small.gltf",
+      "sha256": "d35822d87d61399175d1b04c3e646dd0304c763533b3ee0cc621e8d6003e8c6d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_1_Flat.bin",
+      "sha256": "f2235efcb17e3c7c761eba632bba8901f0299e65a27483528b486fbaece29bb5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_1_Flat.gltf",
+      "sha256": "7e69ba9bcaf45238daa22b96461e9af6c80a59f422f9effb6de7f32e1fc677d8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_1_Round.bin",
+      "sha256": "783db477a76115724668f8846695651725b955af6b5b23a503f834b206ebc958"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_1_Round.gltf",
+      "sha256": "243fe5e3418e2459bcab858055d34e5441b60180a5efaadef440419e25cc27aa"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_2_Flat.bin",
+      "sha256": "8e3bae47e61788d5fe27eb40e13cb7083c421230ae919ca52004e6009db4b4af"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_2_Flat.gltf",
+      "sha256": "12799646808b9df25324f242fc7ef21d96e24508dc8b8376935aff055f5dcfb4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_2_Round.bin",
+      "sha256": "16d70096f9dd338171d8ca9875d51006e7a0e57a697532792ebd9ec256fa89ec"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_2_Round.gltf",
+      "sha256": "6f8ae926aabc02bba3d0b6bdaa283edfb61925d475c3eb5e1468cfba9bafc118"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_4_Flat.bin",
+      "sha256": "7d7899bc3dc01144ecc19aa301c5605d9bdba7e3b94bd0688783369f72ae3ca0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_4_Flat.gltf",
+      "sha256": "93227b03b1502cea785e2e5e31492a5d0e3cfc934a3d767e0cad9b28ca192eed"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_4_Round.bin",
+      "sha256": "3dd8c4b6ea7f30b134ef1ba7733bc0955f958c14d0598fb120e387ff32b5cd9f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_4_Round.gltf",
+      "sha256": "1c97a6b767f8ded473aa1dae86306121634422245524e7eba0e7a524e4950b49"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_8_Flat.bin",
+      "sha256": "6fa6db243a1dbb02ee6ef7c4a47fe99b0b6855d61afced87e7e8e079d3bea042"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_8_Flat.gltf",
+      "sha256": "6c0a4d774c54b8700a90a267039044b78c693c20641deb8bf97e7716e11bf721"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_8_Round.bin",
+      "sha256": "f50580bfc2676edbf788b9ec4a53728e1f01911c80eb661cfa86032340a7d69a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Door_8_Round.gltf",
+      "sha256": "4c3680e6e08142269b3c4a9061f79750475c4b4fad0cabd1bd943f642e1d13aa"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\DoorFrame_Flat_Brick.bin",
+      "sha256": "83b377e0df1cfb8fd4cda0aec94e9b83ea250b89fa4265dc5ea9cb5301c84337"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\DoorFrame_Flat_Brick.gltf",
+      "sha256": "494e41138191781ff96a4cc47687b3bb57ae81007d62a13a6303dd9e4cef9c75"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\DoorFrame_Flat_WoodDark.bin",
+      "sha256": "1e59d95393867a3cfa0612bea2086018d5ddcb3252969525679391a52e16f94c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\DoorFrame_Flat_WoodDark.gltf",
+      "sha256": "e12b923833fe91ba7c26c3984b0d7860a498bc955f6092b2af9fc0f3012105c6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\DoorFrame_Round_Brick.bin",
+      "sha256": "fbc4451caf8f83c6a31df51dfce89220370b92d4a47482289d9bc7db0b6419f1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\DoorFrame_Round_Brick.gltf",
+      "sha256": "1fda0a9226529304d1fa188e0c35ceb966927a66f477253e3bff19b674be0158"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\DoorFrame_Round_WoodDark.bin",
+      "sha256": "1899a064497568422c4d2a9246be0f7dba9e1f9fae6483f4dc39fe63c398b824"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\DoorFrame_Round_WoodDark.gltf",
+      "sha256": "d96fb7e3b6b7a5cb97339a7667dee3d9e03b5b0a02cbea283bd75a69f58bb4a7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_Brick.bin",
+      "sha256": "2205075c87d65d157c735206450b45183dfc24f8185e2e5db706974ac2b5567e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_Brick.gltf",
+      "sha256": "95d965e18f1bfdc78846eb38b30fe04613d6fe4aa6b5b3a1c3d04f40fd47a0ad"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_RedBrick.bin",
+      "sha256": "2205075c87d65d157c735206450b45183dfc24f8185e2e5db706974ac2b5567e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_RedBrick.gltf",
+      "sha256": "2efd193ffd50ce213d3368db8a304b8f992d7609a72075c81fe800cbf662e3d3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_UnevenBrick.bin",
+      "sha256": "2205075c87d65d157c735206450b45183dfc24f8185e2e5db706974ac2b5567e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_UnevenBrick.gltf",
+      "sha256": "8943b3e5a80a56ac7e3670ae90075e40e610f4c6fa6cbaabf643a57ff8a62dce"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark.bin",
+      "sha256": "cb43341c0969b62d82c11e2759caec854ea97ecba3bcb505d3300d57ebba7b81"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark.gltf",
+      "sha256": "2ee57724a06289164fee75ad62eb770f7f8cc9cb1b51c041da477c086775cd8d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_Half1.bin",
+      "sha256": "eddeef364106ada42fd93caec94799bc115e5ee06b92cce6180f367fac837383"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_Half1.gltf",
+      "sha256": "4a2d556f7c3bddcac9f175990170ce32f351f4434967a8cdf1640ff8cf42a680"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_Half2.bin",
+      "sha256": "ffb3b5e846fc02bf674978e34714ef313e327c2a0569cdf45c97e1378c9901b4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_Half2.gltf",
+      "sha256": "f55ad7fd3b7daaac8239ba166ac7e7627a13d662c105a413db07381700b82665"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_Half3.bin",
+      "sha256": "abbee94d6c8b7a24f4d558ec7f0535ce8c4651953f0143a514940c4cf732ec44"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_Half3.gltf",
+      "sha256": "358299b0017ae71a205b51d9bdc44dfba74f0bd1bb2ade4510b66ae871b9e582"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_OverhangCorner.bin",
+      "sha256": "b039997fb666056d6c2a04ef9212d8370d285c26e3f2d48124fd11dea3b4279b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_OverhangCorner.gltf",
+      "sha256": "23e43643fcefef8d408f4219ef1f58114dab08d6e27855d3c9ba9c691201590e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_OverhangCorner2.bin",
+      "sha256": "68cd11f650f70b0b2a7eaee78cadb52a84fa360a4c0527b948d9194035dcb00a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodDark_OverhangCorner2.gltf",
+      "sha256": "00664e32c0282f9c6cc3236919787869857dbec0cc728c53f4d4b63b035980d2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodLight.bin",
+      "sha256": "7fd18bf3f25e20f04df38cc826a7e89a09f8593e56e6c66501fbcee323195c46"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodLight.gltf",
+      "sha256": "8d2e6db247268ec775e758d53e9bc786b64f5d96926dfef8eabd079ca3061447"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodLight_OverhangCorner.bin",
+      "sha256": "ae3b02b8e9abf790aa37d830ceec4a247a5404e412a85853e2104e2c20f59cb5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodLight_OverhangCorner.gltf",
+      "sha256": "50a3db50db0d258a50262b5631b26b02e554179dc616b1758e76f9cdcc3be09d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodLight_OverhangCorner2.bin",
+      "sha256": "f007e6ea06fd6e3c37533cbf748097385eadbd8d570a3ff9aa8f8a3e90da6d69"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Floor_WoodLight_OverhangCorner2.gltf",
+      "sha256": "c0d215ee8e170f1b25203f93129d14b1e094905a9dbbfe14ad23057b29a36ad4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_90Angle.bin",
+      "sha256": "eedd874418088a357c601eb94ff78a55e9c81dc2651a9af6bb91a99408ad9b05"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_90Angle.gltf",
+      "sha256": "60cd986935768788b56aa53f64760ddb85f22a98bda1035e4534a1617b755748"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_90Half.bin",
+      "sha256": "e3e27fed8797b828b3bc74640c0e02bb544b314670e0ff06c87c5de714fdbcdf"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_90Half.gltf",
+      "sha256": "df5aa97afd8f68a1ecc2d630adf8090975614fb7b579152b7177687383044fdf"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_90Stairs.bin",
+      "sha256": "6b50c2a2c7db85ed1c87bd60fcd94df81281a678f0ef20006a19bcd350a4d493"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_90Stairs.gltf",
+      "sha256": "8dff949a2574191740bbfd9de80cc4a7f54d33e1b327abeeaf792e05127eb7df"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_Straight.bin",
+      "sha256": "b3019ff317ee3d5b9c8d3b0f10b875677f6b1db630b9f320c57dd1c2c4a45e1b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_Straight.gltf",
+      "sha256": "b18eef3815082a7c9fad24cb00ea8e7fcc23695339fa253830d39585d5964068"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_StraightHalf.bin",
+      "sha256": "3ccff43cb6686c851bd3b3ed82d4ff43e6b2d13c8ed82ab97a29da52452c6db2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\HoleCover_StraightHalf.gltf",
+      "sha256": "cd03e23c66289aa0e720e441a163ba723869ce5604ceba1312f95ad7fc17311e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Plaster_Corner.bin",
+      "sha256": "d4765bd5cee147b5a6bdbcdf7a7e65b680f0bcd40ed8ab15de97387e0822f7e6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Plaster_Corner.gltf",
+      "sha256": "e3eae7217cdc22382e0e0c060156001eed7d03c842d0d7262e411f7d4a2bab6d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Plaster_Corner_Front.bin",
+      "sha256": "c3a4b1857e9f3ac96cc0bc0284bdc1f188815b6dc60addc3700d96e506d2d9bc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Plaster_Corner_Front.gltf",
+      "sha256": "766b0f24f25856ade805e2e9ca3d67430f90f1d88bcd9cb68a5b9db572e8dab5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Plaster_Long.bin",
+      "sha256": "5400c070395a03fdd87406348c6e5817648229049cf4a3ab389b359e6c2ecefe"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Plaster_Long.gltf",
+      "sha256": "4c85ead6e6aded5eca5d2fc3455c2f4c00a3e46efdb7ad58a0f61212aeee5e91"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Plaster_Short.bin",
+      "sha256": "10132fd4a1da893af67ffe436f839eabfbc92632587a8f1b07f0afb53983744f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Plaster_Short.gltf",
+      "sha256": "a2016fa4b1dd49415d8b3af12e0edf5db29dbe4fef24efd474e1c7f95fd0f27c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Roof_Plaster.bin",
+      "sha256": "d3c77148239e78749351db7bf866d28aabbaa7732acdd9cb84bf78c20391d89b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Roof_Plaster.gltf",
+      "sha256": "bc2a87647e144c1321c7def327ac3fa5f11dc51ed9a7f8bd5deb76e31e30241c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Roof_UnevenBricks.bin",
+      "sha256": "d3c77148239e78749351db7bf866d28aabbaa7732acdd9cb84bf78c20391d89b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Roof_UnevenBricks.gltf",
+      "sha256": "937dfb5989b28b833361b8b7d96c1bb43d719a087aaf5d3ea933e154acd18516"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_RoofIncline_Plaster.bin",
+      "sha256": "0c961d2554f79dae9901c81e7e4cad923b2b0af1f825db5d90368a2652e04676"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_RoofIncline_Plaster.gltf",
+      "sha256": "04152d111c300e0490ee37797d6162770041889ce81347bb6ab280e79ad76bab"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_RoofIncline_UnevenBricks.bin",
+      "sha256": "0c961d2554f79dae9901c81e7e4cad923b2b0af1f825db5d90368a2652e04676"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_RoofIncline_UnevenBricks.gltf",
+      "sha256": "d1906b8e7e7673444c727bb046eafbcdd2d93bc9ba54bc6d094416a1e1c0e9ff"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_Plaster_Long_L.bin",
+      "sha256": "b6fc43a00d65764f190a6802367e9809cbadb593b1a02b293d49aa82697955a3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_Plaster_Long_L.gltf",
+      "sha256": "be4d646261139a2eb688e0cd64359970bb2c5e293ccfd73889d1e6f2b6f52345"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_Plaster_Long_R.bin",
+      "sha256": "fb075a818caed6ccdfb56ff702836f97a43e9f62069361c7330b29b4c276625d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_Plaster_Long_R.gltf",
+      "sha256": "1a0736d9c476008e7d2a635d13a0fc2e5730cd0a0dd1a6fa5659c239230e0e81"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_Plaster_Short_L.bin",
+      "sha256": "b4e26318d92059aababf69ea7d6c17836cd243061d8c6b185f3141b56a730c3a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_Plaster_Short_L.gltf",
+      "sha256": "41b7f9c8263ce7f42029c1aee9cfddbd38e77bb6a32a8b182c4669a73ceb8be9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_Plaster_Short_R.bin",
+      "sha256": "742396d8e0d03bfbea48d61002c8d21ff3ebf9fbda4497b9347b4c4e4de29a10"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_Plaster_Short_R.gltf",
+      "sha256": "d7eb20ffdcdbc2af368bcd2f8fd6d9ecfeb8cc836a23fe87734edf2a60b2ee6c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_UnevenBrick_Long_L.bin",
+      "sha256": "eb13071b8c46f9ef5322a671f0710e7feabd80c164d2d3c0e9ea3e748aeb48a8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_UnevenBrick_Long_L.gltf",
+      "sha256": "1dd2ca52da0d66bf081e95d2293fd51c1e16f437c4cad2a4937bd2b5fa39fef9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_UnevenBrick_Long_R.bin",
+      "sha256": "715be617e129bf8de98de297881241c612aea35331a63363062fa0c2fe63580f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_UnevenBrick_Long_R.gltf",
+      "sha256": "6b9ea6370f80bbd140d052ab280a96e3b69054494c66f6064f0049853df95f01"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_UnevenBrick_Short_L.bin",
+      "sha256": "037960fac916b232367a915b390dda6076e42a1020784f906e088f77123b6b2e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_UnevenBrick_Short_L.gltf",
+      "sha256": "a2ccd1c16465d1387782489b7a2e4ac0e9c7eac1e453f4d2e42afde621a899d5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_UnevenBrick_Short_R.bin",
+      "sha256": "e1cd7a0bc5a982d38d41c97727f2fc5b7ebfd896376ea66ee063fba9f11dfe66"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_Side_UnevenBrick_Short_R.gltf",
+      "sha256": "5a46594dd7e5878ce51f05dc9d675973d8460003652e7f1794de1d5aba9fd766"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_UnevenBrick_Corner.bin",
+      "sha256": "9eb0c26df09a7fd231b68392f543de12b9d01c7ee6ee9f37548b3e05ccdeca1a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_UnevenBrick_Corner.gltf",
+      "sha256": "25e78839c6bf96eaef940154b921ce0d0d9f94eb2921dca33fda0ac21e3d292f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_UnevenBrick_Corner_Front.bin",
+      "sha256": "ce56ae6fdf5c52be3cb3e8de32ed092fe6fc9583e7de9a4511f1669bdae53781"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_UnevenBrick_Corner_Front.gltf",
+      "sha256": "4fd17b6d3133b60166a42f5b578c9779e54b2f8b26dfaa89917884dcc1707af8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_UnevenBrick_Long.bin",
+      "sha256": "c1db0ce46893ed5028f743c202be05c8d6e7a5a6c3c6ffee89af6fabfff5f3b2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_UnevenBrick_Long.gltf",
+      "sha256": "5b8e2f030a8896ce60da57fa986d57f07281679a7c3b1cae2a493317c928e90d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_UnevenBrick_Short.bin",
+      "sha256": "3f9f9a47d842dc443a3fe13e1a5d012a8ddcb6b675658e5214493a03e3290715"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Overhang_UnevenBrick_Short.gltf",
+      "sha256": "37061651bb2c1ef5eed781886da12091f381d7ade496946f35755643278f2b95"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Brick1.bin",
+      "sha256": "4ab322158fe5892bf1a5f2fe7f8ffaadf232588db173bfa6dd39a2f7f49783dd"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Brick1.gltf",
+      "sha256": "7930b8037d1b50c3510eff18bf902417b799fde476f90d3babca9e03cdb83e0b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Brick2.bin",
+      "sha256": "cfac44667692361f46b9c73c7faeb421d0c77ba70f1275df88352850018cb8e8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Brick2.gltf",
+      "sha256": "8b3143dfe27d409f1abeac4e2cfc6d4b9bcb1ae6d8a298ef3623de0885a733a1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Brick3.bin",
+      "sha256": "86a0b05bc38513a1d381170ee541f2d9ea0bc726f42eb317820f3dbfc2ae1940"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Brick3.gltf",
+      "sha256": "b79e0717cd385d1ad10d27fffe15f9b96baa72442d5fb8f2c5d89940683d7125"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Brick4.bin",
+      "sha256": "43b46c5ffe8cdf021ad588ad9e78044c7ee3f2b0ebfda72efea8c165b73bbafb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Brick4.gltf",
+      "sha256": "6801f77751b8def76043d0598cafc66d8293852bcbca36a31e0498ca7d0e3026"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Chimney.bin",
+      "sha256": "d8fb86bae7360511b362240c22431c6a463a38a3519059e0abf7fc343ef920f9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Chimney.gltf",
+      "sha256": "eeda2bd328baa49ce2260b2df1f0280db4ebc3752fa784371b2da5752697c3ba"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Chimney2.bin",
+      "sha256": "07d34b621ea375292e907a92f9231da9539d44224b7b54ff0aaf8d4cc871dc09"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Chimney2.gltf",
+      "sha256": "45e93dfdacd304864ec90fd8a36392bf743b62a35d3b850ac3a25cb4330dc3c6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Crate.bin",
+      "sha256": "b7dbddf64868c84abd62515caac55ac1a9cd70d897d9bf8a6b9b7191210365c4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Crate.gltf",
+      "sha256": "fb1d2ae668cc2761f9177110424e0c5c80a6698ef44f9cac642cb4a766d37883"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_ExteriorBorder_Corner.bin",
+      "sha256": "d0a101b7ef778344f3d942c80c61b5bd4b2eb79d92c575842ed97b2b2d2109e1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_ExteriorBorder_Corner.gltf",
+      "sha256": "64e35a741c816d4762ef3313427b1427143e37f9e2b7d5d464344fdcef801d38"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_ExteriorBorder_Straight1.bin",
+      "sha256": "336d4110e55f663690cd5ef1c1ac2f109f7383ee36f86ca21d3067b0234453f8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_ExteriorBorder_Straight1.gltf",
+      "sha256": "32d565f8338fc0b50a3493bad39e5fc4e2df536ff9e1506443708e92d969f5e4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_ExteriorBorder_Straight2.bin",
+      "sha256": "abf2c9055884e708bcbb3a8663e32c851f804312be85ba4f53ba2b9137274dee"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_ExteriorBorder_Straight2.gltf",
+      "sha256": "2e7220f1567ed484f29a840c6120d61f1ab1d134a67b972871b22d82dff7d671"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_MetalFence_Ornament.bin",
+      "sha256": "bd79fb612f697dc427c54796615bd16617acc00e92e6201d126297ee66147f68"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_MetalFence_Ornament.gltf",
+      "sha256": "9c5dd021577393ad42179a72014d0d334b750bee70c818fb0efb81da10bd0280"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_MetalFence_Simple.bin",
+      "sha256": "873887abfb2eee5a82882b7a2372d09153ebc65da0e0895a14fe3d0c6e54abc8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_MetalFence_Simple.gltf",
+      "sha256": "210c7853fc190af06297927588738b60738af4cbe0fe7373cbfbfa1769ec78d9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Support.bin",
+      "sha256": "c0aa629b294c52071f66feb89e7bc771480391bfe012f33c60b5cb4aa9881897"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Support.gltf",
+      "sha256": "c7292aa4f0f73a3d83c2ea5d0f9f3c726e17b13156679c9dfa043646a9f08037"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine1.bin",
+      "sha256": "43970bd08ae75708cfa440706e1b4b6ec2164280ec804da6d92bf9e8ac854ece"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine1.gltf",
+      "sha256": "5326ab98fef8a68b3b4d980c066d882b21e1d0489ccbc1228fd4b156d5f21ac1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine2.bin",
+      "sha256": "5589815dd2f594054e947fab94a4f120d4769463a795c9de1592f34788b18f2e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine2.gltf",
+      "sha256": "773e4763b072359d9b563a63de6fd9b6e79271f145b4e1fabceb5d3481ce9e0f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine4.bin",
+      "sha256": "0c0c57c791231ca8d2bf012a1c28556d70a44c94ad994bb44ba4d083e123652a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine4.gltf",
+      "sha256": "6d5f7dee9b28dbbc7c7fc549ba5b5c45a66185e3f76840d6dd7240e81afdafb9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine5.bin",
+      "sha256": "df5fed3c089bc0dbc077d82647e8064919abcdabf24732d8d99f825a1e020a3a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine5.gltf",
+      "sha256": "a6fce6fa6dfddf0cbe51ba831eae73a24bf50389eac6961f5034edc8bd141580"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine6.bin",
+      "sha256": "b209ff1eb5570a5eda935ddbefd557276989646d93195511c339a7dd74d770c2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine6.gltf",
+      "sha256": "50cfa774187c2328a0705986d4b0f80f25b08048f9ce42ef9930bc85b24918af"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine9.bin",
+      "sha256": "31c501c6171fc2d1ea5007e96ae8f8f5ceb18d77e0eb67674680d65ebdf07038"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Vine9.gltf",
+      "sha256": "543744599f9155567a08fecf512bb01892f9fcbd171d73485c09331d201a34f9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Wagon.bin",
+      "sha256": "2b5e35c01572b1447bdd3dcf4246fefe5aa5415d4685451b4747b80048d8f544"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_Wagon.gltf",
+      "sha256": "f81bf401710cd59f1325a5cdb36d335c2e5277c8416d79eefffdc646ec3fae83"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_WoodenFence_Extension1.bin",
+      "sha256": "a083e95cfcd4e657c6aec87c124845e7c7b957be22920953567fca1ab78721e8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_WoodenFence_Extension1.gltf",
+      "sha256": "8eccb1f1e52e58e99b649f34fcdf66871a0395d1d8a5d9c0a24e9eca68581178"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_WoodenFence_Extension2.bin",
+      "sha256": "60d92d8e63a530f6cf04c07ab9a6a2a17c38e31d5401c453e074e55fde6565dd"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_WoodenFence_Extension2.gltf",
+      "sha256": "29e1ebbb38f3027e9aff48078b34bee07983d5d1e6657426a61b44165975c004"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_WoodenFence_Single.bin",
+      "sha256": "aac37141af8f33e762b330486fd1cbd1c12a96b2978f491be4a58e24f1fe9ec1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Prop_WoodenFence_Single.gltf",
+      "sha256": "c9f787c03c62dd94268da84bf3e4dacf554b2a5a9beee38314e37ff5d929c407"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_2x4_RoundTile.bin",
+      "sha256": "06c3a9df9c107fa3b9febe95643dc381340e1dc0519958216af2d3381a6ec33c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_2x4_RoundTile.gltf",
+      "sha256": "519c03acf5162aed3fb49dec59d4176026340e4189c68f60a01b795c6c2ad1df"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Dormer_RoundTile.bin",
+      "sha256": "0872bb87dde47c9ef7b240bbc7ac328d63626bfe6ad375675ff0fb86b964afb9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Dormer_RoundTile.gltf",
+      "sha256": "c204215f437c2b231aadb287c45392125afc71e8e4bf80fcefdd31de00223483"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick2.bin",
+      "sha256": "51e76b1ff319f913fcefba75d369025538d84d58ba45b1a26eb792e2738fc63c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick2.gltf",
+      "sha256": "88a44cb9bd2fdcf3bf2dfe2a25cbc33f26e247d858eba418c2983e7e086b1145"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick4.bin",
+      "sha256": "749472d85fbbe9996b20162c8d58dbb49b7271a7d865b3856e761d0a288cc8e5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick4.gltf",
+      "sha256": "a231d35e4929f087526a6126a25a2732efa3799be6119d55107c241ca124564f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick4_Half_L.bin",
+      "sha256": "ca391e5ec2c0c3c05fec8e1178fac1ed7225520df14ea842a9b3ecb3b7177257"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick4_Half_L.gltf",
+      "sha256": "034d59e03fe1fc61ac4b985d7a0f3ba3b9ae8d97733e0859b9de8351b6ad7335"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick4_Half_R.bin",
+      "sha256": "abaf887b907b4ead25b6e6bd4e776796ed1cf766965181e6e6f988d7f204aa6c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick4_Half_R.gltf",
+      "sha256": "a0cd7a51a65973e324c55f85601f2bb029b1100f844ff985869d54764fe353d3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick6.bin",
+      "sha256": "51d3dbf19f03725c918f5c7a3960ed148f7471535e2ab67a97e1c831ac2ede06"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick6.gltf",
+      "sha256": "140784aaedc9eaa2795da24280406c65ee6232ff060a7fc5f2a1d0530a4be0d0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick6_Half_L.bin",
+      "sha256": "0acfe677e0a80c4551ffe079d0b4b4e3db1531dc3bcc0cfefc04031a25da28fb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick6_Half_L.gltf",
+      "sha256": "7a0495a2c9dd6e5c7b9d19a2d2f42f62c3134dc77d7dced2caa4ef0c4111aa5d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick6_Half_R.bin",
+      "sha256": "c8c2a07d57ec1dea936fbd356a481d9bac460b241b6108a7bcbd92ea88776f5f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick6_Half_R.gltf",
+      "sha256": "5411145264fb7c19dc01f1db3b6e515259dea95028382e1b1dc6a68c2be108c8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick8.bin",
+      "sha256": "f1c1127fd89f74f9d24593cb75d37f0ce60204d56d3baf7607cc99798194f708"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick8.gltf",
+      "sha256": "ecd3588791a7b3b5ebf93b2bcd611aae714bf1cd695ec86c32a939a86bce8590"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick8_Half_L.bin",
+      "sha256": "5cd60f2a04b4e10c18adf2f4600256a31c21d8fbf3c50a37e928e055f8ba59a5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick8_Half_L.gltf",
+      "sha256": "05a95a19d2bc6dea6d572c6c76e492c43305980303c1b7b67296d74fc4fa6fd9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick8_Half_R.bin",
+      "sha256": "031f212dbe597fa4a9a621fa3a6fe462ac46c3eecf5ad562b26fa0e6d756a6b8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Front_Brick8_Half_R.gltf",
+      "sha256": "7045f92be87410a86f5d8bce96b2bd5b69b0d87c2c00c813d2cd4a8aa0d37120"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_FrontSupports.bin",
+      "sha256": "04b129736947656b1afae5192cdc25efb26f2fca8a9e8c265b360a22fe7bcc89"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_FrontSupports.gltf",
+      "sha256": "814b678257ff3de1b1079188d6b3fe0a107c5193962b92a31623ce7c6b4ec8ab"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Log.bin",
+      "sha256": "aa78387c070126a4b4b56f289dde263e315eb88b2733dc238d5a8d2a6ca97812"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Log.gltf",
+      "sha256": "10ef55acbb4cc3c9b4e6e5d8ec5b20d8ec82663ed229f993379aa7040f81536c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Modular_RoundTiles.bin",
+      "sha256": "1794e8967d3de91dc90a1d6ddfeafd5d13f63a85e87c83706d1bda1b1d1f7912"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Modular_RoundTiles.gltf",
+      "sha256": "b49ac4330af1e39dff9dce714bb4d92b165cb6975f3fb19d59fca7761cce49ed"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTile_2x1.bin",
+      "sha256": "36dd32986d4272d1c802be826f73498f673058d844c382bea3aa7514f7c02360"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTile_2x1.gltf",
+      "sha256": "4710ee3a7451f47577771939fafb7fb0ca688713fa8cfb87212dd3409caa2fd6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTile_2x1_Long.bin",
+      "sha256": "05e5cae2428acd091fe303bebf03e5ea586866ece05e3bb4efd5ae151eb25089"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTile_2x1_Long.gltf",
+      "sha256": "a284ae84bd9eb0d9a6b05e42aa64e23d826f773ff8706619c80f4a346a0d279f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_4x4.bin",
+      "sha256": "414067398f08e15e7c5c2c56b648770d3d49427489f073b0078ffde81673af67"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_4x4.gltf",
+      "sha256": "c6a7ce0649b897a7746929b44c448f4343f55ccd969ca1e4462f2f18b61676e4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_4x6.bin",
+      "sha256": "f68f36721d6d1000c1f16d1d1482c33479aa6ea518d2872e9649ce762b01c52c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_4x6.gltf",
+      "sha256": "4d969026106822eb2106a32a8d596416e069f63e20f53b475839076fb635ed5a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_4x8.bin",
+      "sha256": "7a3d02ddd7c649a157f2d173e2a723ca82facfafb33249da323b5ae8a45240b9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_4x8.gltf",
+      "sha256": "a33d41c743c8ff6b835de3fc3284b3e8ab8cf3c7b1b2c113e16e5fe05a4c7449"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x10.bin",
+      "sha256": "92b6f11134949c894d8ec4bb7941ceab5d4ef77205878a07412ef136d5cb2201"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x10.gltf",
+      "sha256": "c91658413d74c970c6bdd166aa612d44c5fb1cd8852db76f34714ec1c4336397"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x12.bin",
+      "sha256": "b19fc078dcb09e2fdc325f0d8b892e99bd33b90333d44b8b6ce836b01832e340"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x12.gltf",
+      "sha256": "e27546e8495dc60f78ece9bcc6bd9ed0f37214e4181e9538200c002978e96a77"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x14.bin",
+      "sha256": "ed886a6243346a7a8b1388ecdbc385877a8528b324a4348860befca9495a5d13"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x14.gltf",
+      "sha256": "de3b8400fd6894acfa862f6781d0827148aae92a494a4f99c055b48311b185db"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x4.bin",
+      "sha256": "aeb70110fbb656f9c0271c6c314a26314523d190f08e0b95b65462bc718da509"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x4.gltf",
+      "sha256": "c7a019fb592cd0f00a8b49d8cb45aed0fea084d3dd0abe2da0ce650848999fc4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x6.bin",
+      "sha256": "12296c0a8e161c76e910a2d8b39d2a31f5e27d106b3bb14e2c93b8322e000ff0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x6.gltf",
+      "sha256": "646a34dc9c8da1f2766b8c338b31e045b536a9c6efcebbd9ee44b84906cd18bb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x8.bin",
+      "sha256": "979bd49b8cf47b6af493c54378a19385797a74011dec7ae11f5c62dd43156148"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_6x8.gltf",
+      "sha256": "ca277d643a9fecdaa4c7268243d160739547727ee9a3bbbb20578a5eceff03df"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_8x10.bin",
+      "sha256": "27c9f4c428b0bf48e2969152c92b8412c30d612c0bf49f3cfb0f239b6d70cfcd"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_8x10.gltf",
+      "sha256": "d19ff6699fa5da7d5520f3153d5de445c5ed6242618575a9d69768d225cf3bc6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_8x12.bin",
+      "sha256": "b95d6191e8d11d5e488fdb54c9a6df0204834bb912e5a5e3df331f306af1e5e5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_8x12.gltf",
+      "sha256": "48f1c83fe27c8b4dcd42046867d1c64269012f92f454f48eebb891619d77c813"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_8x14.bin",
+      "sha256": "2a9de46dee87ea46c6b1ff9d4da811817cc48b2c287c15db5edf13f9475591ea"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_8x14.gltf",
+      "sha256": "aa56907f91b9cba4f502fd360d677e6f09d28cffd4fb6d64c7c4f78b53cc6b68"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_8x8.bin",
+      "sha256": "e294f4c589e799f20bcf3b78f33057be7d47e56a05bd00ba872afe2f11a44c23"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_RoundTiles_8x8.gltf",
+      "sha256": "9c345408d676cc1dd25b17e44f29bb2bd7c64a3ab9ae1659eafbcb529534693f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Support2.bin",
+      "sha256": "7b32d83006209fb62d8bc7868a767ff8eabb5369bb77ccde7b303a313b6262be"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Support2.gltf",
+      "sha256": "819006c2dd411105ef3d4a8514cab26303844a4ddaa04e58310ccb58167bc2ed"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Tower_RoundTiles.bin",
+      "sha256": "9b476b9ce73bb9fe17813f03316a674402a4cf9f91589cc2fbacdf2188cfbfef"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Tower_RoundTiles.gltf",
+      "sha256": "b484ef0275ec4012933f020a6d60d84ec8ed3816c7b97b19565db0e493cbb74e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1.bin",
+      "sha256": "e8f8a04efef5fbae79b450b04f93399429bc1025c7fd4bc0ce4b8634dbe85467"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1.gltf",
+      "sha256": "8b93dcb9bfa468842f45738f3d900c05ebf96db276a8dbdd78788420372b60c0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_Center.bin",
+      "sha256": "1cc10d27154a206b2b384cb818b1e5af446ecc24c17faf2977f2ccbe2560fa6e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_Center.gltf",
+      "sha256": "7eae55e33fd7ae829c75d097a182ecea55673c9d07707a7c503e94dbceefedf9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_Center_Mirror.bin",
+      "sha256": "726ab05515b4ab8e65af8cbe2f57981860a2caeca882c8455edc11143f2c4e8e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_Center_Mirror.gltf",
+      "sha256": "a3827f56264e48e096996e27a95b00b7ad4abdd1763ab2cfe846cca74ff2d370"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_Corner.bin",
+      "sha256": "0ee476e4a574183b5c12236a159ea09eb9ec6f5b5dec7a00074c6cd7034f3d5f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_Corner.gltf",
+      "sha256": "1577dd900ac326dc5d202729d3d3f2cee901b6ac17f4ea8d340d32f4b98b1b0e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_L.bin",
+      "sha256": "c2489976937747aae13bcc925c05c64b0cc008162f1f43eaa09dac4e7494fb04"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_L.gltf",
+      "sha256": "7f36fa6b0a007a04ae66ce85cf0855d0a0fc078bc90a8d6777d9aa4abf155102"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_Middle.bin",
+      "sha256": "3cfbfa82500b28176ef11d3c51a9bdbb77897800331c5411c3ffa65b91f04985"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_Middle.gltf",
+      "sha256": "9f842c2ff1d53db7dcfe3f95b704955e27bff877d3a78791e855d77f0484b81b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_R.bin",
+      "sha256": "5a53309c9aa633a24a51099692e2799243fba7f67ba6107b51448f8a0a6b4800"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Roof_Wooden_2x1_R.gltf",
+      "sha256": "22f1e20db96548836b4841703f0bf4a9955ae8fdea9ed844b9416c81546a1df5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stair_Interior_Rails.bin",
+      "sha256": "815e20575f9753be0dab7a3df80266ee048e56587d7e75db51f4fa69917a3a81"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stair_Interior_Rails.gltf",
+      "sha256": "5b64a488eda31ae05ea805bbf52f5601cd592bfd3f3cbf4088509b1e1bb5cdce"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stair_Interior_Simple.bin",
+      "sha256": "56746e0b3bf1dc0a36f4b707c95cccf800b5c2fc7c82733ee50b3420e5ed931a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stair_Interior_Simple.gltf",
+      "sha256": "dae162fb6f92b39714f72a9c7ddbf42a8d4d1b01a0357932144ce4f9f09d3bd4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stair_Interior_Solid.bin",
+      "sha256": "212ad937eaf473efcdc2abf120f919e9a42f7f0be8b4f8af45027c18e1cd9ea1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stair_Interior_Solid.gltf",
+      "sha256": "333bf204c5e3f6df7b856e79c102d02cab281ade76117b6dab69895f56004b94"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stair_Interior_SolidExtended.bin",
+      "sha256": "0564e1bde8be0ee4408ba921e102e4bcd9cae233226fff20f27f2e03694baed8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stair_Interior_SolidExtended.gltf",
+      "sha256": "ff62d4852ad6e5a3df7748d9d8fdebba17716849de505dd3452a2514d35b7f9d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_NoFirstStep.bin",
+      "sha256": "cb267cf3848c84216efd8c0a8187e1d5bd20699c88ce8e29120d744f1289bc96"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_NoFirstStep.gltf",
+      "sha256": "1900e1a4f08a1d11df97e227d3ca276ef201bea393fec6c59d60219b8c2cfac3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Platform.bin",
+      "sha256": "13c119f96bec9fa597008b1b267734f69b50c9356eef9297954f9ae78c299903"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Platform.gltf",
+      "sha256": "6793dfacd6cd556d22b6d698aa47acab9490b51209eff743092518eae579715f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Platform45.bin",
+      "sha256": "9dbd33fc09c89d6db7dc31f1dfdd43517f229225eeaa452daf048a64217dc00e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Platform45.gltf",
+      "sha256": "1f4d7a8e7f57fb3d2c694eb8dfdd3e57d3f19b5e4f6caf6fc62cee4212f838b1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Platform45Clean.bin",
+      "sha256": "3a67a3d75d86045376d4cc0af919860904613429387422e6a9adedeafa5b17c2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Platform45Clean.gltf",
+      "sha256": "f6f8d120303b76fdda2b4c2c61dbfec0c4c9fc22e88760f2f25a98e6fcb00174"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_PlatformU.bin",
+      "sha256": "7e56a56a2563ca689416247cbb805387ae38188ea9da227fc45afd76fdae154b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_PlatformU.gltf",
+      "sha256": "fc5344174eedd10f80e1ce0b70aa7ee6af96c87c80db32bf40a5036fb3f61954"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_SidePlatform.bin",
+      "sha256": "920a38bf11139d58a6a472c04eba75b56edb1f8f8a2186f977e11af67e0823f2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_SidePlatform.gltf",
+      "sha256": "8cb77073d5d3e56c5a1e82691bcf7601c3ee3ea803c2a2bbdeab0b6d6be00ce0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Sides.bin",
+      "sha256": "42117190ccbaec33586b9107078753127cd927cb77a736b917d783da51f007f9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Sides.gltf",
+      "sha256": "ad44393192a780705c4aee64eeea7acaa31b01edf842dc7b7ffd846eb75bf73d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Sides45.bin",
+      "sha256": "2694cd9065b4a33c83e546002da8811b933c96438907f8a12aaa9a41ee978dc6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Sides45.gltf",
+      "sha256": "c0c94d432cb04056ac766c7344ed5e8e25683f34d390bbabc6f6371e6db7422e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_SidesU.bin",
+      "sha256": "2356c782bcf4447c133af93e36c4eb1ad22bfc113dfcc5a2b23b6689f8e79d62"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_SidesU.gltf",
+      "sha256": "556c116b288878581a5a46c0fb1cd3a30f2194ffb504cee0109a49444f2a5ee5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_SingleSide.bin",
+      "sha256": "db19ba6ff453f369b2d6fed04a466054ba9cb5223a9c084f41645d9d5922aa44"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_SingleSide.gltf",
+      "sha256": "5c8339d88bb94f966a56596ea2b43b43a791660522de41d808300d8bfa71c89a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_SingleSideThick.bin",
+      "sha256": "6b6ae76b4f83f7c80b59361dc1929754c1f2e7682b4d7c92dbf739069883ac32"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_SingleSideThick.gltf",
+      "sha256": "4dd3a0854d33a4b14e8b0f83360c2040fe5c58372c5383b335d63a52c0eb6e94"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Straight.bin",
+      "sha256": "2b09708cd0334b8dfcdf66d6121aa1196ef192e7ac40cf56250b99c69f50988a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Straight.gltf",
+      "sha256": "6fc0e396d3441eb06d451690bb50244b047f8d73e9d1ff61c429fb5c46e9e3c7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Straight_Center.bin",
+      "sha256": "868a392618912f239f77ba21cc1cbb303dfbb5e9756e1884a2695863493d47d6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Straight_Center.gltf",
+      "sha256": "7987b48577c1efd698ec58d8d288951f316e7ea119717800bd09fe1a2f4d4337"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Straight_L.bin",
+      "sha256": "9898e5d9ea581712c4efdb4e1777b7898143ae266ca7cc3c97cb29b66cc3d007"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Straight_L.gltf",
+      "sha256": "47d486cef5fb490e5e72280289aa562d029b2a7818487b33283329c4bb749901"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Straight_R.bin",
+      "sha256": "4b25c951db006caa2e76fe2a39a585e8d0a34fcec04e7b107107383cd3b58a91"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Stairs_Exterior_Straight_R.gltf",
+      "sha256": "9d27bc397cf0618d0720f0f151a717ed888f5575bd45ac55a9360fceedfb1bce"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_Brick_BaseColor.png",
+      "sha256": "5515f57e61767838f53f4b9e25aa83b1382ad345ff6b446482718b5140c33813"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_Brick_Normal.png",
+      "sha256": "6349f1fb3eed9985e6f969c1de04b9e92490020a12ba19a44b96ea808fb27c1a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_Brick_Roughness.png",
+      "sha256": "981e7a4f8e3119749b2fb3d557e3d0ba0551e75a39b467cff0a3a948a9392716"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_MetalOrnaments_BaseColor.png",
+      "sha256": "28603125908bb443ef7ac405d6bf2978dafdd348081c1dfd21630ac09862b668"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_MetalOrnaments_Roughness.png",
+      "sha256": "2de0135d6ffc3021e2550860107f531d0e64fdd0b46b3bf06f2f85e30b818874"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_Plaster_BaseColor.png",
+      "sha256": "98547ca83888307e3ffa96384ce058b7622affe0a42add3b36d0b48618c5eda4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_Plaster_Normal.png",
+      "sha256": "8b9617b561466cce00d5a0628eae7bef208dcf63445d72570e7f8e5057fed0d4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_Plaster_ORM.png",
+      "sha256": "7be9d64a6154ba12bb7086e1d6774a7d5bbbc95775efb614f6ff40a4787fe0c7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_RedBrick_BaseColor.png",
+      "sha256": "44c6303a8b9cef8988f02d92d7309482082412ebf0a2e2f99a50a642dcb3b8f9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_RockTrim_BaseColor.png",
+      "sha256": "aa571cd612091a8f4c95393f8f938bd6e5d47a8cdfd9c896b60a4b37903e2c7c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_RockTrim_Normal.png",
+      "sha256": "f93f82f7e69aa0bf1900f8ab3f252390f091b771f0b84a345c5fefb0f0155cd3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_RockTrim_ORM.png",
+      "sha256": "5287dd9a4e9fb7423af8d8440a8de8bdb8910f9f37ba148f619a6eddf58d5bc8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_RoundTiles_BaseColor.png",
+      "sha256": "acf388ebd1a97346e1e5b59091cfc609ed15b4f70b83a626089f12a82a2d9997"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_RoundTiles_Normal.png",
+      "sha256": "e8cf202fbc1ec36c3f5389a25ab9c99f015d49ae0ca963d0404614c3e1e8f687"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_RoundTiles_Roughness.png",
+      "sha256": "02c5cdbb6768de6ac674a343265c020c5bd6ef70fd7ba555d9b9dc7445179366"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_UnevenBrick_BaseColor.png",
+      "sha256": "ee0f096df6110e943cd9739680b61bc0ffd6fe00db752c5c3797941057a95ebc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_UnevenBrick_Normal.png",
+      "sha256": "bbf623cc35720d67a02079b20b9a6d9641c3686952b288cda97dec41e4b8acad"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_UnevenBrick_Roughness.png",
+      "sha256": "da170cb92ac5479b93ca0c0002b783f1186a146e6e3124891ce7bfe6e1a8a942"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_VineLeaf_png.png",
+      "sha256": "8c80a9835d29cf7b1360ca46c2a96cedc0bfffee59f09db892f64db6825e3188"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_WoodTrim_BaseColor.png",
+      "sha256": "a59f410b07a9bc5f0664df3ba7a2c1e37acffc7979795911f3fc8730ab60e33e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_WoodTrim_Normal.png",
+      "sha256": "5847623e4ed6c206e59f32d1718ee75dcb2b49a1d55ede7ef70a254739caf4a8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\T_WoodTrim_Roughness.png",
+      "sha256": "e888464fd4199d458d8cf39e00fa07d56f8a0bcb658aa03b4a7c95d466ceefa3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Arch.bin",
+      "sha256": "f027b554caecf05952c2a2dc9b103efa5c39ca46be477262ed683c1851d9547b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Arch.gltf",
+      "sha256": "4038e91fdd2ddbe2bcd098e34ccf401d5a40e9912fb75239a7a5acb202e476ce"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_BottomCover.bin",
+      "sha256": "41d79aabbf6c00efdd79444c4d1cd4fe684b7775a0e71756d43da0ce72e60254"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_BottomCover.gltf",
+      "sha256": "193d9d1e6d1f150aba4194a4485d106e78519da269b5022cb55a6bf6b7389c04"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Door_Flat.bin",
+      "sha256": "e169b64543f0ef818daac1a5f0a154bcbb665888e8b283979bfde5f758fb5e37"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Door_Flat.gltf",
+      "sha256": "d2bf9bd8bb88068c79ec6c2bcb0915b0dfc94341f02d9612a4d97da9583e75b3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Door_Round.bin",
+      "sha256": "0b347db7975bcf39d97b7df77e884e2df8877b024f396b517d0a7cb6bf56332e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Door_Round.gltf",
+      "sha256": "15514442b52ed9e4bea685faaf83c45ca68a227810d5cec5f66b0f311f5f6fc7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Door_RoundInset.bin",
+      "sha256": "b3cb5c95fdc2e3873ab1b124ec941aab8c339f2803fd48baad06a35df142b278"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Door_RoundInset.gltf",
+      "sha256": "98e8e183cc17a10532f168156ce35035de08a73248456b551bda38b9a6b3dda6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Straight.bin",
+      "sha256": "986bf171c62e9019eea9aab709d19d07a3bd5021ff76ab749f57563f364858f3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Straight.gltf",
+      "sha256": "3bef920cbba4d124df4ca401439d893e0569f88f56049239e3480a04008fd0ac"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Straight_Base.bin",
+      "sha256": "dc92d6b119289637c9ef98180908f7e5398f95b6336f4d1949d86a43d5888449"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Straight_Base.gltf",
+      "sha256": "7a0872134768cceeccb176c223915c53386eb8b563667ae922fa2d534aa5c629"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Straight_L.bin",
+      "sha256": "32effda44cc081cc30edd9ba0b1a7c1ba5e1246902f00850e1521c1505f2412a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Straight_L.gltf",
+      "sha256": "fc2e8406c3ad8515dd7a316ec653d7164965c5e814ce0384007ad4975a79686a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Straight_R.bin",
+      "sha256": "eabd16863b458c30ef5a9a013fa5874f11a0b9cc3fae9018c4e3f6b2841c9e0a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Straight_R.gltf",
+      "sha256": "7617828da5be6424eae563f2dedb11a447967999fa21bcd60ff5e15547948603"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Window_Thin_Round.bin",
+      "sha256": "b52fb0f380f2bfbf3743952e1fddba7c7ccd1fcd6f28f88540d0ccd43bb7c19c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Window_Thin_Round.gltf",
+      "sha256": "94eedafb4964e5e41098a39387298e122598a1b8dd31193070b4639a76b4e0b2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Window_Wide_Flat.bin",
+      "sha256": "45e3b1de7fac151e1192926c6156c6a8c16918d3fa5b0f85e2f56eb0026f0df6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Window_Wide_Flat.gltf",
+      "sha256": "548aab2c01d593a744a9704511068e5485d84bee6f722c50e071cf866aa2ba62"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Window_Wide_Flat2.bin",
+      "sha256": "bb965f0a7bbceba17ae221e48fcbf33284849f66608af3d3df42473fe8f39f43"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Window_Wide_Flat2.gltf",
+      "sha256": "2cc0413cfe7416f3a0885a5e6d87e728506cd9308cdc3f3f43c99ca8f6d1a34d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Window_Wide_Round.bin",
+      "sha256": "833f44b4d5c60805e081604cebb5f763cd88712fb9aeab321af2c5a2cf5cafcc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_Window_Wide_Round.gltf",
+      "sha256": "99400c34093727a7fb82345c1afc9ae151797c1d4452ebf32fdb314ce85ea0aa"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_WoodGrid.bin",
+      "sha256": "c97643db2a58aed8e5e8b4a9f62afc08a27a23354ce746af5e4a9e626ac8408c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_Plaster_WoodGrid.gltf",
+      "sha256": "63493359c240943f1d70a53ea021fdf9726175642bc765ab5af03967b3b8b0c0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Door_Flat.bin",
+      "sha256": "6cf49baa77c62df4f7f298a049d7d1905338eabd82bc8c7a566cef538483cc15"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Door_Flat.gltf",
+      "sha256": "51c6364927fbe67bab7dc979bb7e95a98f2444fa59fe72dc3db6e50afce4136c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Door_Round.bin",
+      "sha256": "525b3f918e81a9b62ca9b22d525b988e2db92debc7f8caebb5db20fd6a30381e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Door_Round.gltf",
+      "sha256": "4bbb83c8ac7799e142dec6783a030d59cc67812751ef9eb36febe15a586caef1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Straight.bin",
+      "sha256": "4d3b14acd4c5e6fe450e13d930f6c9240f719ed22b959bb2e7674e731225f103"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Straight.gltf",
+      "sha256": "3b004772bace43cc43bf76f3c75d47f68dce175510a26690468efe63bfc05f95"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Window_Thin_Round.bin",
+      "sha256": "694702897a0b44a55cd421b1ab02015f825cbfec653ec27806038c110763d4ac"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Window_Thin_Round.gltf",
+      "sha256": "e43cde1412d15cf255d6d5f4eb0b28fdb5b19e34ad0765a8891073f090d13b4d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Window_Wide_Flat.bin",
+      "sha256": "41e0b94bfda9e9739b8e70395aae59cdb4d7a578215ed1e38e928951ec4c923d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Window_Wide_Flat.gltf",
+      "sha256": "3e50147bd935675187019398ea590466fbecf81b35fa3db3bae870faf2cdda43"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Window_Wide_Round.bin",
+      "sha256": "bac31b035e25cb8ae566bd44ff69e5210bec435dccabc2d6d790d895c58bfc8f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Wall_UnevenBrick_Window_Wide_Round.gltf",
+      "sha256": "9ca99d6f1ae1065230355e8098f61dc5ef72a7f2dc095af02480f3906f18e44b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Roof_Thin.bin",
+      "sha256": "d6822678cb99052b80d8d75e5a7e5102323a7d604f3b3d4159b4243c3a89892d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Roof_Thin.gltf",
+      "sha256": "17ee993634742c2cfb3b6b9aa844cfe03e2dec9c8bee48f5a8121e809d543310"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Roof_Wide.bin",
+      "sha256": "8196f09d4dc81bd64b5deef823b65d5876a275641dc27243413eb7d701de7569"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Roof_Wide.gltf",
+      "sha256": "bc58f2e6f8545c6a9afcb46ffcbc17753ed412da3f29072a0f24bc4de7611a2d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Thin_Flat1.bin",
+      "sha256": "824a3393d73140fde87d37671b24c90a3f098380ef99b3fe77a518715670e51b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Thin_Flat1.gltf",
+      "sha256": "3065d7788d7e844c156f34e1282619acbaa05f433aabdad22b870efec30c5ebf"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Thin_Round1.bin",
+      "sha256": "757574fbdb5a42da154baa311203ca4a5d0a0fe8693254105171107b0174c184"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Thin_Round1.gltf",
+      "sha256": "02ffe8984b2a7bffda79d6d598e852c39681c23bbdd7486dd8bcec3613286a4d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Wide_Flat1.bin",
+      "sha256": "95aabb93aa96572ce4f70934e6a2b4270ef9696fca52756572f30c1ebb3e26a9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Wide_Flat1.gltf",
+      "sha256": "28b91e0693bac3763248c72497f234085fccb646f1adee505dc87c62b5ad8403"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Wide_Round1.bin",
+      "sha256": "6b595d00be1c585ba1d4656617cfbf8834b6ce63f44b644e688438268a46b309"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\Window_Wide_Round1.gltf",
+      "sha256": "031c380ad522cae16c4fdbc8d74b18017e3ad3214f05ff1e8696624fc6329a4e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Thin_Flat_Closed.bin",
+      "sha256": "5e4abb4cff41e1106eaec7302429e43aaa7d5b1f67a8991618344abf6c372943"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Thin_Flat_Closed.gltf",
+      "sha256": "7e2b10bc0de0e92543f9ee6962651b0714d53c463e250c9bf1e9126dd64b86a0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Thin_Flat_Open.bin",
+      "sha256": "3cc8ccefb15492c88570e0d88d3bbe0b95e1a201fc3d42fcd2b400448149ec50"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Thin_Flat_Open.gltf",
+      "sha256": "998cc67c1cbc7d00aa4215895732caf3254f64a086dce366ea1df0301a85f410"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Thin_Round_Closed.bin",
+      "sha256": "6d101d20eb3a62628bac43f9c5567bd690ec5942a8bb2c5769a9d600a77841d3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Thin_Round_Closed.gltf",
+      "sha256": "3dbdfbc57aeb708f8dc73314b6c6a407a53316a32d1ddd9d7bc1541480da9bbf"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Thin_Round_Open.bin",
+      "sha256": "dbffd622221dc83a263a72cdb85fbfeb64ba77a789882f40945ebff168058ffd"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Thin_Round_Open.gltf",
+      "sha256": "6aff6c02fc9670f7623849ccc9a1f55f13f624ac8a9521aa2054a2a23520ec6f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Wide_Flat_Closed.bin",
+      "sha256": "e215753b0a052a9e168b2ff5274739ab3589ab83e20de302f1ff9deec9270f1c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Wide_Flat_Closed.gltf",
+      "sha256": "5b9b105aad29aa567d40788a09f2f824856ba4c4eaf07f28d66bacab56d804a1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Wide_Flat_Open.bin",
+      "sha256": "522cd3f266423912a6f51d6a2b58e92857da9541942415d589157b5beb9828a6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Wide_Flat_Open.gltf",
+      "sha256": "af66b3955894e35a88f63743984d82cf692ba4c0c00166f790ae337f50a1e240"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Wide_Round_Closed.bin",
+      "sha256": "94911edbbb2c8815c384ddfa2488ba8b1965fadeb2b32f09a48cb974e9d9e71b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Wide_Round_Closed.gltf",
+      "sha256": "852e2cc26c15c9ecaa8bb57ff1d992b6fc5e64cc677c5e30cf2df79d63714dae"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Wide_Round_Open.bin",
+      "sha256": "e71bfabdac9ff7dae642a9c0835b3f0d0644e78a49b85226273a1da05f1ff10e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\glTF\\WindowShutters_Wide_Round_Open.gltf",
+      "sha256": "057f7df672397df7de31c809292c9a6dd3a206329b32c8fc469a6c12efe1b8fc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\License_Standard.txt",
+      "sha256": "ec6fd5004514cb0515a7dc1065f474644d31698861597b32e1745945ffec71de"
+    },
+    {
+      "path": "D:\\Games\\Stargate Network\\extraction\\fortification_preview\\Kit_Fortification_components.blend",
+      "sha256": "2e837a6a518b4296788973db10fef6ac221a904b13c00f24eae520ca76b6bbf3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\kit_fortification\\license.txt",
+      "sha256": "ea2faec4c9ab4a9712a9794232a461153c6c3ab221856e887fc314b64db1ac4d"
+    }
+  ]
+}

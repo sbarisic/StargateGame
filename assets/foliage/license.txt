@@ -1,0 +1,11 @@
+Model Information:
+* title:	Some Foliage
+* source:	https://sketchfab.com/3d-models/some-foliage-5e806681504a4642a16a59c057d34e8d
+* author:	soidev (https://sketchfab.com/soidev)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Some Foliage" (https://sketchfab.com/3d-models/some-foliage-5e806681504a4642a16a59c057d34e8d) by soidev (https://sketchfab.com/soidev) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -1,0 +1,387 @@
+[
+  {
+    "template": "settlement-mega-house-1",
+    "floor": [
+      -2.7,
+      -2.7,
+      2.7,
+      2.7
+    ],
+    "floorHeight": 0,
+    "outdoor": false,
+    "entrances": [
+      [
+        0.0,
+        0,
+        -3.75
+      ]
+    ],
+    "doorSweeps": [
+      [
+        -0.7538289979594034,
+        -4.222541758212191,
+        0.6930285369896313,
+        -2.7717410868120287
+      ]
+    ],
+    "openings": [
+      [
+        -2.7,
+        -2.7,
+        2.7,
+        -2.1500000000000004
+      ]
+    ],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-mega-house-2",
+    "floor": [
+      -2.7,
+      -3.7,
+      2.7,
+      3.7
+    ],
+    "floorHeight": 0,
+    "outdoor": false,
+    "entrances": [
+      [
+        0.0,
+        0,
+        -4.75
+      ]
+    ],
+    "doorSweeps": [
+      [
+        -0.7538289979594034,
+        -5.222541758212191,
+        0.6930285369896313,
+        -3.7717410868120287
+      ]
+    ],
+    "openings": [
+      [
+        -2.7,
+        -3.7,
+        2.7,
+        -3.1500000000000004
+      ]
+    ],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-mega-house-3",
+    "floor": [
+      -3.7,
+      -3.7,
+      3.7,
+      3.7
+    ],
+    "floorHeight": 0,
+    "outdoor": false,
+    "entrances": [
+      [
+        1.0,
+        0,
+        -4.75
+      ]
+    ],
+    "doorSweeps": [
+      [
+        0.24617100204059658,
+        -5.222541758212191,
+        1.6930285369896312,
+        -3.7717410868120287
+      ]
+    ],
+    "openings": [
+      [
+        -3.7,
+        -3.7,
+        3.7,
+        -3.1500000000000004
+      ]
+    ],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-mega-house-4",
+    "floor": [
+      -3.7,
+      -4.7,
+      3.7,
+      4.7
+    ],
+    "floorHeight": 0,
+    "outdoor": false,
+    "entrances": [
+      [
+        1.0,
+        0,
+        -5.75
+      ]
+    ],
+    "doorSweeps": [
+      [
+        0.24617100204059658,
+        -6.222541758212191,
+        1.6930285369896312,
+        -4.771741086812028
+      ]
+    ],
+    "openings": [
+      [
+        -3.7,
+        -4.7,
+        3.7,
+        -4.15
+      ]
+    ],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-seahill-house-1",
+    "floor": [
+      -2.65,
+      -2.65,
+      2.65,
+      2.65
+    ],
+    "floorHeight": 0,
+    "outdoor": false,
+    "entrances": [
+      [
+        0.0,
+        0,
+        -3.75
+      ]
+    ],
+    "doorSweeps": [
+      [
+        -0.8700286984443665,
+        -4.405961888718748,
+        0.7796831902743807,
+        -2.75625
+      ]
+    ],
+    "openings": [
+      [
+        -2.65,
+        -2.65,
+        2.65,
+        -2.0999999999999996
+      ]
+    ],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-seahill-house-2",
+    "floor": [
+      -2.65,
+      -3.65,
+      2.65,
+      3.65
+    ],
+    "floorHeight": 0,
+    "outdoor": false,
+    "entrances": [
+      [
+        0.0,
+        0,
+        -4.75
+      ]
+    ],
+    "doorSweeps": [
+      [
+        -0.8700286984443665,
+        -5.405961888718748,
+        0.7796831902743807,
+        -3.75625
+      ]
+    ],
+    "openings": [
+      [
+        -2.65,
+        -3.65,
+        2.65,
+        -3.0999999999999996
+      ]
+    ],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-seahill-house-3",
+    "floor": [
+      -3.65,
+      -3.65,
+      3.65,
+      3.65
+    ],
+    "floorHeight": 0,
+    "outdoor": false,
+    "entrances": [
+      [
+        1.0,
+        0,
+        -4.75
+      ]
+    ],
+    "doorSweeps": [
+      [
+        0.12997130155563355,
+        -5.405961888718748,
+        1.7796831902743806,
+        -3.75625
+      ]
+    ],
+    "openings": [
+      [
+        -3.65,
+        -3.65,
+        3.65,
+        -3.0999999999999996
+      ]
+    ],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-seahill-house-4",
+    "floor": [
+      -3.65,
+      -4.65,
+      3.65,
+      4.65
+    ],
+    "floorHeight": 0,
+    "outdoor": false,
+    "entrances": [
+      [
+        1.0,
+        0,
+        -5.75
+      ]
+    ],
+    "doorSweeps": [
+      [
+        0.12997130155563355,
+        -6.405961888718748,
+        1.7796831902743806,
+        -4.75625
+      ]
+    ],
+    "openings": [
+      [
+        -3.65,
+        -4.65,
+        3.65,
+        -4.1000000000000005
+      ]
+    ],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-desert-compound-1",
+    "floor": [
+      -6,
+      -6,
+      6,
+      6
+    ],
+    "floorHeight": 0,
+    "outdoor": true,
+    "entrances": [
+      [
+        0,
+        0,
+        -9.0
+      ]
+    ],
+    "doorSweeps": [],
+    "openings": [],
+    "exclusions": []
+  },
+  {
+    "template": "settlement-desert-compound-2",
+    "floor": [
+      -10,
+      -6,
+      10,
+      6
+    ],
+    "floorHeight": 0,
+    "outdoor": true,
+    "entrances": [
+      [
+        0,
+        0,
+        -9.0
+      ]
+    ],
+    "doorSweeps": [],
+    "openings": [],
+    "exclusions": [
+      [
+        7.8733,
+        3.8733899999999997,
+        12.1267,
+        8.12661
+      ]
+    ]
+  },
+  {
+    "template": "settlement-desert-compound-3",
+    "floor": [
+      -10,
+      -10,
+      10,
+      10
+    ],
+    "floorHeight": 0,
+    "outdoor": true,
+    "entrances": [
+      [
+        0,
+        0,
+        -13.0
+      ]
+    ],
+    "doorSweeps": [],
+    "openings": [],
+    "exclusions": [
+      [
+        7.8733,
+        7.8733900000000006,
+        12.1267,
+        12.12661
+      ]
+    ]
+  },
+  {
+    "template": "settlement-desert-compound-4",
+    "floor": [
+      -14,
+      -10,
+      14,
+      10
+    ],
+    "floorHeight": 0,
+    "outdoor": true,
+    "entrances": [
+      [
+        0,
+        0,
+        -13.0
+      ]
+    ],
+    "doorSweeps": [],
+    "openings": [],
+    "exclusions": [
+      [
+        11.8733,
+        7.8733900000000006,
+        16.1267,
+        12.12661
+      ]
+    ]
+  }
+]

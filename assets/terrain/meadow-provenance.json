@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "source": "Original procedural four-blade tufts; no external imagery",
+  "seed": 7319,
+  "patchMetres": 2,
+  "tufts": 192,
+  "size": 512,
+  "generator": "tools/build_meadow_detail.py",
+  "sha256": "2168f39d12a61993fd4ea21c04e8bbafe6b5bf7146fc47a330bcc5ac9dc104de"
+}

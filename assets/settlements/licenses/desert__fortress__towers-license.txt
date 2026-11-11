@@ -1,0 +1,11 @@
+Model Information:
+* title:	Desert_ Fortress_ Towers
+* source:	https://sketchfab.com/3d-models/desert--fortress--towers-368813c939494eb0b0d63fa634b03589
+* author:	Nicolai Kilstrup (https://sketchfab.com/nkilstrup)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Desert_ Fortress_ Towers" (https://sketchfab.com/3d-models/desert--fortress--towers-368813c939494eb0b0d63fa634b03589) by Nicolai Kilstrup (https://sketchfab.com/nkilstrup) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "author": "Nicholas-3D",
+  "license": "CC BY 4.0",
+  "source": "D:\\Games\\Stargate Network\\extraction\\tree_optimization",
+  "method": "Approved Quality / LOD0 / LOD1 / LOD2 GLBs; metres, Y-up; shared planting origin from principal trunk base; original UVs flipped for runtime; OpenGL normal green inverted for DirectX; alpha retained; textures capped at 2048; leaf-free far-LOD wood collision",
+  "models": [
+    {
+      "name": "RealisticTree_01",
+      "triangles": [
+        50000,
+        16699,
+        8000,
+        2999
+      ],
+      "planting_origin": [
+        -0.1447291374206543,
+        1.7022451162338257,
+        0.06615333259105682
+      ],
+      "wood_collision_triangles": 1199,
+      "lodDistances": [
+        40,
+        90,
+        180
+      ]
+    },
+    {
+      "name": "RealisticTree_02",
+      "triangles": [
+        50000,
+        16699,
+        8000,
+        3000
+      ],
+      "planting_origin": [
+        0.2813711166381836,
+        1.4042248725891113,
+        0.24416524171829224
+      ],
+      "wood_collision_triangles": 1200,
+      "lodDistances": [
+        40,
+        90,
+        180
+      ]
+    },
+    {
+      "name": "MoreRealisticTree_01",
+      "triangles": [
+        50000,
+        16700,
+        7999,
+        3000
+      ],
+      "planting_origin": [
+        0.3026456832885742,
+        0.0,
+        -0.6623021364212036
+      ],
+      "wood_collision_triangles": 1200,
+      "lodDistances": [
+        40,
+        90,
+        180
+      ]
+    },
+    {
+      "name": "MoreRealisticTree_02",
+      "triangles": [
+        50000,
+        16699,
+        8000,
+        2999
+      ],
+      "planting_origin": [
+        -0.21868360042572021,
+        -0.0023644561879336834,
+        0.302560418844223
+      ],
+      "wood_collision_triangles": 1199,
+      "lodDistances": [
+        40,
+        90,
+        180
+      ]
+    }
+  ],
+  "source_sha256": {
+    "RealisticTree_01_Quality.glb": "605e62a1a8bb79a8b69e3cfb70681aa19e72463add4892504d2ad05c301a1bf0",
+    "RealisticTree_01_LOD0.glb": "540d927bf5b3cb2e5f5aeacb046530b45ef245f0ae0a522eb3bea74e636b3e84",
+    "RealisticTree_01_LOD1.glb": "45c14ac4a07e14b6e52781f0df1e7279de9e989a60af125605aa1c28ed377057",
+    "RealisticTree_01_LOD2.glb": "2806182267bf95ab5bb913adb85b870e28a1fb7c84b5e69bed61d8e9e43cb4d2",
+    "RealisticTree_02_Quality.glb": "8951b9a6aa9a99b5623049afef23e633f242fce9c1d2774be62aaeb51f460a35",
+    "RealisticTree_02_LOD0.glb": "c5b06e01ec292af9ed488ca2f1e953e5021e2ae94fadb5abbe2dcaa438177451",
+    "RealisticTree_02_LOD1.glb": "48d9e1aa0734fe51c241c93ae364bdad50a24962efa8dd22e2f9b02967a3e741",
+    "RealisticTree_02_LOD2.glb": "55756c1a1f81fb8876984ea3905958b28c59273ee21842e372c0b2951ce75cb8",
+    "MoreRealisticTree_01_Quality.glb": "553eec5d8aeafe7e516e849aca4504c7ace5e0bbf27c530146cf615544a09090",
+    "MoreRealisticTree_01_LOD0.glb": "5f066a643dc40257ba66a3a8650e2da81de163f5c5159bf52916f1999469951d",
+    "MoreRealisticTree_01_LOD1.glb": "1cb5e3b57eb3ff6b7b39cd3928f09e337f42459f9d03ababfd27589f2b370d24",
+    "MoreRealisticTree_01_LOD2.glb": "37ded37c6b0dec05e02627cdf80258599dc15929a53e9200554894382c318fcc",
+    "MoreRealisticTree_02_Quality.glb": "623cea19bdc0465cd6340ca75d73e0389e459ae8ac3c7341362b0134a1f087f2",
+    "MoreRealisticTree_02_LOD0.glb": "939ba11ec5fca5668f7f420d775d9cdb87b591227f8fa2d94aef2b544cfd727f",
+    "MoreRealisticTree_02_LOD1.glb": "4353ea09a054e982386562feeb6c868925a003d704910a1f79007c781bc9c451",
+    "MoreRealisticTree_02_LOD2.glb": "faeebdaf6cd9703e58e89fc3de0aedb8f22f18a1bd563074605cbc5450c59602"
+  },
+  "textures_sha256": {
+    "realistic-tree-775785478a929947-base.png": "004ace5028c5aa8b3f361891a06461113a7a3c8c7499aba2c9115bd3dae7be4f",
+    "realistic-tree-1394977cdeff1a12-mr.png": "cdd926c5e18539c3c687ae53a69f24ce167fe009f86a459f029086ed19e2fd96",
+    "realistic-tree-5c2ddd2286aad6fa-normal.png": "8fd7a41741b182f375ab726f863e87e9417b8631939ae30c804913300c494501",
+    "realistic-tree-35cdae9b1d31909e-base.png": "e8e141a9d63fb501bceb6bea183efc3b3f2c22ea66033ff1ed4dc7249f53478e",
+    "realistic-tree-165396ac5430a97c-mr.png": "b7afa0ef6fae993fef0567debfaf22137997f1169bb28feb15e4efe989cae7a1",
+    "realistic-tree-2749555243450607-normal.png": "e6aa774e033217171bcde6bfc63c16ef37ce092fc63dfb8c1f67504a063b6fb1"
+  }
+}

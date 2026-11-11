@@ -1,0 +1,24 @@
+[
+  {
+    "Name": "Testing menu",
+    "Projects": [
+      {
+        "Path": "src\\StargateGame.Client\\StargateGame.Client.csproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "Server + Client",
+    "Projects": [
+      {
+        "Path": "src\\StargateGame.Server\\StargateGame.Server.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\StargateGame.Client\\StargateGame.Client.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

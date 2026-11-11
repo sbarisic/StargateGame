@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup><EmbeddedResource Include="../../assets/settlements/templates.json" LogicalName="settlement-templates.json" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="../../assets/interaction/dhd.sgdi" LogicalName="DhdInteraction" /></ItemGroup>
+</Project>

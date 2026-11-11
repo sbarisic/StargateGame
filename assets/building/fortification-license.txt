@@ -1,0 +1,11 @@
+Model Information:
+* title:	Kit Fortification update
+* source:	https://sketchfab.com/3d-models/kit-fortification-update-74dc7a573027460098d0e306cd80dfb3
+* author:	TuszPro (https://sketchfab.com/TuszPro)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Kit Fortification update" (https://sketchfab.com/3d-models/kit-fortification-update-74dc7a573027460098d0e306cd80dfb3) by TuszPro (https://sketchfab.com/TuszPro) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

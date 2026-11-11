@@ -1,0 +1,90 @@
+{
+  "source_sha256": "a5e8440f50683037bf435481f31fc47ef706ef030cb6bfdafba7afbd8d1917f0",
+  "method": "source triangle material assignments rasterized into existing runtime UVs",
+  "parts": [
+    {
+      "mesh": "stargate_00.mesh",
+      "mask": "stargate_00-emission.png",
+      "mask_sha256": "7232401eeb5b6987795ae7c210d61fdc68c1b22c2ae509d3bf9390c6480ef6f5",
+      "lit_pixels": 103934
+    },
+    {
+      "mesh": "stargate_01.mesh",
+      "mask": "stargate_01-emission.png",
+      "mask_sha256": "7232401eeb5b6987795ae7c210d61fdc68c1b22c2ae509d3bf9390c6480ef6f5",
+      "lit_pixels": 103934
+    },
+    {
+      "mesh": "stargate_02.mesh",
+      "mask": "stargate_02-emission.png",
+      "mask_sha256": "7232401eeb5b6987795ae7c210d61fdc68c1b22c2ae509d3bf9390c6480ef6f5",
+      "lit_pixels": 103934
+    },
+    {
+      "mesh": "stargate_03.mesh",
+      "mask": "stargate_03-emission.png",
+      "mask_sha256": "7232401eeb5b6987795ae7c210d61fdc68c1b22c2ae509d3bf9390c6480ef6f5",
+      "lit_pixels": 103934
+    },
+    {
+      "mesh": "stargate_06.mesh",
+      "mask": "stargate_06-emission.png",
+      "mask_sha256": "7232401eeb5b6987795ae7c210d61fdc68c1b22c2ae509d3bf9390c6480ef6f5",
+      "lit_pixels": 103934
+    },
+    {
+      "mesh": "stargate_07.mesh",
+      "mask": "stargate_07-emission.png",
+      "mask_sha256": "7232401eeb5b6987795ae7c210d61fdc68c1b22c2ae509d3bf9390c6480ef6f5",
+      "lit_pixels": 103934
+    },
+    {
+      "mesh": "stargate_08.mesh",
+      "mask": "stargate_08-emission.png",
+      "mask_sha256": "7232401eeb5b6987795ae7c210d61fdc68c1b22c2ae509d3bf9390c6480ef6f5",
+      "lit_pixels": 103934
+    },
+    {
+      "mesh": "stargate_09.mesh",
+      "mask": "stargate_09-emission.png",
+      "mask_sha256": "b79535a68e17e1995a23c6a895b98d376acf33803df2f7b8f5aa8ff822b30d60",
+      "lit_pixels": 44714
+    },
+    {
+      "mesh": "stargate_10.mesh",
+      "mask": "stargate_10-emission.png",
+      "mask_sha256": "b79535a68e17e1995a23c6a895b98d376acf33803df2f7b8f5aa8ff822b30d60",
+      "lit_pixels": 44714
+    },
+    {
+      "mesh": "stargate_11.mesh",
+      "mask": "stargate_11-emission.png",
+      "mask_sha256": "b79535a68e17e1995a23c6a895b98d376acf33803df2f7b8f5aa8ff822b30d60",
+      "lit_pixels": 44714
+    },
+    {
+      "mesh": "stargate_12.mesh",
+      "mask": "stargate_12-emission.png",
+      "mask_sha256": "b79535a68e17e1995a23c6a895b98d376acf33803df2f7b8f5aa8ff822b30d60",
+      "lit_pixels": 44714
+    },
+    {
+      "mesh": "stargate_15.mesh",
+      "mask": "stargate_15-emission.png",
+      "mask_sha256": "b79535a68e17e1995a23c6a895b98d376acf33803df2f7b8f5aa8ff822b30d60",
+      "lit_pixels": 44714
+    },
+    {
+      "mesh": "stargate_16.mesh",
+      "mask": "stargate_16-emission.png",
+      "mask_sha256": "b79535a68e17e1995a23c6a895b98d376acf33803df2f7b8f5aa8ff822b30d60",
+      "lit_pixels": 44714
+    },
+    {
+      "mesh": "stargate_17.mesh",
+      "mask": "stargate_17-emission.png",
+      "mask_sha256": "b79535a68e17e1995a23c6a895b98d376acf33803df2f7b8f5aa8ff822b30d60",
+      "lit_pixels": 44714
+    }
+  ]
+}

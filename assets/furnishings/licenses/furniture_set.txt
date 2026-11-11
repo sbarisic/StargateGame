@@ -1,0 +1,11 @@
+Model Information:
+* title:	Furniture set
+* source:	https://sketchfab.com/3d-models/furniture-set-09b8b458fbad4986b6fd44698f5bc6dc
+* author:	Asylum Nox (https://sketchfab.com/peter.pottiez)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Furniture set" (https://sketchfab.com/3d-models/furniture-set-09b8b458fbad4986b6fd44698f5bc6dc) by Asylum Nox (https://sketchfab.com/peter.pottiez) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

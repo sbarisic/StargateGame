@@ -1,0 +1,424 @@
+using System;
+using System.Collections.Generic;
+using System.Numerics;
+using YamlDotNet.Serialization;
+
+namespace FishUI.Controls
+{
+    /// <summary>
+    /// An image box control that displays animated frame sequences.
+    /// </summary>
+    public partial class AnimatedImageBox : Control
+    {
+        /// <summary>
+        /// The frames of the animation as an array of images.
+        /// </summary>
+        [YamlIgnore]
+        public List<ImageRef> Frames { get; set; } = new List<ImageRef>();
+
+        /// <summary>
+        /// The current frame index being displayed.
+        /// </summary>
+        [YamlIgnore]
+        public int CurrentFrame
+        {
+            get => _currentFrame;
+            set
+            {
+                if (Frames.Count == 0)
+                    _currentFrame = 0;
+                else
+                    _currentFrame = Math.Clamp(value, 0, Frames.Count - 1);
+            }
+        }
+        private int _currentFrame = 0;
+
+        /// <summary>
+        /// Frame rate in frames per second.
+        /// </summary>
+        [YamlMember]
+        public float FrameRate
+        {
+            get => _frameRate;
+            set { if (!float.IsFinite(value) || value <= 0) throw new ArgumentOutOfRangeException(nameof(value)); _frameRate = value; }
+        }
+        private float _frameRate = 10f;
+
+        /// <summary>
+        /// Whether the animation is currently playing.
+        /// </summary>
+        [YamlMember]
+        public bool IsPlaying { get; set; } = true;
+
+        /// <summary>
+        /// Whether the animation should loop when it reaches the end.
+        /// </summary>
+        [YamlMember]
+        public bool Loop { get; set; } = true;
+
+        /// <summary>
+        /// Whether to play the animation in reverse.
+        /// </summary>
+        [YamlMember]
+        public bool Reverse { get; set; } = false;
+
+        /// <summary>
+        /// Whether to ping-pong (play forward then backward).
+        /// </summary>
+        [YamlMember]
+        public bool PingPong { get; set; } = false;
+
+        /// <summary>
+        /// Scaling mode for how frames are displayed within the control bounds.
+        /// </summary>
+        [YamlMember]
+        public ImageScaleMode ScaleMode { get; set; } = ImageScaleMode.Fit;
+
+        /// <summary>
+        /// Event fired when the animation completes (only when Loop is false).
+        /// </summary>
+        public event Action<AnimatedImageBox> OnAnimationComplete;
+
+        /// <summary>
+        /// Event fired when a frame changes.
+        /// </summary>
+        public event Action<AnimatedImageBox, int> OnFrameChanged;
+
+        private double _frameTimer;
+        private int _completionVersion;
+        private bool _pingPongForward = true;
+
+        public AnimatedImageBox()
+        {
+            Size = new Vector2(64, 64);
+        }
+
+        /// <summary>
+        /// Creates an AnimatedImageBox with the specified frames.
+        /// </summary>
+        public AnimatedImageBox(IEnumerable<ImageRef> frames) : this()
+        {
+            Frames.AddRange(frames);
+            if (Frames.Count > 0)
+            {
+                Size = new Vector2(Frames[0].Width, Frames[0].Height);
+            }
+        }
+
+        /// <summary>
+        /// Adds a frame to the animation.
+        /// </summary>
+        public void AddFrame(ImageRef frame)
+        {
+            int previous = Frames.Count;
+            Frames.Add(frame);
+            RecordDiagnosticTransition("frameCount", previous, Frames.Count);
+        }
+
+        /// <summary>
+        /// Clears all frames from the animation.
+        /// </summary>
+        public void ClearFrames()
+        {
+            int previous = Frames.Count;
+            Frames.Clear();
+            _currentFrame = 0;
+            RecordDiagnosticTransition("frameCount", previous, 0);
+        }
+
+        /// <summary>
+        /// Starts playing the animation.
+        /// </summary>
+        public void Play()
+        {
+            bool oldValue = IsPlaying;
+            IsPlaying = true;
+            RecordDiagnosticTransition("playing", oldValue, true);
+        }
+
+        /// <summary>
+        /// Pauses the animation at the current frame.
+        /// </summary>
+        public void Pause()
+        {
+            bool oldValue = IsPlaying;
+            IsPlaying = false;
+            RecordDiagnosticTransition("playing", oldValue, false);
+        }
+
+        /// <summary>
+        /// Stops the animation and resets to the first frame.
+        /// </summary>
+        public void Stop()
+        {
+            bool oldValue = IsPlaying;
+            IsPlaying = false;
+            RecordDiagnosticTransition("playing", oldValue, false);
+            _currentFrame = Reverse ? Frames.Count - 1 : 0;
+            _frameTimer = 0f;
+            _pingPongForward = true;
+        }
+
+        /// <summary>
+        /// Advances to the next frame manually.
+        /// </summary>
+        public void NextFrame()
+        {
+            if (Frames.Count == 0)
+                return;
+
+            int oldFrame = _currentFrame;
+            _currentFrame++;
+            if (_currentFrame >= Frames.Count)
+            {
+                _currentFrame = Loop ? 0 : Frames.Count - 1;
+            }
+
+            if (oldFrame != _currentFrame)
+                OnFrameChanged?.Invoke(this, _currentFrame);
+        }
+
+        /// <summary>
+        /// Goes to the previous frame manually.
+        /// </summary>
+        public void PreviousFrame()
+        {
+            if (Frames.Count == 0)
+                return;
+
+            int oldFrame = _currentFrame;
+            _currentFrame--;
+            if (_currentFrame < 0)
+            {
+                _currentFrame = Loop ? Frames.Count - 1 : 0;
+            }
+
+            if (oldFrame != _currentFrame)
+                OnFrameChanged?.Invoke(this, _currentFrame);
+        }
+
+        /// <summary>
+        /// Jumps to a specific frame.
+        /// </summary>
+        public void GotoFrame(int frameIndex)
+        {
+            int oldFrame = _currentFrame;
+            CurrentFrame = frameIndex;
+            if (oldFrame != _currentFrame)
+                OnFrameChanged?.Invoke(this, _currentFrame);
+        }
+
+        /// <summary>
+        /// Gets the total number of frames in the animation.
+        /// </summary>
+        [YamlIgnore]
+        public int FrameCount => Frames.Count;
+
+        /// <summary>
+        /// Gets the duration of the full animation in seconds.
+        /// </summary>
+        [YamlIgnore]
+        public float Duration => Frames.Count / FrameRate;
+
+        protected override void OnFishUIUpdate(FishUI UI, float Dt, float Time)
+        {
+            if (!IsPlaying || Frames.Count <= 1 || FrameRate <= 0)
+                return;
+            if (!float.IsFinite(Dt)) throw new ArgumentOutOfRangeException(nameof(Dt));
+            _currentFrame = Math.Clamp(_currentFrame, 0, Frames.Count - 1);
+            _frameTimer += Math.Max(0, Dt);
+            double interval = 1.0 / FrameRate;
+            int count = Frames.Count, completion = _completionVersion;
+            float rate = FrameRate;
+            int replayed = 0;
+            while (IsPlaying && Frames.Count > 1 && _frameTimer >= interval && replayed++ < 256)
+            {
+                _frameTimer -= interval;
+                AdvanceFrame();
+                if (_completionVersion != completion || Frames.Count != count || FrameRate != rate)
+                {
+                    _frameTimer = 0;
+                    return;
+                }
+            }
+            if (!IsPlaying || _frameTimer < interval) return;
+            double steps = Math.Floor(_frameTimer / interval);
+            _frameTimer %= interval;
+            int old = _currentFrame;
+            bool completed = false;
+            if (PingPong)
+            {
+                double period = 2.0 * (count - 1);
+                double phase = (_pingPongForward ? _currentFrame : period - _currentFrame) + steps;
+                completed = !Loop && phase >= period;
+                phase = completed ? 0 : phase % period;
+                _pingPongForward = phase < count - 1;
+                _currentFrame = (int)(phase <= count - 1 ? phase : period - phase);
+            }
+            else
+            {
+                double position = _currentFrame + (Reverse ? -steps : steps);
+                completed = !Loop && (position < 0 || position >= count);
+                _currentFrame = Loop ? (int)((position % count + count) % count) : (int)Math.Clamp(position, 0, count - 1);
+            }
+            if (completed)
+            {
+                IsPlaying = false;
+                _completionVersion++;
+                OnAnimationComplete?.Invoke(this);
+            }
+            if (old != _currentFrame) OnFrameChanged?.Invoke(this, _currentFrame);
+        }
+
+        public override void DrawControl(FishUI UI, float Dt, float Time)
+        {
+            using FishUIDebugRenderScope semantic = UI.Diagnostics.EnterRenderSemantic(FishUIRenderSemantic.ControlBounds);
+            // Draw current frame
+            if (Frames.Count > 0 && _currentFrame >= 0 && _currentFrame < Frames.Count)
+            {
+                ImageRef currentImage = Frames[_currentFrame];
+                if (currentImage != null)
+                {
+                    DrawFrame(UI, currentImage);
+                }
+            }
+        }
+
+        private void AdvanceFrame()
+        {
+            int oldFrame = _currentFrame;
+
+            if (PingPong)
+            {
+                if (_pingPongForward)
+                {
+                    _currentFrame++;
+                    if (_currentFrame >= Frames.Count - 1)
+                    {
+                        _currentFrame = Frames.Count - 1;
+                        _pingPongForward = false;
+                    }
+                }
+                else
+                {
+                    _currentFrame--;
+                    if (_currentFrame <= 0)
+                    {
+                        _currentFrame = 0;
+                        _pingPongForward = true;
+                        if (!Loop)
+                        {
+                            IsPlaying = false;
+                            RecordDiagnosticTransition("completion", "pending", "completed");
+                            _completionVersion++;
+                            OnAnimationComplete?.Invoke(this);
+                        }
+                    }
+                }
+            }
+            else if (Reverse)
+            {
+                _currentFrame--;
+                if (_currentFrame < 0)
+                {
+                    if (Loop)
+                    {
+                        _currentFrame = Frames.Count - 1;
+                    }
+                    else
+                    {
+                        _currentFrame = 0;
+                        IsPlaying = false;
+                        RecordDiagnosticTransition("completion", "pending", "completed");
+                        _completionVersion++;
+                            OnAnimationComplete?.Invoke(this);
+                    }
+                }
+            }
+            else
+            {
+                _currentFrame++;
+                if (_currentFrame >= Frames.Count)
+                {
+                    if (Loop)
+                    {
+                        _currentFrame = 0;
+                    }
+                    else
+                    {
+                        _currentFrame = Frames.Count - 1;
+                        IsPlaying = false;
+                        RecordDiagnosticTransition("completion", "pending", "completed");
+                        _completionVersion++;
+                            OnAnimationComplete?.Invoke(this);
+                    }
+                }
+            }
+
+            if (oldFrame != _currentFrame)
+                OnFrameChanged?.Invoke(this, _currentFrame);
+        }
+
+        private void DrawFrame(FishUI UI, ImageRef image)
+        {
+            Vector2 pos = GetAbsolutePosition();
+            Vector2 size = GetAbsoluteSize();
+            FishColor drawColor = EffectiveColor;
+
+            switch (ScaleMode)
+            {
+                case ImageScaleMode.None:
+                    // Draw at original size, centered
+                    Vector2 offset = (size - new Vector2(image.Width, image.Height)) / 2;
+                    UI.Graphics.DrawImage(image, pos + offset, 0f, 1f, drawColor);
+                    break;
+
+                case ImageScaleMode.Stretch:
+                    // Stretch to fill the control bounds
+                    UI.Graphics.DrawImage(image, pos, size, 0f, 1f, drawColor);
+                    break;
+
+                case ImageScaleMode.Fit:
+                    // Scale to fit while maintaining aspect ratio
+                    {
+                        float imgAspect = (float)image.Width / image.Height;
+                        float ctrlAspect = size.X / size.Y;
+                        Vector2 drawSize;
+                        if (imgAspect > ctrlAspect)
+                        {
+                            drawSize = new Vector2(size.X, size.X / imgAspect);
+                        }
+                        else
+                        {
+                            drawSize = new Vector2(size.Y * imgAspect, size.Y);
+                        }
+                        Vector2 drawOffset = (size - drawSize) / 2;
+                        UI.Graphics.DrawImage(image, pos + drawOffset, drawSize, 0f, 1f, drawColor);
+                    }
+                    break;
+
+                case ImageScaleMode.Fill:
+                    // Scale to fill while maintaining aspect ratio (may crop)
+                    {
+                        float imgAspect = (float)image.Width / image.Height;
+                        float ctrlAspect = size.X / size.Y;
+                        Vector2 drawSize;
+                        if (imgAspect < ctrlAspect)
+                        {
+                            drawSize = new Vector2(size.X, size.X / imgAspect);
+                        }
+                        else
+                        {
+                            drawSize = new Vector2(size.Y * imgAspect, size.Y);
+                        }
+                        Vector2 drawOffset = (size - drawSize) / 2;
+
+                        UI.Graphics.PushScissor(pos, size);
+                        UI.Graphics.DrawImage(image, pos + drawOffset, drawSize, 0f, 1f, drawColor);
+                        UI.Graphics.PopScissor();
+                    }
+                    break;
+            }
+        }
+    }
+}

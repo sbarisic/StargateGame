@@ -1,0 +1,991 @@
+{
+  "Version": "rda-compatible-fit-20261106-v1",
+  "References": [
+    {
+      "X": 6.295226,
+      "Y": -31.854334,
+      "Z": -35.076593
+    },
+    {
+      "X": -16.089708,
+      "Y": 2.747918,
+      "Z": -35.53707
+    },
+    {
+      "X": 27.640413,
+      "Y": -24.9695,
+      "Z": -4.059987
+    },
+    {
+      "X": -35.188804,
+      "Y": -15.054097,
+      "Z": -11.224247
+    },
+    {
+      "X": -50.175428,
+      "Y": 12.481369,
+      "Z": 1.115846
+    },
+    {
+      "X": -10.798188,
+      "Y": 27.316668,
+      "Z": 7.653097
+    },
+    {
+      "X": 26.981446,
+      "Y": -16.939155,
+      "Z": 18.023552
+    },
+    {
+      "X": -0.306757,
+      "Y": -35.700898,
+      "Z": 27.519261
+    },
+    {
+      "X": 2.110806,
+      "Y": -37.466159,
+      "Z": -1.344351
+    },
+    {
+      "X": 2.644448,
+      "Y": 21.302474,
+      "Z": 21.260791
+    },
+    {
+      "X": -17.428509,
+      "Y": 5.807429,
+      "Z": -25.874201
+    },
+    {
+      "X": -27.035132,
+      "Y": 28.733652,
+      "Z": 4.034634
+    },
+    {
+      "X": -37.0867,
+      "Y": 19.791599,
+      "Z": -2.842566
+    },
+    {
+      "X": -6.380554,
+      "Y": 12.860171,
+      "Z": 33.725667
+    },
+    {
+      "X": -2.53162,
+      "Y": 18.514649,
+      "Z": -29.017571
+    },
+    {
+      "X": -5.041212,
+      "Y": 8.967359,
+      "Z": 23.799406
+    },
+    {
+      "X": 7.91317,
+      "Y": -19.85332,
+      "Z": 32.354816
+    },
+    {
+      "X": 14.922739,
+      "Y": -27.012314,
+      "Z": -33.427389
+    },
+    {
+      "X": 18.650157,
+      "Y": -2.092916,
+      "Z": 35.96561
+    },
+    {
+      "X": 31.910365,
+      "Y": -4.319491,
+      "Z": -30.007218
+    },
+    {
+      "X": 16.88827,
+      "Y": 17.634244,
+      "Z": 23.219815
+    },
+    {
+      "X": -31.8818,
+      "Y": -9.564102,
+      "Z": 35.87132
+    },
+    {
+      "X": 13.159861,
+      "Y": 17.942559,
+      "Z": -22.968794
+    },
+    {
+      "X": -13.136263,
+      "Y": -1.305372,
+      "Z": -29.849624
+    },
+    {
+      "X": -24.012627,
+      "Y": -2.846674,
+      "Z": -29.483868
+    },
+    {
+      "X": -24.655793,
+      "Y": -3.281421,
+      "Z": 28.968166
+    },
+    {
+      "X": 11.962995,
+      "Y": -22.191877,
+      "Z": 25.981165
+    },
+    {
+      "X": -25.138675,
+      "Y": -7.041687,
+      "Z": -24.540521
+    },
+    {
+      "X": 5.422528,
+      "Y": 2.69261,
+      "Z": -25.904701
+    },
+    {
+      "X": -20.903076,
+      "Y": -15.464792,
+      "Z": -29.263114
+    },
+    {
+      "X": 19.802697,
+      "Y": 26.666397,
+      "Z": -2.302262
+    },
+    {
+      "X": 22.840444,
+      "Y": 5.416778,
+      "Z": -8.944683
+    },
+    {
+      "X": 35.060701,
+      "Y": 3.25258,
+      "Z": 20.499716
+    },
+    {
+      "X": -8.67596,
+      "Y": -50.12612,
+      "Z": -7.125271
+    },
+    {
+      "X": -1.661524,
+      "Y": -24.981244,
+      "Z": 24.856684
+    },
+    {
+      "X": -38.616678,
+      "Y": 0.89366,
+      "Z": 2.907148
+    },
+    {
+      "X": -3.291866,
+      "Y": 6.987024,
+      "Z": 27.694627
+    },
+    {
+      "X": -5.453,
+      "Y": -41.07,
+      "Z": -12.153
+    }
+  ],
+  "Routes": [
+    {
+      "Record": "RDA-01",
+      "Name": "Abydos",
+      "SourceSequence": [
+        27,
+        7,
+        15,
+        32,
+        12,
+        30
+      ],
+      "GameSequence": [
+        27,
+        7,
+        15,
+        32,
+        12,
+        30
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-02",
+      "Name": "Apophis's Base",
+      "SourceSequence": [
+        20,
+        18,
+        11,
+        38,
+        10,
+        32
+      ],
+      "GameSequence": [
+        20,
+        18,
+        11,
+        38,
+        10,
+        32
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-03",
+      "Name": "Castiana & Sahal",
+      "SourceSequence": [
+        29,
+        3,
+        6,
+        9,
+        12,
+        16
+      ],
+      "GameSequence": [
+        29,
+        3,
+        6,
+        9,
+        12,
+        16
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-04",
+      "Name": "Castiana & Sahal",
+      "SourceSequence": [
+        29,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "GameSequence": [
+        29,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-05",
+      "Name": "Chulak",
+      "SourceSequence": [
+        9,
+        2,
+        23,
+        15,
+        37,
+        20
+      ],
+      "GameSequence": [
+        9,
+        2,
+        23,
+        15,
+        37,
+        20
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-06",
+      "Name": "Clava Thessara Infinitas",
+      "SourceSequence": [
+        14,
+        21,
+        16,
+        11,
+        30,
+        7
+      ],
+      "GameSequence": [
+        14,
+        21,
+        16,
+        11,
+        30,
+        7
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-07",
+      "Name": "Clava Thessara Infinitas",
+      "SourceSequence": [
+        26,
+        20,
+        35,
+        32,
+        23,
+        4
+      ],
+      "GameSequence": [
+        26,
+        20,
+        35,
+        32,
+        23,
+        4
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-08",
+      "Name": "Destroyers",
+      "SourceSequence": [
+        3,
+        32,
+        16,
+        8,
+        10,
+        12
+      ],
+      "GameSequence": [
+        3,
+        32,
+        16,
+        8,
+        10,
+        12
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-09",
+      "Name": "Earth",
+      "SourceSequence": [
+        28,
+        26,
+        5,
+        36,
+        11,
+        29
+      ],
+      "GameSequence": [
+        28,
+        26,
+        5,
+        36,
+        11,
+        29
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-10",
+      "Name": "Edora",
+      "SourceSequence": [
+        28,
+        38,
+        35,
+        9,
+        15,
+        3
+      ],
+      "GameSequence": [
+        28,
+        38,
+        35,
+        9,
+        15,
+        3
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-11",
+      "Name": "Euronda",
+      "SourceSequence": [
+        30,
+        27,
+        9,
+        7,
+        18,
+        16
+      ],
+      "GameSequence": [
+        30,
+        27,
+        9,
+        7,
+        18,
+        16
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-12",
+      "Name": "Juna",
+      "SourceSequence": [
+        29,
+        8,
+        18,
+        22,
+        4,
+        25
+      ],
+      "GameSequence": [
+        29,
+        8,
+        18,
+        22,
+        4,
+        25
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-13",
+      "Name": "Kallana",
+      "SourceSequence": [
+        6,
+        16,
+        8,
+        3,
+        26,
+        25
+      ],
+      "GameSequence": [
+        6,
+        16,
+        8,
+        3,
+        26,
+        25
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-14",
+      "Name": "Kheb",
+      "SourceSequence": [
+        26,
+        35,
+        6,
+        8,
+        23,
+        14
+      ],
+      "GameSequence": [
+        26,
+        35,
+        6,
+        8,
+        23,
+        14
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-15",
+      "Name": "K'tau",
+      "SourceSequence": [
+        18,
+        2,
+        30,
+        12,
+        26,
+        33
+      ],
+      "GameSequence": [
+        18,
+        2,
+        30,
+        12,
+        26,
+        33
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-16",
+      "Name": "Land of Light",
+      "SourceSequence": [
+        26,
+        2,
+        0,
+        38,
+        10,
+        32
+      ],
+      "GameSequence": [
+        26,
+        2,
+        12,
+        38,
+        10,
+        32
+      ],
+      "GameAuthored": true,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-17",
+      "Name": "Martin Lloyd's Homeworld",
+      "SourceSequence": [
+        24,
+        12,
+        32,
+        7,
+        11,
+        34
+      ],
+      "GameSequence": [
+        24,
+        12,
+        32,
+        7,
+        11,
+        34
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-18",
+      "Name": "NID Off-world Base",
+      "SourceSequence": [
+        38,
+        28,
+        15,
+        35,
+        3,
+        19
+      ],
+      "GameSequence": [
+        38,
+        28,
+        15,
+        35,
+        3,
+        19
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-19",
+      "Name": "Othala",
+      "SourceSequence": [
+        11,
+        27,
+        23,
+        16,
+        33,
+        3,
+        9
+      ],
+      "GameSequence": [
+        11,
+        27,
+        23,
+        16,
+        33,
+        3,
+        9
+      ],
+      "GameAuthored": false,
+      "Intergalactic": true
+    },
+    {
+      "Record": "RDA-20",
+      "Name": "P2X-555",
+      "SourceSequence": [
+        28,
+        8,
+        16,
+        33,
+        13,
+        31
+      ],
+      "GameSequence": [
+        28,
+        8,
+        16,
+        33,
+        13,
+        31
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-21",
+      "Name": "P34-353J",
+      "SourceSequence": [
+        38,
+        9,
+        28,
+        15,
+        35,
+        3
+      ],
+      "GameSequence": [
+        38,
+        9,
+        28,
+        15,
+        35,
+        3
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-22",
+      "Name": "P3W-451",
+      "SourceSequence": [
+        19,
+        8,
+        4,
+        37,
+        26,
+        16
+      ],
+      "GameSequence": [
+        19,
+        8,
+        4,
+        37,
+        26,
+        16
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-23",
+      "Name": "P3X-116",
+      "SourceSequence": [
+        21,
+        13,
+        26,
+        17,
+        0,
+        0
+      ],
+      "GameSequence": [
+        21,
+        13,
+        26,
+        17,
+        30,
+        35
+      ],
+      "GameAuthored": true,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-24",
+      "Name": "P3X-118",
+      "SourceSequence": [
+        9,
+        26,
+        34,
+        37,
+        17,
+        21
+      ],
+      "GameSequence": [
+        9,
+        26,
+        34,
+        37,
+        17,
+        21
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-25",
+      "Name": "P3X-562",
+      "SourceSequence": [
+        3,
+        28,
+        9,
+        35,
+        24,
+        15
+      ],
+      "GameSequence": [
+        3,
+        28,
+        9,
+        35,
+        24,
+        15
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-26",
+      "Name": "P3X-984",
+      "SourceSequence": [
+        29,
+        5,
+        36,
+        6,
+        23,
+        0
+      ],
+      "GameSequence": [
+        29,
+        5,
+        36,
+        6,
+        23,
+        35
+      ],
+      "GameAuthored": true,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-27",
+      "Name": "P9C-372",
+      "SourceSequence": [
+        25,
+        8,
+        18,
+        29,
+        4,
+        22
+      ],
+      "GameSequence": [
+        25,
+        8,
+        18,
+        29,
+        4,
+        22
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-28",
+      "Name": "PB5-926",
+      "SourceSequence": [
+        12,
+        36,
+        23,
+        18,
+        7,
+        27
+      ],
+      "GameSequence": [
+        12,
+        36,
+        23,
+        18,
+        7,
+        27
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-29",
+      "Name": "PX1-767",
+      "SourceSequence": [
+        20,
+        2,
+        35,
+        8,
+        26,
+        15
+      ],
+      "GameSequence": [
+        20,
+        2,
+        35,
+        8,
+        26,
+        15
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-30",
+      "Name": "Praclarush Taonas",
+      "SourceSequence": [
+        35,
+        3,
+        31,
+        29,
+        5,
+        17
+      ],
+      "GameSequence": [
+        35,
+        3,
+        31,
+        29,
+        5,
+        17
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-31",
+      "Name": "Sangreal Planet",
+      "SourceSequence": [
+        30,
+        19,
+        34,
+        9,
+        33,
+        18
+      ],
+      "GameSequence": [
+        30,
+        19,
+        34,
+        9,
+        33,
+        18
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-32",
+      "Name": "Tartarus",
+      "SourceSequence": [
+        33,
+        28,
+        23,
+        26,
+        16,
+        31
+      ],
+      "GameSequence": [
+        33,
+        28,
+        23,
+        26,
+        16,
+        31
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-33",
+      "Name": "Tollan",
+      "SourceSequence": [
+        6,
+        33,
+        27,
+        37,
+        11,
+        18
+      ],
+      "GameSequence": [
+        6,
+        33,
+        27,
+        37,
+        11,
+        18
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-34",
+      "Name": "Tollana",
+      "SourceSequence": [
+        4,
+        29,
+        8,
+        22,
+        18,
+        25
+      ],
+      "GameSequence": [
+        4,
+        29,
+        8,
+        22,
+        18,
+        25
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-35",
+      "Name": "Vagon Brei",
+      "SourceSequence": [
+        3,
+        8,
+        2,
+        12,
+        19,
+        30
+      ],
+      "GameSequence": [
+        3,
+        8,
+        2,
+        12,
+        19,
+        30
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    },
+    {
+      "Record": "RDA-36",
+      "Name": "Unnamed Planet",
+      "SourceSequence": [
+        9,
+        18,
+        27,
+        15,
+        21,
+        36
+      ],
+      "GameSequence": [
+        9,
+        18,
+        27,
+        15,
+        21,
+        36
+      ],
+      "GameAuthored": false,
+      "Intergalactic": false
+    }
+  ]
+}

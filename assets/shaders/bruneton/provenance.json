@@ -1,0 +1,21 @@
+{
+  "commit": "34f14e745cff948f4ca3157d1b62a445ffa7286f",
+  "license": "BSD-3-Clause",
+  "files": [
+    {
+      "file": "definitions.glsl",
+      "source": "https://raw.githubusercontent.com/ebruneton/precomputed_atmospheric_scattering/34f14e745cff948f4ca3157d1b62a445ffa7286f/atmosphere/definitions.glsl",
+      "sha256": "fb7579bc25f7b22b19aaa479c2a009eb70875216062a58b329d1ca2f01b8794b"
+    },
+    {
+      "file": "functions.glsl",
+      "source": "https://raw.githubusercontent.com/ebruneton/precomputed_atmospheric_scattering/34f14e745cff948f4ca3157d1b62a445ffa7286f/atmosphere/functions.glsl",
+      "sha256": "fae5b16bdd2b5a1d1a8b423c5b76973984eaf9b7514c349fe74b1d44d0c9f498"
+    },
+    {
+      "file": "LICENSE",
+      "source": "https://raw.githubusercontent.com/ebruneton/precomputed_atmospheric_scattering/34f14e745cff948f4ca3157d1b62a445ffa7286f/LICENSE",
+      "sha256": "530cf0bc2bf96a7e41400683ce6cfb3301ba8cf0166f6528b2f5caf87fa7df38"
+    }
+  ]
+}

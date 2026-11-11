@@ -1,0 +1,6 @@
+{
+  "source": "assets_itch\\RetroWeaponPack\\RetroWeaponsPack\\Guns\\Rifle_01\\Fbx_Files\\Rifle_01.fbx",
+  "sha256": "d0220ec89014520ff612e7abfead929d74b99f13c836ccbaad4c7f2379eda7db",
+  "generator": "tools/render_ui_rifle.py",
+  "license": "See existing RetroWeaponPack attribution in THIRD-PARTY-NOTICES.md"
+}

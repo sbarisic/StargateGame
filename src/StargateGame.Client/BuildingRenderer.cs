@@ -1,0 +1,202 @@
+using System.Numerics;
+using FishGfx;
+using FishGfx.Graphics;
+using FishGfx.Graphics.Drawables;
+using StargateGame.Building;
+using StargateGame.Shared;
+
+namespace StargateGame.Client;
+
+sealed partial class SceneRenderer
+{
+    Vector3 settlementCamera;
+    public void SettlementCamera(Vector3 position) => settlementCamera = position;
+    readonly HashSet<string> settlementFar = [];
+    WorldChanges buildingState = WorldChanges.Empty;
+    bool buildingModelsPending;
+    int buildingModelCount = -1;
+    readonly Dictionary<ChunkCoordinate, (BuildingPiece[] Pieces, Mesh3D Mesh, AxisAlignedBoundingBox Bounds)> buildingMeshes = [];
+    readonly HashSet<(string, ulong)> removedScenery = [];
+    readonly List<(string Model, Matrix4x4 Transform, AxisAlignedBoundingBox Bounds)> buildingPrefabs = [];
+    Mesh3D? buildPreview;
+    ShaderProgram? previewShader;
+    Vector3 previewColor;
+    public void UpdateBuildings(WorldChanges changes)
+    {
+        if (ReferenceEquals(changes, buildingState) && (!buildingModelsPending || buildingModelCount == models.Count))
+            return;
+        bool ready = true;
+        foreach (var piece in changes.Pieces.Where(p => p.Kind == PieceKind.Prefab).Concat(BuildingCorners.Pieces(changes)))
+            ready &= RequestModel(piece.Prefab);
+        if (changes.LocationId != buildingState.LocationId)
+            ClearBuildings();
+        buildingModelsPending = !ready;
+        buildingModelCount = models.Count;
+        buildingState = changes;
+        removedScenery.Clear();
+        foreach (var r in changes.Removed)
+            removedScenery.Add((r.Category, r.Id));
+        buildingPrefabs.Clear();
+        foreach (var p in changes.Pieces.Where(p => p.Kind == PieceKind.Prefab).Concat(BuildingCorners.Pieces(changes)))
+        {
+            if (!models.ContainsKey(p.Prefab))
+                continue;
+            if (BuildingPrefabs.Get(p.Prefab).Group == "Generated" && BuildingPrefabs.Get(p.Prefab).Role != "furnishing" && !BuildingPrefabs.IsDoor(p) && !settlementFar.Contains(p.Prefab))
+            {
+                RequestModel(p.Prefab + "-far");
+                settlementFar.Add(p.Prefab);
+            }
+            var s = changes.Structures.Single(s => s.Id == p.StructureId);
+            var transform = BuildingPrefabs.Transform(s, p);
+            var b = modelBounds[p.Prefab];
+            var bounds = AxisAlignedBoundingBox.FromPoints(Enumerable.Range(0, 8).Select(i => Vector3.Transform(new Vector3((i & 1) == 0 ? b.Min.X : b.Max.X, (i & 2) == 0 ? b.Min.Y : b.Max.Y, (i & 4) == 0 ? b.Min.Z : b.Max.Z), transform)));
+            buildingPrefabs.Add((p.Prefab, transform, bounds));
+        }
+        var groups = changes.Pieces.Where(p => p.Kind != PieceKind.Prefab).GroupBy(p => BuildingGeometry.Chunks(BuildingGeometry.Bounds(BuildingGeometry.Mesh(changes, p))).Order().First()).ToDictionary(g => g.Key, g => g.OrderBy(p => p.Id).ToArray());
+        foreach (var c in buildingMeshes.Keys.Where(c => !groups.ContainsKey(c)).ToArray())
+        {
+            buildingMeshes[c].Mesh.Dispose();
+            buildingMeshes.Remove(c);
+        }
+        foreach (var (c, pieces) in groups)
+        {
+            if (buildingMeshes.TryGetValue(c, out var old) && old.Pieces.SequenceEqual(pieces))
+                continue;
+            old.Mesh?.Dispose();
+            var triangles = pieces.SelectMany(p => BuildingGeometry.Mesh(changes, p)).ToArray();
+            buildingMeshes[c] = (pieces, BuildingMesh(triangles), AxisAlignedBoundingBox.FromPoints(triangles.SelectMany(t => new[] { t.A, t.B, t.C })));
+        }
+        RebuildPrefabBuckets();
+        shadows.InvalidateAll();
+        InvalidateGateShadows();
+        fogRoomRevision = -1;
+    }
+    Mesh3D BuildingMesh(BuildTriangle[] triangles)
+    {
+        var vertices = triangles.SelectMany(t => new[] { t.A, t.B, t.C }).ToArray();
+        var normals = triangles.SelectMany(t => Enumerable.Repeat(Vector3.Normalize(Vector3.Cross(t.B - t.A, t.C - t.A)), 3)).ToArray();
+        var uv = vertices.Select((v, i) =>
+        {
+            var normal = normals[i];
+            if (Math.Abs(normal.Y) > .5f)
+                return new Vector2(v.X, v.Z) / 2f;
+            // Unit horizontal tangent avoids compressed textures on 30/60-degree walls.
+            // Canonical sign gives coplanar overlaps exactly the same texture coordinates.
+            var tangent = Vector3.Normalize(new Vector3(normal.Z, 0, -normal.X));
+            if (tangent.X < -.001f || Math.Abs(tangent.X) <= .001f && tangent.Z < 0)
+                tangent = -tangent;
+            return new Vector2(Vector3.Dot(v, tangent), v.Y) / 2f;
+        }).ToArray();
+        var mesh = graphics.CreateMesh3D();
+        mesh.SetVertices(vertices);
+        mesh.SetNormals(normals);
+        mesh.SetUVs(uv);
+        return mesh;
+    }
+    public void Preview(BuildTriangle[]? triangles, bool valid)
+    {
+        buildPreview?.Dispose();
+        buildPreview = null;
+        if (triangles is null || triangles.Length == 0)
+            return;
+        buildPreview = BuildingMesh(triangles);
+        previewColor = valid ? new(.12f, .85f, .45f) : new(.95f, .15f, .12f);
+        previewShader ??= LoadProgram("world.vert", "building-preview.frag");
+    }
+    void DrawBuildings(RenderPass pass, ShaderProgram program, ViewFrustum frustum, bool depth)
+    {
+        program.SetUniform("uTerrain", 3);
+        program.SetUniform("uTint", Vector3.One);
+        program.SetUniform("uHasModelNormal", depth ? 0 : 1);
+        program.SetUniform("uRockSnow", 0);
+        program.SetUniform("uFoliageCutoff", 0f);
+        using var normal = depth ? null : buildingNormal.Bind(5);
+        foreach (var batch in buildingMeshes.Values)
+            if (frustum.Intersects(batch.Bounds))
+                Mesh(pass, batch.Mesh, depth ? white : buildingTexture, program);
+        program.SetUniform("uTerrain", 0);
+        program.SetUniform("uTint", Vector3.One);
+        program.SetUniform("uHasModelNormal", 0);
+        using var twoSided = pass.PushState(pass.State with
+        {
+            CullMode = CullMode.None
+        });
+        foreach (var piece in buildingState.Pieces.Where(p => p.Kind == PieceKind.Prefab && !models.ContainsKey(p.Prefab)))
+        {
+            var structure = buildingState.Structures.FirstOrDefault(s => s.Id == piece.StructureId);
+            if (structure is not null) DrawModelProxy(pass, program, piece.Prefab, BuildingPrefabs.Transform(structure, piece));
+        }
+        foreach (var list in visiblePrefabs.Values)
+            list.Clear();
+        foreach (var bucket in prefabBuckets.Values)
+        {
+            if (!frustum.Intersects(bucket.Bounds))
+                continue;
+            foreach (var index in bucket.Indices)
+            {
+                var prefab = buildingPrefabs[index];
+                if (!frustum.Intersects(prefab.Bounds))
+                    continue;
+                if (BuildingPrefabs.Get(prefab.Model).Role == "furnishing" && Vector3.DistanceSquared(prefab.Transform.Translation, settlementCamera) > 100 * 100)
+                    continue;
+                var model = settlementFar.Contains(prefab.Model) && models.ContainsKey(prefab.Model + "-far") && Vector3.DistanceSquared(prefab.Transform.Translation, settlementCamera) > 180 * 180 ? prefab.Model + "-far" : prefab.Model;
+                if (!visiblePrefabs.TryGetValue(model, out var list))
+                    visiblePrefabs[model] = list = [];
+                list.Add(prefab.Transform);
+            }
+        }
+        foreach (var (name, instances) in visiblePrefabs)
+        {
+            if (instances.Count == 0)
+                continue;
+            foreach (var part in models[name])
+            {
+                program.SetUniform("uFoliageCutoff", part.AlphaCutoff);
+                program.SetUniform("uHasModelNormal", !depth && part.normal is not null ? 1 : 0);
+                program.SetUniform("uHasMetallicRoughness", !depth && part.MetallicRoughness is not null ? 1 : 0);
+                program.SetUniform("uMetallicRoughness", 6);
+                using var n = depth ? null : part.normal?.Bind(5);
+                using var mr = depth ? null : part.MetallicRoughness?.Bind(6);
+                program.SetUniform("uTreeMode", 0);
+                program.SetUniform("uTreeVertices", -1);
+                for (int offset = 0; offset < instances.Count; offset += TreeBatchSize)
+                {
+                    int count = Math.Min(TreeBatchSize, instances.Count - offset);
+                    instances.CopyTo(offset, treeTransforms, 0, count);
+                    program.SetUniform("uTreeTransforms", treeTransforms.AsSpan(0, count));
+                    pass.DrawMeshInstances(part.mesh, count, depth && part.AlphaCutoff == 0 ? white : part.texture, program);
+                    DrawCalls++;
+                }
+                program.SetUniform("uTreeVertices", 0);
+            }
+        }
+        program.SetUniform("uHasModelNormal", 0);
+        program.SetUniform("uHasMetallicRoughness", 0);
+        program.SetUniform("uFoliageCutoff", 0f);
+    }
+    void DrawBuildPreview(RenderPass pass)
+    {
+        if (buildPreview is null || previewShader is null)
+            return;
+        using var state = pass.PushState(pass.State with
+        {
+            BlendEnabled = true,
+            DepthWriteEnabled = false,
+            CullMode = CullMode.None
+        });
+        previewShader.SetUniform("uTint", previewColor);
+        Mesh(pass, buildPreview, white, previewShader);
+    }
+    void ClearBuildings()
+    {
+        foreach (var b in buildingMeshes.Values)
+            b.Mesh.Dispose();
+        buildingMeshes.Clear();
+        buildingPrefabs.Clear();
+        prefabBuckets.Clear();
+        removedScenery.Clear();
+        buildingState = WorldChanges.Empty;
+        buildPreview?.Dispose();
+        buildPreview = null;
+    }
+}

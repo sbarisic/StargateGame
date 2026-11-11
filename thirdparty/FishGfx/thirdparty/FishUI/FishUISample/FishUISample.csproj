@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="screenshots\**" />
+    <EmbeddedResource Remove="screenshots\**" />
+    <None Remove="screenshots\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Raylib-cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FishUIDemos\FishUIDemos.csproj" />
+    <ProjectReference Include="..\FishUI\FishUI.csproj" />
+    <ProjectReference Include="..\RaylibFishUI\RaylibFishGfx.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="data\cegui_theme\GWEN.imageset.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\cegui_theme\GWEN.looknfeel.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\cegui_theme\GWEN.scheme.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

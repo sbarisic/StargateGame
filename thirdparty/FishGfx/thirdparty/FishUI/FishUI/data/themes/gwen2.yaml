@@ -1,0 +1,7 @@
+theme:
+  name: "Gwen2 Funky"
+  description: "Funky GWEN"
+  inherits: "gwen.yaml"  # Inherits all settings from gwen.yaml
+
+atlas:
+  path: "data/gwen2.png"  # Only override what's different

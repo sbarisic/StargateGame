@@ -1,0 +1,646 @@
+{
+  "center_local_m": [
+    0.0,
+    3.064,
+    0.0
+  ],
+  "slot_pitch_deg": 9.23076923076923,
+  "slots": [
+    {
+      "slot": 0,
+      "neutral_angle_deg": 0.0,
+      "angular_extent_relative_to_slot_deg": [
+        -1.9052005454570917,
+        1.9023532933414913
+      ],
+      "triangle_count": 179,
+      "runtime_mesh": "stargate_18.mesh",
+      "rda_glyph_id": 1,
+      "source_name": "Earth",
+      "semantic": "LOCAL_ORIGIN",
+      "reference_id": null,
+      "dhd_part_name": null,
+      "target_ring_angle_cw_deg": 0.0
+    },
+    {
+      "slot": 1,
+      "neutral_angle_deg": 9.23076923076923,
+      "angular_extent_relative_to_slot_deg": [
+        -1.727346198543387,
+        1.7634976286195467
+      ],
+      "triangle_count": 193,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 2,
+      "source_name": "Crater",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 1,
+      "dhd_part_name": "SM_Key_02",
+      "target_ring_angle_cw_deg": 350.7692307692308
+    },
+    {
+      "slot": 2,
+      "neutral_angle_deg": 18.46153846153846,
+      "angular_extent_relative_to_slot_deg": [
+        -2.4476185665714922,
+        2.5182632970423526
+      ],
+      "triangle_count": 264,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 3,
+      "source_name": "Virgo",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 2,
+      "dhd_part_name": "SM_Key_03",
+      "target_ring_angle_cw_deg": 341.53846153846155
+    },
+    {
+      "slot": 3,
+      "neutral_angle_deg": 27.69230769230769,
+      "angular_extent_relative_to_slot_deg": [
+        -2.280829790598972,
+        2.328842507797532
+      ],
+      "triangle_count": 113,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 4,
+      "source_name": "Bootes",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 3,
+      "dhd_part_name": "SM_Key_04",
+      "target_ring_angle_cw_deg": 332.3076923076923
+    },
+    {
+      "slot": 4,
+      "neutral_angle_deg": 36.92307692307692,
+      "angular_extent_relative_to_slot_deg": [
+        -3.003667356840225,
+        2.9162954146825655
+      ],
+      "triangle_count": 258,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 5,
+      "source_name": "Centaurus",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 4,
+      "dhd_part_name": "SM_Key_05",
+      "target_ring_angle_cw_deg": 323.0769230769231
+    },
+    {
+      "slot": 5,
+      "neutral_angle_deg": 46.153846153846146,
+      "angular_extent_relative_to_slot_deg": [
+        -1.9120866126805822,
+        1.9423841698878448
+      ],
+      "triangle_count": 205,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 6,
+      "source_name": "Libra",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 5,
+      "dhd_part_name": "SM_Key_06",
+      "target_ring_angle_cw_deg": 313.84615384615387
+    },
+    {
+      "slot": 6,
+      "neutral_angle_deg": 55.38461538461538,
+      "angular_extent_relative_to_slot_deg": [
+        -1.1639923215747388,
+        1.0981921253678877
+      ],
+      "triangle_count": 151,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 7,
+      "source_name": "Serpens Caput",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 6,
+      "dhd_part_name": "SM_Key_07",
+      "target_ring_angle_cw_deg": 304.61538461538464
+    },
+    {
+      "slot": 7,
+      "neutral_angle_deg": 64.61538461538461,
+      "angular_extent_relative_to_slot_deg": [
+        -1.594980042380996,
+        1.6204200224580632
+      ],
+      "triangle_count": 68,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 8,
+      "source_name": "Norma",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 7,
+      "dhd_part_name": "SM_Key_08",
+      "target_ring_angle_cw_deg": 295.38461538461536
+    },
+    {
+      "slot": 8,
+      "neutral_angle_deg": 73.84615384615384,
+      "angular_extent_relative_to_slot_deg": [
+        -2.2247419423882775,
+        2.131385208020845
+      ],
+      "triangle_count": 379,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 9,
+      "source_name": "Scorpio",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 8,
+      "dhd_part_name": "SM_Key_09",
+      "target_ring_angle_cw_deg": 286.1538461538462
+    },
+    {
+      "slot": 9,
+      "neutral_angle_deg": 83.07692307692307,
+      "angular_extent_relative_to_slot_deg": [
+        -1.729695166523186,
+        1.7041581903994256
+      ],
+      "triangle_count": 197,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 10,
+      "source_name": "Cra",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 9,
+      "dhd_part_name": "SM_Key_10",
+      "target_ring_angle_cw_deg": 276.9230769230769
+    },
+    {
+      "slot": 10,
+      "neutral_angle_deg": 92.30769230769229,
+      "angular_extent_relative_to_slot_deg": [
+        -1.0647427414343156,
+        1.105147321718249
+      ],
+      "triangle_count": 106,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 11,
+      "source_name": "Scutum",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 10,
+      "dhd_part_name": "SM_Key_11",
+      "target_ring_angle_cw_deg": 267.6923076923077
+    },
+    {
+      "slot": 11,
+      "neutral_angle_deg": 101.53846153846153,
+      "angular_extent_relative_to_slot_deg": [
+        -2.4943859652108245,
+        2.418518420490983
+      ],
+      "triangle_count": 268,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 12,
+      "source_name": "Sagittarius",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 11,
+      "dhd_part_name": "SM_Key_12",
+      "target_ring_angle_cw_deg": 258.46153846153845
+    },
+    {
+      "slot": 12,
+      "neutral_angle_deg": 110.76923076923076,
+      "angular_extent_relative_to_slot_deg": [
+        -2.183838610185717,
+        2.2269074550254686
+      ],
+      "triangle_count": 280,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 13,
+      "source_name": "Aquila",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 12,
+      "dhd_part_name": "SM_Key_13",
+      "target_ring_angle_cw_deg": 249.23076923076923
+    },
+    {
+      "slot": 13,
+      "neutral_angle_deg": 119.99999999999999,
+      "angular_extent_relative_to_slot_deg": [
+        -1.6694918147854878,
+        1.6873441917095136
+      ],
+      "triangle_count": 218,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 14,
+      "source_name": "Mic",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 13,
+      "dhd_part_name": "SM_Key_14",
+      "target_ring_angle_cw_deg": 240.0
+    },
+    {
+      "slot": 14,
+      "neutral_angle_deg": 129.23076923076923,
+      "angular_extent_relative_to_slot_deg": [
+        -2.264902902939582,
+        2.2234940570025117
+      ],
+      "triangle_count": 240,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 15,
+      "source_name": "Capricorn",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 14,
+      "dhd_part_name": "SM_Key_15",
+      "target_ring_angle_cw_deg": 230.76923076923077
+    },
+    {
+      "slot": 15,
+      "neutral_angle_deg": 138.46153846153845,
+      "angular_extent_relative_to_slot_deg": [
+        -2.1658251325818014,
+        2.1458934868225015
+      ],
+      "triangle_count": 240,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 16,
+      "source_name": "Pisces Austrinus",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 15,
+      "dhd_part_name": "SM_Key_16",
+      "target_ring_angle_cw_deg": 221.53846153846155
+    },
+    {
+      "slot": 16,
+      "neutral_angle_deg": 147.69230769230768,
+      "angular_extent_relative_to_slot_deg": [
+        -1.325447616721675,
+        1.4193183779566994
+      ],
+      "triangle_count": 121,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 17,
+      "source_name": "Equuleus",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 16,
+      "dhd_part_name": "SM_Key_17",
+      "target_ring_angle_cw_deg": 212.30769230769232
+    },
+    {
+      "slot": 17,
+      "neutral_angle_deg": 156.9230769230769,
+      "angular_extent_relative_to_slot_deg": [
+        -1.9444743182985178,
+        1.8864234725465963
+      ],
+      "triangle_count": 310,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 18,
+      "source_name": "Aquarius",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 17,
+      "dhd_part_name": "SM_Key_18",
+      "target_ring_angle_cw_deg": 203.07692307692307
+    },
+    {
+      "slot": 18,
+      "neutral_angle_deg": 166.15384615384613,
+      "angular_extent_relative_to_slot_deg": [
+        -2.033416693744499,
+        2.0000147638888564
+      ],
+      "triangle_count": 346,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 19,
+      "source_name": "Pegasus",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 18,
+      "dhd_part_name": "SM_Key_19",
+      "target_ring_angle_cw_deg": 193.84615384615384
+    },
+    {
+      "slot": 19,
+      "neutral_angle_deg": 175.38461538461536,
+      "angular_extent_relative_to_slot_deg": [
+        -3.300188636780831,
+        3.1826040111210148
+      ],
+      "triangle_count": 154,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 20,
+      "source_name": "Sculptor",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 19,
+      "dhd_part_name": "SM_Key_20",
+      "target_ring_angle_cw_deg": 184.6153846153846
+    },
+    {
+      "slot": 20,
+      "neutral_angle_deg": 184.61538461538458,
+      "angular_extent_relative_to_slot_deg": [
+        -2.261562284522114,
+        2.222531262078121
+      ],
+      "triangle_count": 343,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 21,
+      "source_name": "Pisces",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 20,
+      "dhd_part_name": "SM_Key_21",
+      "target_ring_angle_cw_deg": 175.3846153846154
+    },
+    {
+      "slot": 21,
+      "neutral_angle_deg": 193.84615384615384,
+      "angular_extent_relative_to_slot_deg": [
+        -3.4537865993260937,
+        3.468507843570535
+      ],
+      "triangle_count": 232,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 22,
+      "source_name": "Andromeda",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 21,
+      "dhd_part_name": "SM_Key_22",
+      "target_ring_angle_cw_deg": 166.15384615384616
+    },
+    {
+      "slot": 22,
+      "neutral_angle_deg": 203.07692307692307,
+      "angular_extent_relative_to_slot_deg": [
+        -1.9197014536599397,
+        1.9886506662596446
+      ],
+      "triangle_count": 93,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 23,
+      "source_name": "Triangulum",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 22,
+      "dhd_part_name": "SM_Key_23",
+      "target_ring_angle_cw_deg": 156.92307692307693
+    },
+    {
+      "slot": 23,
+      "neutral_angle_deg": 212.3076923076923,
+      "angular_extent_relative_to_slot_deg": [
+        -3.2859011261625994,
+        3.2870229571638845
+      ],
+      "triangle_count": 112,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 24,
+      "source_name": "Aries",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 23,
+      "dhd_part_name": "SM_Key_24",
+      "target_ring_angle_cw_deg": 147.69230769230768
+    },
+    {
+      "slot": 24,
+      "neutral_angle_deg": 221.53846153846152,
+      "angular_extent_relative_to_slot_deg": [
+        -1.5266193748151125,
+        1.5583615476680848
+      ],
+      "triangle_count": 343,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 25,
+      "source_name": "Perseus",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 24,
+      "dhd_part_name": "SM_Key_25",
+      "target_ring_angle_cw_deg": 138.46153846153845
+    },
+    {
+      "slot": 25,
+      "neutral_angle_deg": 230.76923076923075,
+      "angular_extent_relative_to_slot_deg": [
+        -2.0248670910295345,
+        2.126090048172699
+      ],
+      "triangle_count": 330,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 26,
+      "source_name": "Cetus",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 25,
+      "dhd_part_name": "SM_Key_26",
+      "target_ring_angle_cw_deg": 129.23076923076923
+    },
+    {
+      "slot": 26,
+      "neutral_angle_deg": 239.99999999999997,
+      "angular_extent_relative_to_slot_deg": [
+        -2.254039036183798,
+        2.252593136597369
+      ],
+      "triangle_count": 247,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 27,
+      "source_name": "Taurus",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 26,
+      "dhd_part_name": "SM_Key_27",
+      "target_ring_angle_cw_deg": 120.0
+    },
+    {
+      "slot": 27,
+      "neutral_angle_deg": 249.2307692307692,
+      "angular_extent_relative_to_slot_deg": [
+        -1.807259467399433,
+        1.8606833114941708
+      ],
+      "triangle_count": 233,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 28,
+      "source_name": "Auriga",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 27,
+      "dhd_part_name": "SM_Key_28",
+      "target_ring_angle_cw_deg": 110.76923076923077
+    },
+    {
+      "slot": 28,
+      "neutral_angle_deg": 258.46153846153845,
+      "angular_extent_relative_to_slot_deg": [
+        -3.7077777516122694,
+        3.658439599011956
+      ],
+      "triangle_count": 319,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 29,
+      "source_name": "Eridanus",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 28,
+      "dhd_part_name": "SM_Key_29",
+      "target_ring_angle_cw_deg": 101.53846153846155
+    },
+    {
+      "slot": 29,
+      "neutral_angle_deg": 267.6923076923077,
+      "angular_extent_relative_to_slot_deg": [
+        -1.881990583329923,
+        1.969538532152967
+      ],
+      "triangle_count": 590,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 30,
+      "source_name": "Orion",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 29,
+      "dhd_part_name": "SM_Key_30",
+      "target_ring_angle_cw_deg": 92.30769230769232
+    },
+    {
+      "slot": 30,
+      "neutral_angle_deg": 276.9230769230769,
+      "angular_extent_relative_to_slot_deg": [
+        -1.417873703930013,
+        1.400680745933414
+      ],
+      "triangle_count": 97,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 31,
+      "source_name": "Canis Minor",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 30,
+      "dhd_part_name": "SM_Key_31",
+      "target_ring_angle_cw_deg": 83.0769230769231
+    },
+    {
+      "slot": 31,
+      "neutral_angle_deg": 286.15384615384613,
+      "angular_extent_relative_to_slot_deg": [
+        -2.8607301578546185,
+        2.887976608230815
+      ],
+      "triangle_count": 340,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 32,
+      "source_name": "Monoceros",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 31,
+      "dhd_part_name": "SM_Key_32",
+      "target_ring_angle_cw_deg": 73.84615384615387
+    },
+    {
+      "slot": 32,
+      "neutral_angle_deg": 295.38461538461536,
+      "angular_extent_relative_to_slot_deg": [
+        -2.1512757604338617,
+        2.168885249053176
+      ],
+      "triangle_count": 240,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 33,
+      "source_name": "Gemini",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 32,
+      "dhd_part_name": "SM_Key_33",
+      "target_ring_angle_cw_deg": 64.61538461538464
+    },
+    {
+      "slot": 33,
+      "neutral_angle_deg": 304.6153846153846,
+      "angular_extent_relative_to_slot_deg": [
+        -2.858428615073933,
+        2.8103051705463713
+      ],
+      "triangle_count": 397,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 34,
+      "source_name": "Hydra",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 33,
+      "dhd_part_name": "SM_Key_34",
+      "target_ring_angle_cw_deg": 55.38461538461536
+    },
+    {
+      "slot": 34,
+      "neutral_angle_deg": 313.8461538461538,
+      "angular_extent_relative_to_slot_deg": [
+        -2.3188913016757056,
+        2.2642006018375014
+      ],
+      "triangle_count": 214,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 35,
+      "source_name": "Lynx",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 34,
+      "dhd_part_name": "SM_Key_35",
+      "target_ring_angle_cw_deg": 46.15384615384613
+    },
+    {
+      "slot": 35,
+      "neutral_angle_deg": 323.07692307692304,
+      "angular_extent_relative_to_slot_deg": [
+        -1.3725859151003874,
+        1.310290526599431
+      ],
+      "triangle_count": 206,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 36,
+      "source_name": "Cancer",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 35,
+      "dhd_part_name": "SM_Key_36",
+      "target_ring_angle_cw_deg": 36.923076923076906
+    },
+    {
+      "slot": 36,
+      "neutral_angle_deg": 332.30769230769226,
+      "angular_extent_relative_to_slot_deg": [
+        -1.2868456132177357,
+        1.2945656150606055
+      ],
+      "triangle_count": 183,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 37,
+      "source_name": "Sextans",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 36,
+      "dhd_part_name": "SM_Key_37",
+      "target_ring_angle_cw_deg": 27.69230769230768
+    },
+    {
+      "slot": 37,
+      "neutral_angle_deg": 341.5384615384615,
+      "angular_extent_relative_to_slot_deg": [
+        -2.854864501703446,
+        2.984732574167765
+      ],
+      "triangle_count": 181,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 38,
+      "source_name": "Leo Minor",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 37,
+      "dhd_part_name": "SM_Key_38",
+      "target_ring_angle_cw_deg": 18.461538461538453
+    },
+    {
+      "slot": 38,
+      "neutral_angle_deg": 350.7692307692307,
+      "angular_extent_relative_to_slot_deg": [
+        -2.271005084049534,
+        2.3049654593142463
+      ],
+      "triangle_count": 265,
+      "runtime_mesh": "stargate_19.mesh",
+      "rda_glyph_id": 39,
+      "source_name": "Leo",
+      "semantic": "DESTINATION_SYMBOL",
+      "reference_id": 38,
+      "dhd_part_name": "SM_Key_39",
+      "target_ring_angle_cw_deg": 9.230769230769226
+    }
+  ],
+  "status": "Observed asset mapping and accepted shared-origin semantics; not runtime implementation",
+  "date": "2026-11-06",
+  "view": "front, on local +Z side looking toward -Z; +X screen right, +Y up",
+  "neutral_pose": "unrotated exported mesh",
+  "rotation_positive": "clockwise in front view",
+  "runtime_rotation_axis": "+Z",
+  "runtime_right_handed_rotation_sign": -1,
+  "source_hashes": {
+    "stargate.json": "90166a29279a825b4497384ab199e61610967663ef68bb8e24ed9b7d6682a967",
+    "stargate_18.mesh": "b4cb73bba6be5f934799ac1f9c8ec8489887a99af55eaf7722b57af6609593ad",
+    "stargate_19.mesh": "d512f16edcb4e4e48530e803c0ca2aaf2cba6b28f2d1dd45036a566cd4656fca"
+  }
+}

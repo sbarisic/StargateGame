@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "StargateGame.Server": {
+      "commandName": "Project",
+      "commandLineArgs": "--bind 127.0.0.1 --port 17777 --seed 7319 --preset temperate --dev-planets --universe regional-v10"
+    },
+    "Persistent universe": {
+      "commandName": "Project",
+      "commandLineArgs": "--dev-planets --universe dev-settlements6-layout4"
+    },
+    "Gate pair fixture": {
+      "commandName": "Project",
+      "commandLineArgs": "--bind 127.0.0.1 --port 17777 --fixture gate-pair --preset temperate"
+    }
+  }
+}

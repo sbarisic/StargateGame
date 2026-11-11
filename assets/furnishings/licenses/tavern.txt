@@ -1,0 +1,11 @@
+Model Information:
+* title:	Day5-the final tavern
+* source:	https://sketchfab.com/3d-models/day5-the-final-tavern-35306e061fc547a0b17d9c44d2dc35c5
+* author:	Xeka Volnin (https://sketchfab.com/volnin)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Day5-the final tavern" (https://sketchfab.com/3d-models/day5-the-final-tavern-35306e061fc547a0b17d9c44d2dc35c5) by Xeka Volnin (https://sketchfab.com/volnin) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

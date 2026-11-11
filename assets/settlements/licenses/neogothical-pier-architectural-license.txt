@@ -1,0 +1,11 @@
+Model Information:
+* title:	neogothical pier architectural asset pack
+* source:	https://sketchfab.com/3d-models/neogothical-pier-architectural-asset-pack-fe0c11a87f1d404baa5b6156ea885356
+* author:	Samuel Francis Johnson (Oneironauticus) (https://sketchfab.com/oneironauticus)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "neogothical pier architectural asset pack" (https://sketchfab.com/3d-models/neogothical-pier-architectural-asset-pack-fe0c11a87f1d404baa5b6156ea885356) by Samuel Francis Johnson (Oneironauticus) (https://sketchfab.com/oneironauticus) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

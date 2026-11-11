@@ -1,0 +1,120 @@
+{
+  "$id": "1",
+  "Assets": {
+    "$id": "2",
+    "$values": [
+      {
+        "$id": "3",
+        "Terrain": {
+          "$id": "4",
+          "Id": "cd46dc41-7fcd-4e1e-974e-b10d5393a3d3",
+          "Nodes": {
+            "$id": "5"
+          },
+          "Groups": {
+            "$id": "6"
+          },
+          "Notes": {
+            "$id": "7"
+          },
+          "GraphTabs": {
+            "$id": "8",
+            "$values": [
+              {
+                "$id": "9",
+                "Name": "Graph 1",
+                "Color": "Brass",
+                "ZoomFactor": 1.0,
+                "ViewportLocation": {
+                  "$id": "10",
+                  "X": 26000.0,
+                  "Y": 26000.0
+                }
+              }
+            ]
+          },
+          "Width": 5000.0,
+          "Height": 2500.0,
+          "Ratio": 0.5,
+          "Regions": {
+            "$id": "11",
+            "$values": []
+          }
+        },
+        "Automation": {
+          "$id": "12",
+          "Bindings": {
+            "$id": "13",
+            "$values": []
+          },
+          "Expressions": {
+            "$id": "14"
+          },
+          "Variables": {
+            "$id": "15"
+          }
+        },
+        "BuildDefinition": {
+          "$id": "16",
+          "Type": "Standard",
+          "Destination": "<Builds>\\[Filename]\\[+++]",
+          "Resolution": 1024,
+          "BakeResolution": 2048,
+          "TileResolution": 1024,
+          "BucketResolution": 2048,
+          "NumberOfTiles": 3,
+          "EdgeBlending": 0.25,
+          "TileZeroIndex": true,
+          "TilePattern": "_y%Y%_x%X%",
+          "OrganizeFiles": "NodeSubFolder",
+          "ColorSpace": "sRGB"
+        },
+        "State": {
+          "$id": "17",
+          "BakeResolution": 2048,
+          "PreviewResolution": 1024,
+          "HDResolution": 4096,
+          "SelectedNode": -1,
+          "NodeBookmarks": {
+            "$id": "18",
+            "$values": []
+          },
+          "Viewport": {
+            "$id": "19",
+            "CameraPosition": {
+              "$id": "20",
+              "$values": []
+            },
+            "Camera": {
+              "$id": "21"
+            },
+            "RenderMode": "Realistic",
+            "AmbientOcclusion": true,
+            "Shadows": true
+          }
+        },
+        "BuildProfiles": {
+          "$id": "22"
+        }
+      }
+    ]
+  },
+  "Id": "cf27ceac",
+  "Branch": 1,
+  "Macros": {
+    "$id": "23",
+    "$values": []
+  },
+  "Metadata": {
+    "$id": "24",
+    "Name": "",
+    "Description": "",
+    "Version": "2.3.1.0",
+    "Edition": "Community",
+    "Owner": "",
+    "DateCreated": "2026-11-06 14:27:20Z",
+    "DateLastBuilt": "2026-11-06 14:27:20Z",
+    "DateLastSaved": "2026-11-06 14:27:52Z",
+    "ModifiedVersion": "2.3.1.0"
+  }
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup><EmbeddedResource Include="../../assets/settlements/prefabs.json" LogicalName="settlement-prefabs.json" /></ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../assets/furnishings/catalog.json" LogicalName="furnishing-catalog.json" />
+    <EmbeddedResource Include="../../assets/furnishings/interiors.json" LogicalName="furnishing-interiors.json" />
+    <EmbeddedResource Include="../../assets/furnishings/prefabs.json" LogicalName="furnishing-prefabs.json" />
+  </ItemGroup>
+  <ItemGroup><ProjectReference Include="../StargateGame.Shared/StargateGame.Shared.csproj" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="../../assets/building/prefabs.json" LogicalName="prefabs.json" /></ItemGroup>
+</Project>

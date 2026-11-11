@@ -1,0 +1,38 @@
+<Project>
+  <Target Name="PrepareVisualStudioAssets" BeforeTargets="PrepareForBuild;GetCopyToOutputDirectoryItems"
+          Condition="'$(CookAssets)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <Exec Command="&quot;$(AssetPython)&quot; &quot;$(AssetCookRoot)\tools\build_asset_packs.py&quot; --root &quot;$(AssetCookRoot)&quot; --cache &quot;$(AssetCookCache)&quot;" WorkingDirectory="$(AssetCookRoot)" />
+    <Error Condition="!Exists('$(CookedAssetPacks)/catalog.json')" Text="Cooked category packs are missing. Check the asset-cooker output above." />
+  </Target>
+  <Target Name="IncludeMountedAssetPacks" BeforeTargets="AssignTargetPaths"
+          DependsOnTargets="PrepareVisualStudioAssets" Condition="'$(CookedAssetPacks)' != '' and '$(DesignTimeBuild)' != 'true'">
+    <WriteLinesToFile File="$(IntermediateOutputPath)cooked.required" Lines="SGA-CATALOG-1" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <Error Condition="!Exists('$(CookedAssetPacks)/pack-files.txt')" Text="Asset pack file list missing. Run build_asset_packs.py before building with CookAssets=false." />
+    <ReadLinesFromFile File="$(CookedAssetPacks)/pack-files.txt"><Output TaskParameter="Lines" ItemName="MountedPackFiles" /></ReadLinesFromFile>
+    <ItemGroup>
+      <Content Include="$(IntermediateOutputPath)cooked.required" Link="assets/cooked.required" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+      <Content Include="$(CookedAssetPacks)/catalog.json" Link="assets/packs/catalog.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+      <Content Include="@(MountedPackFiles->'$(CookedAssetPacks)/%(Identity)')" Link="assets/packs/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+  <Target Name="RequireVisualStudioCookedAssets" AfterTargets="CopyFilesToOutputDirectory"
+          Condition="'$(CookAssets)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <WriteLinesToFile File="$(TargetDir)assets/cooked.required" Lines="SGA-CATALOG-1" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+  <Target Name="SelectLooseDevelopmentAssets" AfterTargets="CopyFilesToOutputDirectory"
+          Condition="'$(UseLooseAssets)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <!-- These are generated output files, not importer inputs. -->
+    <Delete Files="$(TargetDir)assets/models.sga;$(TargetDir)assets/packs/catalog.json;$(TargetDir)assets/cooked.required" />
+  </Target>
+  <Target Name="PrepareLooseLeafAssets" BeforeTargets="PrepareForBuild;GetCopyToOutputDirectoryItems"
+          Condition="'$(UseLooseAssets)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <Error Condition="!Exists('$(AssetCookCache)/models/veg-MoreRealisticTree_01.json')"
+           Text="Prepare loose vegetation first: python tools/prepare_vegetation.py --output artifacts/cooked/models" />
+    <Exec Command="&quot;$(AssetPython)&quot; &quot;$(AssetCookRoot)/tools/prepare_leaf_mips.py&quot; --vegetation &quot;$(AssetCookCache)/models&quot;" WorkingDirectory="$(AssetCookRoot)" />
+    <ItemGroup>
+      <Content Remove="$(AssetCookCache)/models/**/*;../../assets/models/**/*.mips.gz" />
+      <Content Include="$(AssetCookCache)/models/**/*" Link="assets/vegetation/models/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+      <Content Include="../../assets/models/**/*.mips.gz" Link="assets/models/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -1,0 +1,146 @@
+using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace StargateGame.Shared;
+
+/// <summary>Small deterministic developer worlds. Never materialized into universe saves.</summary>
+public static class GraphicsFixture
+{
+    public const int Version = 6;
+    public static bool Forest(PlanetDefinition d) => d.Fixture == "gate-pair" && d.Preset == "temperate";
+    public static float ForestPathX(float z) => 30 + (-z - 20) * .25f + 3 * MathF.Sin((-z - 20) * .065f);
+    public static float ForestPathDistance(float x, float z) => z is <= -17 and >= -86 ? Math.Abs(Math.Abs(x) - ForestPathX(z)) : float.PositiveInfinity;
+    static readonly PlacementCandidate[] forestTrees = BuildForest();
+    static PlacementCandidate[] BuildForest()
+    {
+        static uint Hash(uint x)
+        {
+            x ^= x >> 16;
+            x *= 0x7feb352d;
+            x ^= x >> 15;
+            x *= 0x846ca68b;
+            return x ^ (x >> 16);
+        }
+        static float Unit(uint x) => (Hash(x) & 65535) / 65535f;
+        List<(uint Rank, Vector3 P, float Yaw, ulong Id)> candidates = [];
+        for (int z = -85; z <= 62; z += 9)
+            for (int x = -85; x <= 85; x += 9)
+            {
+                uint seed = Hash(unchecked((uint)x * 73856093u ^ (uint)z * 19349663u) ^ 7319u);
+                var p = new Vector3(x + (Unit(seed + 1) - .5f) * 2, 0, z + (Unit(seed + 2) - .5f) * 2);
+                // Twenty-one metres of crown clearance for the enlarged world trees.
+                if (Math.Abs(p.X) < 45 && p.Z > -38 && p.Z < 44)
+                    continue;
+                if (Math.Abs(p.X) < 36 && p.Z > -34)
+                    continue;
+                if (ForestPathDistance(p.X, p.Z) < 3.3f)
+                    continue;
+                if (Math.Abs(p.X) > 83 + 3 * MathF.Sin(p.Z * .07f) || p.Z < -83 + 3 * MathF.Sin(p.X * .08f))
+                    continue;
+                ulong id = ((ulong)Hash(seed + 5) << 32) | Hash(seed + 6);
+                candidates.Add((Hash(seed + 7), p, Unit(seed + 8) * MathF.Tau, id));
+            }
+        return candidates.OrderBy(t => t.Rank).Take(140).Select((t, i) =>
+            new PlacementCandidate((t.Id & ~0x300UL) | ((ulong)(i % 4) << 8), "tree", t.P, t.Yaw, 1)).ToArray();
+    }
+    public static bool IsFixture(PlanetDefinition d) => d.Fixture is "graphics-lab" or "gate-pair";
+    public static bool Contains(ChunkCoordinate c) => c.X is >= -2 and < 2 && c.Z is >= -2 and < 2;
+    public static ChunkCoordinate[] Chunks => ChunkCoordinate.All.Where(Contains).ToArray();
+    static Guid Id(string text) => new(SHA256.HashData(Encoding.UTF8.GetBytes(text)).AsSpan(0, 16));
+    public static Guid EntityId(PlanetDefinition world, string entity) => Id(world.LocationId + ":" + entity);
+    public static PlanetDefinition Create(string scene, string preset = "temperate")
+    {
+        if (scene is not ("graphics-lab" or "gate-pair") || !PlanetSettings.Presets.Contains(preset))
+            throw new ArgumentException("Unknown graphics fixture.");
+        string key = $"fixture:{Version}:{scene}:{preset}";
+        List<StaticEntity> entities = [];
+        void Gate(string suffix, Vector3 p, float yaw)
+        {
+            var rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, yaw);
+            entities.Add(new("gate-" + suffix, "stargate", p - Vector3.UnitY * PlanetSettings.GateEmbedDepth)
+            {
+                Scale = PlanetSettings.GateScale,
+                Rotation = rotation
+            });
+            entities.Add(new("dhd-" + suffix, "dhd", p + Vector3.Transform(new Vector3(4, 0, 6), rotation))
+            {
+                Rotation = rotation
+            });
+        }
+        if (scene == "gate-pair")
+        {
+            Gate("a", new(-6, 0, 0), 0);
+            Gate("b", new(6, 0, 0), 0);
+        }
+        else
+            Gate("a", new(-35, 0, -35), 0);
+        return new("fixture-" + scene + "-" + preset, scene + " / " + preset, 7319, 100,
+            Enumerable.Range(0, 8).Select(i => scene == "gate-pair" ? new Vector3(-3 + i % 4 * 2, 0, 9 + i / 4 * 2) : new Vector3(i % 4 * 2, 0, 8 + i / 4 * 2)).ToArray(), entities.ToArray())
+        {
+            Fixture = scene,
+            GeneratorVersion = PlanetSettings.Version,
+            Preset = preset,
+            UniverseId = Id("graphics-fixtures"),
+            LocationId = Id(key),
+            SettingsHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(key))),
+            Props = new PropDefinition[] { new(1, scene == "gate-pair" ? new(-9, .52f, 7) : new(8, .52f, 3), new(.5f), 10), PropDefinition.Barrel(2, scene == "gate-pair" ? new(-7, .612f, 8) : new(10, .612f, 3), false) }.Select(p => p with { PersistentId = Id(key + ":prop:" + p.Id) }).ToArray()
+        };
+    }
+    public static void Validate(PlanetDefinition d)
+    {
+        if (!IsFixture(d) || !PlanetSettings.Presets.Contains(d.Preset))
+            throw new InvalidDataException("Unknown fixture.");
+        var expected = Create(d.Fixture!, d.Preset);
+        // The fixture layout is immutable; its live prop registry changes after
+        // capture/destruction and is independently validated with physics state.
+        if (System.Text.Json.JsonSerializer.Serialize(d with
+        {
+            Props = expected.Props
+        }, Protocol.Json) != System.Text.Json.JsonSerializer.Serialize(expected, Protocol.Json))
+            throw new InvalidDataException("Fixture definition does not match this build.");
+    }
+    static float Smooth(float a, float b, float x)
+    {
+        float t = Math.Clamp((x - a) / (b - a), 0, 1);
+        return t * t * (3 - 2 * t);
+    }
+    public static float Height(PlanetDefinition d, float x, float z)
+    {
+        if (d.Fixture == "gate-pair")
+            return x is > -12 and < 12 && z is > 55 and < 78 ? -1.5f * Smooth(55, 60, z) * (1 - Smooth(73, 78, z)) * (1 - Smooth(8, 12, Math.Abs(x))) : 0;
+        float hill = 8 * Smooth(25, 60, x) * Smooth(10, 40, z);
+        float river = Math.Abs(z - 45 - 3 * MathF.Sin(x * .05f));
+        float channel = river < 7 ? -1.4f * (1 - Smooth(3, 7, river)) : 0;
+        return hill + channel;
+    }
+    public static TerrainChunkData BuildChunk(PlanetDefinition d, ChunkCoordinate c)
+    {
+        if (!Contains(c))
+            throw new ArgumentOutOfRangeException(nameof(c));
+        int[] h = new int[TerrainChunkData.Count], w = Enumerable.Repeat(int.MinValue, TerrainChunkData.Count).ToArray();
+        byte[] m = new byte[h.Length * 4];
+        for (int z = -1; z <= 65; z++)
+            for (int x = -1; x <= 65; x++)
+            {
+                int i = (z + 1) * 67 + x + 1;
+                float wx = c.X * 64 + x, wz = c.Z * 64 + z, height = Height(d, wx, wz);
+                h[i] = (int)MathF.Round(height * 1000);
+                if (height < -.35f)
+                    w[i] = -350;
+                m[i * 4] = 180;
+                m[i * 4 + 1] = 45;
+                m[i * 4 + 2] = 25;
+                m[i * 4 + 3] = 5;
+            }
+        List<PlacementCandidate> trees = [];
+        if (Forest(d))
+            trees.AddRange(forestTrees.Where(t => ChunkCoordinate.At(t.Position.X, t.Position.Z) == c));
+        if (d.Fixture == "graphics-lab")
+            for (int z = -78; z <= -52; z += 9)
+                for (int x = 35; x <= 70; x += 9)
+                    if (ChunkCoordinate.At(x, z) == c)
+                        trees.Add(new((ulong)(10000 + ((z + 78) / 9 * 4 + (x - 35) / 9) * 257), "tree", new(x, Height(d, x, z), z), x * .17f % MathF.Tau, 1));
+        return new(c, h, w, m, trees.ToArray());
+    }
+}

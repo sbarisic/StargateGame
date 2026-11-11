@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "method": "Export picking surfaces from retained runtime triangles/UVs, without changing source assets.",
+  "parts": [
+    {
+      "part": "SM_DHD_Base",
+      "sha256": "0d79a0f1797cc62f1e8fa8af65a1c56bd5f3d10b15751d8dfad057c1fa1fedbb",
+      "triangles": 7188
+    },
+    {
+      "part": "SM_DHD_Dome",
+      "sha256": "a6030f350e5eab1f97bbd2e2456fce6d426d8f8c322472d16472b5ac71fdebe9",
+      "triangles": 1250,
+      "emissionMask": "dhd_01-emission.png",
+      "emissionMaskSha256": "b281cdb0b22e20b01469456c066c8fe31031a7e5040c0bab53680a1f9f636e0e",
+      "textureFlipY": true
+    },
+    {
+      "part": "SM_Key_01",
+      "sha256": "91b590cce232e9bcc22d0c365703893c6f1450092c00f58c8a97abcc1a453115",
+      "triangles": 113
+    },
+    {
+      "part": "SM_Key_02",
+      "sha256": "e29067deb82dc4de621154e3dbebfffd7a467241b00c24aad77a3647feda9231",
+      "triangles": 113
+    },
+    {
+      "part": "SM_Key_03",
+      "sha256": "8c9e320271f2159beb6318e18859d98795e10b150726385f54bff84811c87aaf",
+      "triangles": 151
+    },
+    {
+      "part": "SM_Key_04",
+      "sha256": "e94eae7f19fa9c7bb8fea5c4fed6132e08d032f21a96515314b4867dd0fb3f55",
+      "triangles": 96
+    },
+    {
+      "part": "SM_Key_05",
+      "sha256": "761be1425b5607ff14af001b0c6d796ff0da253f72046741a70b07256cb8320b",
+      "triangles": 130
+    },
+    {
+      "part": "SM_Key_06",
+      "sha256": "1bc33227981be1ef7883c1328a0c681102992b7b5972661314ba1575ba0f160e",
+      "triangles": 104
+    },
+    {
+      "part": "SM_Key_07",
+      "sha256": "20e044ae24c88e520f42f4663f38bf3a0a142bdda949ac849c55e8b3716c9a39",
+      "triangles": 110
+    },
+    {
+      "part": "SM_Key_08",
+      "sha256": "c02157512848773a7eeb3bc0a4bda46711a5634581554f970f679de3eb5e3f52",
+      "triangles": 78
+    },
+    {
+      "part": "SM_Key_09",
+      "sha256": "27fc944a180b27c1561928001aede45df5476af4e368af0b667f16650aaf0951",
+      "triangles": 143
+    },
+    {
+      "part": "SM_Key_10",
+      "sha256": "d327f265ee7dfc53927d7a033c5057a431b945195f24d2bf358b98786c59ad21",
+      "triangles": 123
+    },
+    {
+      "part": "SM_Key_11",
+      "sha256": "5dc2455f824e7efc721c9e611fbc487054e00520f2d5b3301c38c5ccd76bfa50",
+      "triangles": 96
+    },
+    {
+      "part": "SM_Key_12",
+      "sha256": "3f5d03cfb4be5f63459efd22aa2a61ce489a2d5ff886aa836f98d7375c8eb92e",
+      "triangles": 137
+    },
+    {
+      "part": "SM_Key_14",
+      "sha256": "d37af11e20fc727cadba387b66992d90f30fe7b667231ec94951ad6ba4575688",
+      "triangles": 111
+    },
+    {
+      "part": "SM_Key_15",
+      "sha256": "f1ae7236c990068ccd1b93921080bd24cb3ab78f7dda2b833eaf5c1a312c66e2",
+      "triangles": 115
+    },
+    {
+      "part": "SM_Key_16",
+      "sha256": "970dc20a95f2fa252b423b282e59bce46d4c12ad918acb9f5bcc3ebb43e9b86d",
+      "triangles": 124
+    },
+    {
+      "part": "SM_Key_17",
+      "sha256": "fd659e2ee08f589a64bc046f49a1182415d2c08b7c332645a2af402be0c5139c",
+      "triangles": 101
+    },
+    {
+      "part": "SM_Key_18",
+      "sha256": "6c319dd8e6a0e07cdb5450b2a62bb1118e1e06f4a1760bb6ba3024fbba21f8b7",
+      "triangles": 143
+    },
+    {
+      "part": "SM_Key_19",
+      "sha256": "03ca2d24b0a9e8e4119af78d31800a8ec29eaf715ef52e216caa2ba2f126febc",
+      "triangles": 141
+    },
+    {
+      "part": "SM_Key_20",
+      "sha256": "6e725faf6f6ba20883799721482964acd90331438269dbf2080116fdfe19eb81",
+      "triangles": 95
+    },
+    {
+      "part": "SM_Key_21",
+      "sha256": "4c8d3da35184325a738e1410846e8e24cacfe2f46b995ed0a1dcfc551bce4ee7",
+      "triangles": 119
+    },
+    {
+      "part": "SM_Key_22",
+      "sha256": "c9909bdacb2440a80f57b0c23e7eccbc3cff59a6758f1fbd5b42b9a73265a668",
+      "triangles": 131
+    },
+    {
+      "part": "SM_Key_23",
+      "sha256": "198d8db3c2622c4f4460eee28ed9376bef8485ae0c36d9c7dbc94430df98ff74",
+      "triangles": 82
+    },
+    {
+      "part": "SM_Key_24",
+      "sha256": "defe4610f24a1fd3ca5e70b8c023c054700b383b76823e421040befa76a7461a",
+      "triangles": 92
+    },
+    {
+      "part": "SM_Key_25",
+      "sha256": "66ddde4f1a272bb190a46d8db9d5a19c9bc7b5af16c2cc1690c8238f6e510236",
+      "triangles": 122
+    },
+    {
+      "part": "SM_Key_26",
+      "sha256": "a39d3cd7c250c8c2681743f2153ef6a7c226408dccd380a3a9aaaf0e3f1dd90d",
+      "triangles": 142
+    },
+    {
+      "part": "SM_Key_27",
+      "sha256": "acc9e646a6f66e6bd14e163a147ff39feee8851ed476b1d18bdba95a21ea3dd0",
+      "triangles": 122
+    },
+    {
+      "part": "SM_Key_28",
+      "sha256": "958672ebab9fa09fda28d359b3e91a7d299939f82368ee5a1c641edad1b7883f",
+      "triangles": 117
+    },
+    {
+      "part": "SM_Key_29",
+      "sha256": "cb1e235ad4910a552cc5092150acf562747fffde7d7ca92f99afdacac2035e09",
+      "triangles": 146
+    },
+    {
+      "part": "SM_Key_30",
+      "sha256": "229811da283f2a0e3dd3b024245a13da3fb23ac48c92ebe2b8bab11ca62dbe9d",
+      "triangles": 267
+    },
+    {
+      "part": "SM_Key_31",
+      "sha256": "6c716575104f44d620ac1f33a3700e7c2acdab59793c72fb4e46d9ecf7dc1bf6",
+      "triangles": 80
+    },
+    {
+      "part": "SM_Key_32",
+      "sha256": "d022758272dcb9ec5e16aed30824ef24b5026a7cfd8e3ba42c33b31c222b0bd4",
+      "triangles": 137
+    },
+    {
+      "part": "SM_Key_33",
+      "sha256": "1a82c8d50e66227d49bb7a62dbd0a7eb568b4dc2a1a7eaf8ba27b41f5404009c",
+      "triangles": 130
+    },
+    {
+      "part": "SM_Key_34",
+      "sha256": "a8f189eec056378d23f8dc291fe2d8a71036b8c20f2dc4f06d0e81d863989000",
+      "triangles": 152
+    },
+    {
+      "part": "SM_Key_35",
+      "sha256": "bfc1ac21a5fb00b40d5cdbc45e32d068c8c0ea524881aec0c36bc871df142f74",
+      "triangles": 137
+    },
+    {
+      "part": "SM_Key_36",
+      "sha256": "c73740baa914451074c702a585fa8a7264de2e281d8e40a254674210cfbaab87",
+      "triangles": 117
+    },
+    {
+      "part": "SM_Key_37",
+      "sha256": "a29145fd6f5db6fa823c7720518391d9963130dfa2bbe204aad07e4421715faf",
+      "triangles": 103
+    },
+    {
+      "part": "SM_Key_38",
+      "sha256": "03966e74e3a1dc8528786a4ad6b9b085f8fec321e2cd8bb35fc5acbaa42fecbf",
+      "triangles": 116
+    },
+    {
+      "part": "SM_Key_39",
+      "sha256": "5fcd944665a9923cecfceed220f3b2f8c4cc9319d4582b671905d1b3f27b5f37",
+      "triangles": 122
+    }
+  ],
+  "sha256": "170615d64268561fc02a5717aade7ad58cdddc33ca660b29bebc496b7566450a"
+}

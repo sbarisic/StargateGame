@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <PackageId>FishUI</PackageId>
+    <Authors>sbarisic</Authors>
+    <Company>sbarisic</Company>
+    <Product>FishUI</Product>
+    <Description>A backend-agnostic retained GUI library for .NET applications.</Description>
+    <PackageTags>gui;ui;controls;gamedev;raylib;theme;yaml</PackageTags>
+    <PackageProjectUrl>https://github.com/sbarisic/FishUI</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sbarisic/FishUI</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>NUGET_FISHUI_README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\NUGET_FISHUI_README.md" Pack="true" PackagePath="\" />
+    <None Update="data\**\*" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="build\FishUI.props" Pack="true" PackagePath="build\" />
+    <None Include="build\FishUI.targets" Pack="true" PackagePath="build\" />
+  </ItemGroup>
+</Project>

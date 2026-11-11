@@ -1,0 +1,11 @@
+Model Information:
+* title:	Wooden Box
+* source:	https://sketchfab.com/3d-models/wooden-box-afb1324784774f9d8de52f1c9756a052
+* author:	Alexey Stepanov (https://sketchfab.com/Alexey.Stepanov)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Wooden Box" (https://sketchfab.com/3d-models/wooden-box-afb1324784774f9d8de52f1c9756a052) by Alexey Stepanov (https://sketchfab.com/Alexey.Stepanov) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

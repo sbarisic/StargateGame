@@ -1,0 +1,727 @@
+﻿# FishUI
+
+Current source contracts and migration notes: [Unicode, layout, and update hardening](docs/HARDENING.md).
+
+A backend-independent, retained-control GUI library for .NET applications with backend-agnostic rendering.
+
+[![.NET 9.0](https://img.shields.io/badge/.NET-9.0-purple.svg)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![NuGet FishUI](https://img.shields.io/nuget/v/FishUI.svg?label=FishUI)](https://www.nuget.org/packages/FishUI)
+[![NuGet RaylibFishGfx](https://img.shields.io/nuget/v/RaylibFishGfx.svg?label=RaylibFishGfx)](https://www.nuget.org/packages/RaylibFishGfx)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-sbarisic%2FFishUI-blue.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAyCAYAAAAnWDnqAAAAAXNSR0IArs4c6QAAA05JREFUaEPtmUtyEzEQhtWTQyQLHNak2AB7ZnyXZMEjXMGeK/AIi+QuHrMnbChYY7MIh8g01fJoopFb0uhhEqqcbWTp06/uv1saEDv4O3n3dV60RfP947Mm9/SQc0ICFQgzfc4CYZoTPAswgSJCCUJUnAAoRHOAUOcATwbmVLWdGoH//PB8mnKqScAhsD0kYP3j/Yt5LPQe2KvcXmGvRHcDnpxfL2zOYJ1mFwrryWTz0advv1Ut4CJgf5uhDuDj5eUcAUoahrdY/56ebRWeraTjMt/00Sh3UDtjgHtQNHwcRGOC98BJEAEymycmYcWwOprTgcB6VZ5JK5TAJ+fXGLBm3FDAmn6oPPjR4rKCAoJCal2eAiQp2x0vxTPB3ALO2CRkwmDy5WohzBDwSEFKRwPbknEggCPB/imwrycgxX2NzoMCHhPkDwqYMr9tRcP5qNrMZHkVnOjRMWwLCcr8ohBVb1OMjxLwGCvjTikrsBOiA6fNyCrm8V1rP93iVPpwaE+gO0SsWmPiXB+jikdf6SizrT5qKasx5j8ABbHpFTx+vFXp9EnYQmLx02h1QTTrl6eDqxLnGjporxl3NL3agEvXdT0WmEost648sQOYAeJS9Q7bfUVoMGnjo4AZdUMQku50McDcMWcBPvr0SzbTAFDfvJqwLzgxwATnCgnp4wDl6Aa+Ax283gghmj+vj7feE2KBBRMW3FzOpLOADl0Isb5587h/U4gGvkt5v60Z1VLG8BhYjbzRwyQZemwAd6cCR5/XFWLYZRIMpX39AR0tjaGGiGzLVyhse5C9RKC6ai42ppWPKiBagOvaYk8lO7DajerabOZP46Lby5wKjw1HCRx7p9sVMOWGzb/vA1hwiWc6jm3MvQDTogQkiqIhJV0nBQBTU+3okKCFDy9WwferkHjtxib7t3xIUQtHxnIwtx4mpg26/HfwVNVDb4oI9RHmx5WGelRVlrtiw43zboCLaxv46AZeB3IlTkwouebTr1y2NjSpHz68WNFjHvupy3q8TFn3Hos2IAk4Ju5dCo8B3wP7VPr/FGaKiG+T+v+TQqIrOqMTL1VdWV1DdmcbO8KXBz6esmYWYKPwDL5b5FA1a0hwapHiom0r/cKaoqr+27/XcrS5UwSMbQAAAABJRU5ErkJggg==)](https://deepwiki.com/sbarisic/FishUI)
+
+Uses the [GWEN Skin](https://github.com/benelot/CEGUI-GWEN-Skin) atlas for theming.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Screenshots](#screenshots)
+- [Features](#features)
+- [Installation](#installation)
+- [Projects](#projects)
+- [Quick Start](#quick-start)
+- [Control Examples](#control-examples)
+- [Layout & Positioning](#layout--positioning)
+- [Theming](#theming)
+- [Serialization](#serialization)
+- [Virtual Cursor](#virtual-cursor-gamepadkeyboard-navigation)
+- [Integrating with Existing Game Loops](#integrating-with-existing-game-loops)
+- [FishUIEditor](#fishuieditor---visual-layout-designer)
+- [Running Samples](#running-samples)
+- [Documentation](#documentation)
+- [Requirements](#requirements)
+- [Project Structure](#project-structure)
+- [License](#license)
+
+## Overview
+
+FishUI is a flexible GUI framework that separates UI logic from rendering, allowing integration with any graphics library. It provides a comprehensive set of controls suitable for game development, tools, and applications.
+
+**Key Principles:**
+- **Backend Agnostic**: Implement your own graphics and input handlers via simple interfaces
+- **Small Core**: YamlDotNet supplies theme and layout serialization
+- **Game-Ready**: Designed for real-time applications with features like virtual cursor support
+- **Themeable**: YAML-based theme system with atlas/9-slice support
+
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/new/anim_system.gif" width="600" alt="Animation & Particle System"/>
+</p>
+
+<p align="center">
+  <img src="screenshots/new/26.png" width="400" alt="Windows & Dialogs"/>
+  <img src="screenshots/new/26_2.png" width="400" alt="Windows & Dialogs"/>
+</p>
+<p align="center">
+  <img src="screenshots/new/1.png" width="400" alt="Animations"/>
+  <img src="screenshots/new/3.png" width="400" alt="Button Variants"/>
+</p>
+<p align="center">
+  <img src="screenshots/new/4.png" width="400" alt="DataGrid"/>
+  <img src="screenshots/new/5.png" width="400" alt="DatePicker"/>
+</p>
+<p align="center">
+  <img src="screenshots/new/6.png" width="400" alt="DropDown"/>
+  <img src="screenshots/new/7.png" width="400" alt="Editor Layout"/>
+</p>
+<p align="center">
+  <img src="screenshots/new/9.png" width="400" alt="Game Main Menu"/>
+  <img src="screenshots/new/10.png" width="400" alt="Gauges"/>
+</p>
+<p align="center">
+  <img src="screenshots/new/13.png" width="400" alt="LayoutSystem"/>
+  <img src="screenshots/new/14.png" width="400" alt="LineChart"/>
+</p>
+<p align="center">
+  <img src="screenshots/new/16.png" width="400" alt="MenuBar"/>
+  <img src="screenshots/new/17.png" width="400" alt="MultiLineEditbox"/>
+</p>
+<p align="center">
+  <img src="screenshots/new/18.png" width="400" alt="PropertyGrid"/>
+  <img src="screenshots/new/19.png" width="400" alt="ScrollablePane"/>
+</p>
+<p align="center">
+  <img src="screenshots/new/21.png" width="400" alt="SpreadsheetGrid"/>
+  <img src="screenshots/new/game_window_sample.png" width="400" alt="Game Window Sample"/>
+</p>
+
+## Features
+
+### Controls (50+ Built-in)
+
+| Category | Controls |
+|----------|----------|
+| **Input** | Button, Textbox, CheckBox, RadioButton, ToggleSwitch, Slider, NumericUpDown, MultiLineEditbox |
+| **Selection** | ListBox, DropDown (ComboBox), TreeView, SelectionBox, DatePicker, TimePicker |
+| **Display** | Label, StaticText, ImageBox, AnimatedImageBox, ProgressBar, LineChart, Timeline, BigDigitDisplay, ToastNotification |
+| **Containers** | Panel, Window, GroupBox, TabControl, ScrollablePane, StackLayout, FlowLayout, GridLayout |
+| **Navigation** | ScrollBarV, ScrollBarH, MenuBar, ContextMenu, MenuItem |
+| **Gauges** | RadialGauge, BarGauge, VUMeter |
+| **Data** | DataGrid, SpreadsheetGrid, PropertyGrid, ItemListbox |
+| **Effects** | ParticleEmitter |
+| **Utility** | Tooltip, Titlebar, GameConsole |
+
+### Framework Features
+
+- **Layout System**: Absolute positioning, anchoring, margins/padding, StackLayout, FlowLayout, GridLayout
+- **Theme System**: YAML themes with atlas regions, 9-slice/NPatch rendering, color overrides, inheritance
+- **Serialization**: Save/load UI layouts to YAML files with event handler binding
+- **Animation**: Built-in animation system with easing functions, tween helpers, and particle effects
+- **Input**: Mouse, keyboard, touch, and virtual cursor (gamepad/keyboard navigation)
+- **Events**: Control events, serializable event handlers, event broadcasting
+- **UI Scaling**: Resolution-independent UI with configurable scale factor
+
+## Installation
+
+### NuGet Packages
+
+FishUI is available on NuGet. Choose the package that fits your needs:
+
+#### Option 1: Raylib Backend (Recommended for Quick Start)
+
+If you're using Raylib for graphics/input, install the all-in-one package:
+
+```bash
+dotnet add package RaylibFishGfx
+```
+
+This includes:
+- **FishUI** - Core library with all controls
+- **Raylib-cs** - Raylib bindings
+- Pre-built `IFishUIGfx` and `IFishUIInput` implementations
+
+#### Option 2: Core Library Only
+
+If you're implementing your own graphics backend:
+
+```bash
+dotnet add package FishUI
+```
+
+Then implement `IFishUIGfx` and `IFishUIInput` interfaces for your graphics library.
+
+### Data Files
+
+The NuGet packages automatically include theme files, fonts, and icons. These are copied to your output directory on build under the `data/` folder.
+
+## Projects
+
+| Project | Description |
+|---------|-------------|
+| **FishUI** | Core library - all controls and interfaces |
+| **RaylibFishGfx** | Raylib graphics/input backend (NuGet package) |
+| **FishUIEditor** | Visual layout editor for designing FishUI interfaces |
+| **FishUIDemos** | Sample implementations using ISample interface |
+| **FishUISample** | Raylib-based sample runner with GUI chooser |
+
+## Quick Start
+
+### 1. Implement Required Interfaces
+
+FishUI requires two interfaces for your graphics backend (or use the pre-built Raylib backend):
+
+```csharp
+// Graphics rendering
+public class MyGfx : IFishUIGfx
+{
+    public void Init() { }
+    public void BeginDrawing(float dt) { }
+    public void EndDrawing() { }
+
+    public int GetWindowWidth() { /* ... */ }
+    public int GetWindowHeight() { /* ... */ }
+
+    public ImageRef LoadImage(string path) { /* ... */ }
+    public FontRef LoadFont(string path, int size) { /* ... */ }
+
+    public void DrawRectangle(Vector2 pos, Vector2 size, FishColor color) { /* ... */ }
+    public void DrawImage(ImageRef img, Vector2 pos, float rot, float scale, FishColor color) { /* ... */ }
+    public void DrawNPatch(NPatch patch, Vector2 pos, Vector2 size, FishColor color) { /* ... */ }
+    public void DrawText(FontRef font, string text, Vector2 pos, float size, float spacing, FishColor color) { /* ... */ }
+
+    public void BeginScissor(Vector2 pos, Vector2 size) { /* ... */ }
+    public void EndScissor() { /* ... */ }
+    // ... see IFishUIGfx for full interface
+}
+
+// Input handling
+public class MyInput : IFishUIInput
+{
+    public Vector2 GetMousePosition() { /* ... */ }
+    public bool IsMouseDown(FishMouseButton button) { /* ... */ }
+    public bool IsMousePressed(FishMouseButton button) { /* ... */ }
+    public bool IsKeyDown(FishKey key) { /* ... */ }
+    public bool IsKeyPressed(FishKey key) { /* ... */ }
+    public FishKey GetKeyPressed() { /* ... */ }
+    public int GetCharPressed() { /* ... */ }
+    public float GetMouseWheelMove() { /* ... */ }
+    // ... see IFishUIInput for full interface
+}
+
+// Event handling (optional - can use empty implementation)
+public class MyEvents : IFishUIEvents
+{
+    public void Broadcast(FishUI.FishUI ui, Control sender, string eventName, object[] args) { }
+}
+```
+
+### 2. Initialize FishUI
+
+```csharp
+// Using the Raylib backend (recommended)
+using RaylibGfx = RaylibFishGfx.RaylibFishGfx;
+using RaylibInput = RaylibFishGfx.RaylibInput;
+
+FishUISettings settings = new FishUISettings();
+RaylibGfx gfx = new RaylibGfx(800, 600, "My App");
+gfx.UseBeginDrawing = false;  // Set to false if managing draw calls yourself
+IFishUIInput input = new RaylibInput();
+IFishUIEvents events = new MyEvents();  // Or use a simple empty implementation
+
+FishUI.FishUI ui = new FishUI.FishUI(settings, gfx, input, events);
+ui.Init();
+
+// Load a theme (required for proper rendering)
+settings.LoadTheme("data/themes/gwen.yaml", applyImmediately: true);
+```
+
+### 3. Add Controls
+
+```csharp
+// Simple button with event
+Button btn = new Button();
+btn.Text = "Click Me";
+btn.Position = new Vector2(100, 100);
+btn.Size = new Vector2(150, 40);
+btn.OnButtonPressed += (sender, mouseBtn, pos) => Console.WriteLine("Clicked!");
+ui.AddControl(btn);
+
+// Panel with children
+Panel panel = new Panel();
+panel.Position = new Vector2(10, 10);
+panel.Size = new Vector2(300, 200);
+ui.AddControl(panel);
+
+CheckBox check = new CheckBox("Enable Feature");
+check.Position = new Vector2(10, 10);
+check.Size = new Vector2(20, 20);  // Size for the checkbox icon
+panel.AddChild(check);
+
+// ListBox with items
+ListBox list = new ListBox();
+list.Position = new Vector2(10, 50);
+list.Size = new Vector2(150, 120);
+list.AlternatingRowColors = true;
+for (int i = 0; i < 10; i++)
+    list.AddItem($"Item {i + 1}");
+list.OnItemSelected += (lb, idx, item) => Console.WriteLine($"Selected: {item.Text}");
+panel.AddChild(list);
+```
+
+### 4. Run the Update Loop
+
+```csharp
+// Main game loop
+while (!Raylib.WindowShouldClose())
+{
+    float dt = Raylib.GetFrameTime();
+
+    // Handle window resize
+    if (Raylib.IsWindowResized())
+        ui.Resized(Raylib.GetScreenWidth(), Raylib.GetScreenHeight());
+
+    Raylib.BeginDrawing();
+    Raylib.ClearBackground(Color.DarkGray);
+
+    // Update and render UI
+    ui.Tick(dt, (float)Raylib.GetTime());
+
+    Raylib.EndDrawing();
+}
+
+Raylib.CloseWindow();
+```
+
+### Complete Minimal Example
+
+Here's a complete working example using the Raylib backend:
+
+```csharp
+using FishUI;
+using FishUI.Controls;
+using Raylib_cs;
+using System.Numerics;
+using RaylibGfx = RaylibFishGfx.RaylibFishGfx;
+using RaylibInput = RaylibFishGfx.RaylibInput;
+
+// Simple event handler
+class SimpleEvents : IFishUIEvents
+{
+    public void Broadcast(FishUI.FishUI ui, Control ctrl, string name, object[] args) { }
+}
+
+class Program
+{
+    static void Main()
+    {
+        // Setup
+        var settings = new FishUISettings();
+        var gfx = new RaylibGfx(800, 600, "FishUI Demo");
+        gfx.UseBeginDrawing = false;
+
+        var ui = new FishUI.FishUI(settings, gfx, new RaylibInput(), new SimpleEvents());
+        ui.Init();
+        settings.LoadTheme("data/themes/gwen.yaml", applyImmediately: true);
+
+        // Create a button
+        var button = new Button { Text = "Click Me!", Position = new Vector2(100, 100), Size = new Vector2(120, 40) };
+        button.OnButtonPressed += (btn, mouse, pos) => Console.WriteLine("Clicked!");
+        ui.AddControl(button);
+
+        // Main loop
+        while (!Raylib.WindowShouldClose())
+        {
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.DarkGray);
+            ui.Tick(Raylib.GetFrameTime(), (float)Raylib.GetTime());
+            Raylib.EndDrawing();
+        }
+        Raylib.CloseWindow();
+    }
+}
+```
+
+## Control Examples
+
+### Button Variants
+
+```csharp
+// Standard button
+Button btn = new Button { Text = "Normal" };
+
+// Image button (icon only)
+Button imgBtn = new Button();
+imgBtn.Icon = gfx.LoadImage("icon.png");
+imgBtn.IsImageButton = true;
+
+// Toggle button
+Button toggleBtn = new Button { Text = "Toggle", IsToggle = true };
+
+// Repeat button (fires while held)
+Button repeatBtn = new Button { Text = "Hold Me", IsRepeat = true };
+```
+
+### DropDown with Features
+
+```csharp
+// Searchable dropdown
+DropDown searchable = new DropDown();
+searchable.Searchable = true;  // Type to filter
+searchable.AddItem("Apple");
+searchable.AddItem("Banana");
+searchable.AddItem("Cherry");
+
+// Multi-select dropdown
+DropDown multi = new DropDown();
+multi.MultiSelect = true;
+multi.OnMultiSelectionChanged += (dd, indices) => { /* ... */ };
+```
+
+### ListBox Features
+
+```csharp
+ListBox list = new ListBox();
+list.AlternatingRowColors = true;
+list.EvenRowColor = new FishColor(200, 220, 255, 40);
+list.MultiSelect = true;  // Ctrl+click, Shift+click
+
+// Custom item rendering
+list.CustomItemHeight = 28;
+list.CustomItemRenderer = (ui, item, index, pos, size, selected, hovered) =>
+{
+    ui.Graphics.DrawRectangle(pos, new Vector2(12, 12), FishColor.Red);
+    ui.Graphics.DrawText(ui.Settings.FontDefault, item.Text, pos + new Vector2(16, 0));
+};
+```
+
+### Window with Titlebar
+
+```csharp
+Window window = new Window();
+window.Title = "My Window";
+window.Position = new Vector2(100, 100);
+window.Size = new Vector2(400, 300);
+window.ShowCloseButton = true;
+window.Resizable = true;
+window.OnClosed += (wnd) => wnd.Visible = false;
+ui.AddControl(window);
+
+// Add content to window
+Label content = new Label("Window content here");
+content.Position = new Vector2(10, 10);
+window.AddChild(content);
+```
+
+### Quake-Style Game Console
+
+Add `GameConsole` as a root control. It opens from the top with Grave or Shift+Grave, focuses its command input, and exposes a capture signal for the game input layer.
+
+```csharp
+GameConsole console = new GameConsole();
+console.RegisterCommand("teleport", context =>
+{
+    // Parse context.Arguments and update the game on the UI thread.
+    context.Console.WriteLine("Teleport command received.");
+}, "Teleports the player.", "teleport <x> <y> <z>", "tp");
+
+ui.AddControl(console); // GameConsole must be a root.
+```
+
+Use split update/draw calls when gameplay must inspect keyboard capture in the same frame:
+
+```csharp
+ui.TickUpdate(deltaTime, currentTime);
+
+if (!ui.WantsKeyboardCapture)
+    game.ProcessInput();
+
+ui.TickDraw(deltaTime, currentTime);
+```
+
+`WriteLine` and `console.Logger` are safe for background producers. Command registration, execution, opening, closing, and UI properties remain UI-thread operations. A matched text-consuming hotkey suppresses all generated characters remaining in that update frame.
+
+### Gauges
+
+```csharp
+// Radial gauge (speedometer style)
+RadialGauge radial = new RadialGauge();
+radial.Size = new Vector2(150, 150);
+radial.MinValue = 0;
+radial.MaxValue = 100;
+radial.Value = 75;
+
+// Bar gauge (linear)
+BarGauge bar = new BarGauge();
+bar.Size = new Vector2(200, 30);
+bar.MinValue = 0;
+bar.MaxValue = 100;
+bar.Value = 60;
+
+// VU Meter (audio level)
+VUMeter vu = new VUMeter();
+vu.Size = new Vector2(30, 100);
+vu.Value = 0.7f;
+```
+
+## Layout & Positioning
+
+### Anchoring
+
+```csharp
+// Anchor to edges (resizes with parent)
+Button btn = new Button();
+btn.Anchor = FishUIAnchor.Left | FishUIAnchor.Right;  // Stretches horizontally
+btn.Anchor = FishUIAnchor.All;  // Fills parent
+```
+
+### Margins
+
+```csharp
+control.Margin = new FishUIMargin(10, 10, 10, 10);  // Left, Top, Right, Bottom
+```
+
+### StackLayout
+
+```csharp
+StackLayout stack = new StackLayout();
+stack.Orientation = StackOrientation.Vertical;
+stack.Spacing = 5;
+
+stack.AddChild(new Button { Text = "First" });
+stack.AddChild(new Button { Text = "Second" });
+stack.AddChild(new Button { Text = "Third" });
+```
+
+## Theming
+
+### YAML Theme Files
+
+```yaml
+# Theme file example
+Atlas: "gwen.png"
+
+Button.Normal:
+  X: 480
+  Y: 0
+  W: 31
+  H: 31
+  Left: 8
+  Right: 8
+  Top: 8
+  Bottom: 8
+
+Button.Hovered:
+  X: 480
+  Y: 32
+  W: 31
+  H: 31
+  # ...
+```
+
+### Color Overrides
+
+```csharp
+// Per-control color customization
+label.SetColorOverride("Text", new FishColor(255, 0, 0, 255));
+button.SetColorOverride("Text", new FishColor(100, 200, 255, 255));
+```
+
+### Opacity
+
+```csharp
+control.Opacity = 0.5f;  // 50% transparent (affects children)
+```
+
+## Serialization
+
+```csharp
+// Save UI layout
+LayoutFormat.SerializeToFile(ui, "layout.yaml");
+
+// Load UI layout
+LayoutFormat.DeserializeFromFile(ui, "layout.yaml");
+```
+
+## Virtual Cursor (Gamepad/Keyboard Navigation)
+
+```csharp
+// Enable virtual cursor
+ui.VirtualMouse.Enabled = true;
+ui.VirtualMouse.Speed = 300f;
+
+// In update loop, map gamepad to virtual cursor
+if (gamepad.LeftStick.X != 0 || gamepad.LeftStick.Y != 0)
+{
+    ui.VirtualMouse.Move(gamepad.LeftStick * deltaTime);
+}
+```
+
+## Integrating with Existing Game Loops
+
+When integrating FishUI into an existing game that already handles `BeginDrawing()`/`EndDrawing()` calls (e.g., in Raylib), you can disable FishUI's automatic drawing frame management:
+
+```csharp
+// In your graphics backend implementation
+public class MyRaylibGfx : IFishUIGfx
+{
+    // Set to false to disable automatic BeginDrawing()/EndDrawing() calls
+    public bool UseBeginDrawing { get; set; } = false;
+
+    public void BeginDrawing(float dt)
+    {
+        if (UseBeginDrawing)
+        {
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.Gray);
+        }
+        // Alpha blending is still enabled
+        Raylib.BeginBlendMode(BlendMode.Alpha);
+    }
+
+    public void EndDrawing()
+    {
+        Raylib.EndBlendMode();
+        if (UseBeginDrawing)
+        {
+            Raylib.EndDrawing();
+        }
+    }
+}
+```
+
+Then in your game loop:
+
+```csharp
+// Your existing game loop
+while (!Raylib.WindowShouldClose())
+{
+    Raylib.BeginDrawing();
+    Raylib.ClearBackground(Color.Black);
+
+    // Draw your game content...
+    DrawGameWorld();
+
+    // Draw FishUI on top (it won't call BeginDrawing/EndDrawing)
+    ui.Tick(deltaTime, currentTime);
+
+    Raylib.EndDrawing();
+}
+```
+
+This allows FishUI to render as an overlay on top of your existing game rendering without interfering with your drawing frame management.
+
+## FishUIEditor - Visual Layout Designer
+
+FishUI includes a visual layout editor for designing interfaces:
+
+```bash
+cd FishUIEditor
+dotnet run
+```
+
+**Features:**
+- Drag-and-drop control placement from toolbox
+- Visual resize handles and selection
+- PropertyGrid for editing control properties
+- Layout hierarchy tree view
+- Save/load layouts to YAML files
+- Parent/child control relationships with reparenting
+- Anchor and Z-ordering support
+- Visual feedback for drop targets
+- Container selection mode (Window/TabControl protect internal controls)
+- Nested control resizing with proper parent offset calculation
+
+Layouts created in the editor can be loaded in your application:
+
+```csharp
+// Load a layout created in FishUIEditor
+LayoutFormat.DeserializeFromFile(ui, "data/layouts/my_layout.yaml");
+```
+
+## Running Samples
+
+The `FishUISample` project includes a GUI-based sample chooser:
+
+```bash
+cd FishUISample
+dotnet run
+```
+
+Or run a specific sample:
+```bash
+dotnet run -- --sample 0
+```
+
+### Available Samples
+
+- **Basic Controls**: Textbox, Slider, NumericUpDown, ProgressBar, ToggleSwitch
+- **Button Variants**: Icon buttons, toggle, repeat, image buttons
+- **DropDown**: Basic, searchable, multi-select, custom rendering
+- **ListBox**: Alternating colors, multi-select, custom rendering
+- **ImageBox**: Scale modes, filter modes, animated images
+- **Gauges**: RadialGauge, BarGauge, VUMeter dashboard
+- **PropertyGrid**: Reflection-based property editor
+- **MenuBar**: Dropdown menus with submenus
+- **ScrollablePane**: Virtual scrolling container
+- **Layout System**: Anchoring, margins, StackLayout, FlowLayout, GridLayout
+- **Theme Switcher**: Runtime theme switching
+- **Virtual Cursor**: Keyboard/gamepad navigation
+- **Game Menu**: Example game-style UI
+- **Windows 98 Notepad**: Classic text editor clone with in-memory Open/Save, Find, clipboard commands, and Word Wrap
+- **Diagnostic Snapshot**: Capture structured input, layout, rendering, and multiline scrolling state on the next draw
+- **Editor Layout**: Load and display layouts from FishUIEditor
+- **Data Controls**: DataGrid, SpreadsheetGrid, DatePicker, TimePicker
+- **Serialization**: Layout save/load with event handler binding
+
+## Documentation
+
+Additional documentation is available in the `docs/` folder:
+
+- **[Custom Control Creation Guide](docs/CUSTOM_CONTROLS.md)** - How to create your own controls
+- **[Diagnostic Snapshot Guide](docs/DIAGNOSTICS.md)** - Capture lifecycle, privacy, framebuffer, and export contracts
+- **[FishUI 2.0 Runtime Contracts](docs/RUNTIME_2.0.md)** - Lifecycle, frames, input, overlays, serialization, and resource ownership
+- **[FishUI 2.0 Migration Guide](docs/MIGRATING_TO_2.0.md)** - Required changes for 1.x applications and backends
+- **[FishUI 2.0 Codebase Audit](docs/CODEBASE_AUDIT.md)** - Baseline defects, coverage, and verification scope
+- **[Custom Backend Guide](docs/BACKEND_GUIDE.md)** - Graphics, clipping, input, and backend resource ownership
+- **[Theme Creation Guide](docs/THEMING.md)** - Creating custom themes with YAML
+
+## Requirements
+
+- **.NET 9.0**
+- **YamlDotNet** (included via NuGet) - for layout/theme serialization
+
+For the sample application:
+- **Raylib-cs** - graphics/input backend for demos
+
+## Project Structure
+
+```
+FishUI/
+├── FishUI/                 # Core library (NuGet: FishUI)
+│   ├── Controls/           # All UI controls (50+)
+│   ├── FishUI.cs           # Main UI manager
+│   ├── FishUISettings.cs   # Settings and theme loading
+│   ├── IFishUIGfx.cs       # Graphics interface
+│   ├── IFishUIInput.cs     # Input interface
+│   ├── IFishUIEvents.cs    # Event handling interface
+│   ├── LayoutFormat.cs     # YAML serialization
+│   ├── build/              # NuGet build props/targets
+│   └── data/               # Themes, fonts, icons
+├── RaylibFishUI/           # Raylib backend (NuGet: RaylibFishGfx)
+│   ├── RaylibFishGfx.cs    # IFishUIGfx implementation
+│   └── RaylibInput.cs      # IFishUIInput implementation
+├── FishUIEditor/           # Visual layout editor
+│   ├── Controls/           # Editor-specific controls
+│   └── FishUIEditor.cs     # Editor application
+├── FishUIDemos/            # Sample implementations
+│   ├── Samples/            # ISample implementations
+│   └── Forms/              # Designer form examples
+├── FishUISample/           # Raylib-based sample runner
+│   ├── Program.cs          # Sample chooser entry point
+│   └── SampleChooser.cs    # GUI sample selector
+├── NugetTest/              # NuGet package testing project
+├── docs/                   # Documentation
+│   ├── CUSTOM_CONTROLS.md  # Custom control creation guide
+│   ├── DIAGNOSTICS.md      # Diagnostic snapshot guide
+│   ├── RUNTIME_2.0.md      # FishUI 2.0 runtime contracts
+│   ├── MIGRATING_TO_2.0.md # FishUI 2.0 migration guide
+│   ├── CODEBASE_AUDIT.md   # Baseline audit and verification evidence
+│   └── THEMING.md          # Theme creation guide
+└── screenshots/            # Screenshot gallery
+```
+
+## License
+
+MIT License - see repository for details.
+

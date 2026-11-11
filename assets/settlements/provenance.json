@@ -1,0 +1,1336 @@
+{
+  "version": 1,
+  "tool": "tools/import_settlements.py",
+  "mesh_preparation": {
+    "blender": "5.2.1 LTS",
+    "meshes": [
+      {
+        "name": "wall_out_timber",
+        "source_sha256": "2208bff9fb3dfd6c76f242008009ccac881879896e71dc8e828ad20c43f6f75a",
+        "before": 9352,
+        "after": 1573
+      },
+      {
+        "name": "wall_out_timber_window",
+        "source_sha256": "807d165b38cb83858c26359ebb73fd2e07e52f19cab8a1d94d3e06b6840779f5",
+        "before": 10172,
+        "after": 2033
+      },
+      {
+        "name": "wall_out_timber_doorway",
+        "source_sha256": "1bcf2b6bdc14c7841706579828376ab6e05d26fdca846ce279398a80f23f40e1",
+        "before": 7552,
+        "after": 881
+      },
+      {
+        "name": "wall_out_stone",
+        "source_sha256": "a8f6a7c0cbecbaf0c3d5e7308f3f02b91a0c81843d65108f55a551b82c5a4329",
+        "before": 9948,
+        "after": 2712
+      },
+      {
+        "name": "floor_in_planks_dark",
+        "source_sha256": "f768452802afc89b8f3a2035013798ac7d1ea7b3cafc86cfadec097f30096d93",
+        "before": 6076,
+        "after": 1410
+      },
+      {
+        "name": "roof_clay",
+        "source_sha256": "8cd7df09d1e4cc032ca47857c4ef31915f465b86d47f5aaedfc1917bf3ff7e54",
+        "before": 9712,
+        "after": 3030
+      },
+      {
+        "name": "roof_slate",
+        "source_sha256": "0c1fc0901a11032d00dd813e642f90465bf7eaaef0f85b7746cb6dd1615118c8",
+        "before": 7904,
+        "after": 2225
+      },
+      {
+        "name": "post_timber",
+        "source_sha256": "74c57b90ade0b240301bb577d69704a689bc9d63869d682c1a755434394f4d1c",
+        "before": 4236,
+        "after": 124
+      },
+      {
+        "name": "attic_gable_timber",
+        "source_sha256": "af1451e1c00576dac245169739bf491b3d2ef3774eee7953522c2bac0bf694e3",
+        "before": 11556,
+        "after": 1183
+      },
+      {
+        "name": "roof_ridge_clay",
+        "source_sha256": "9a295de2707305542e096ebb4d5299fc4014da0b8b86e6859ca628de47da935b",
+        "before": 2384,
+        "after": 82
+      },
+      {
+        "name": "roof_ridge_slate",
+        "source_sha256": "8e4cf36075a42f3f16baa65496ca85694d236779ed3966f397cb78445afe8ffb",
+        "before": 2384,
+        "after": 82
+      },
+      {
+        "name": "door_round",
+        "source_sha256": "e0b4cd9bad9bce2cba0af4e08d4609975457f1c900abadc725e897ddf48277af",
+        "before": 24248,
+        "after": 947
+      }
+    ]
+  },
+  "conversion": "World node transforms, Y-up metres, base-centred pivots; UV V and normal green flipped; 2048px shared textures; separate doors; source groups retained",
+  "sources": [
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\attic_gable_timber.glb",
+      "sha256": "8d3f8d4d030a82795526cfc40abb6d8b87fb298a4cfed199ec7169ce20e22501"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\door_round.glb",
+      "sha256": "c9d7363bfbf6ac716209ea0ac9db9d60468dd77dcb57dcfdd995d940171dc77f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\floor_in_planks_dark.glb",
+      "sha256": "920c7a1f4d870a446fcddff507c181480415799143ba1c4aaf6be0346ad70b99"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\post_timber.glb",
+      "sha256": "831678864b9bf354cedb219680cf4862389f50c45bdb759ffa7b363927de7648"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\roof_clay.glb",
+      "sha256": "a84cc1caca6f5110b1ae707e724a960046a9c3e915fda65dc4763b579b2b0754"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\roof_ridge_clay.glb",
+      "sha256": "f72a1133738ab7dc72c47d6140e8233f0fb4e9758c0908dd07650dc082195a61"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\roof_ridge_slate.glb",
+      "sha256": "064f0bcf2bfe7a3b99d4ef9fe946f5042fb50635e4ed17969c1718ad9c3053f0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\roof_slate.glb",
+      "sha256": "84fc8cb68eac3bb0a0201069bc5b0b3b8c9317848c1785530ebdd91ed5e1f26c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\wall_out_stone.glb",
+      "sha256": "a178929444484a736667aee74c45aecd58957ebf82301b2b5b1b61348beb4f8e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\wall_out_timber.glb",
+      "sha256": "d530d9137e7c83b71131221fa68cc4d846473503a4d8b9c43189a8b6a8df46fe"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\wall_out_timber_doorway.glb",
+      "sha256": "7709c5bf42b81ceb8d3c0ab9859fe5f2c8496e7b731fa4696c7d914b958dcd97"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\artifacts\\settlement-meshes\\wall_out_timber_window.glb",
+      "sha256": "705d661d9920806234a20715167630aab42b6e0b3db4396f4bdb52fde7e85880"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\fort-solid-wall-runtime-0.mesh",
+      "sha256": "e16f544c984a0ff26af7f3e48167acae27770f1c04c41909734d3d64ed538757"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\fort-solid-wall.json",
+      "sha256": "7657cbdcd529f124a5343e6d107082cb938ed05610577a05c047877216fe1907"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-corner-exterior-brick-runtime-0.mesh",
+      "sha256": "731325fde014ad96f8c9823517755b92c1b8418e1b9d616bfc0ccd24a4709c36"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-corner-exterior-brick.json",
+      "sha256": "7cdf7b00c3c83ac620734275eb58e445d70719cb635ae9582b65654591e6e840"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-floor-brick-runtime-0.mesh",
+      "sha256": "4fc1fd27a9dfd4b1239aba82042b88cafcaaeb4cdc6ce41d8194a047e5989dd6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-floor-brick.json",
+      "sha256": "4ff9e334726957d25546f99f2ea3e0be3583c1711734a1ff206c75b24dda9930"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-floor-wooddark-runtime-0.mesh",
+      "sha256": "356947c6e427185b4424a965a0478f6b6b0a99d56b7900041f9bf05a90a7f1c1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-floor-wooddark.json",
+      "sha256": "68eb8bce49af44307ec17ea29b5c2409581122abf10b6135b3b6c60c1ddaed2a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-roof-front-brick6-runtime-0.mesh",
+      "sha256": "b0e036849cbb8855bf9df54251012fedc7e03d794e56f645c5eadbddeefdd8a0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-roof-front-brick6-runtime-1.mesh",
+      "sha256": "f5883e0fb6062fa3f04e8a6a57004109dcf2476f9686f541539a08b56d31e830"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-roof-front-brick6.json",
+      "sha256": "804ffbbfbb7c3eaee7b4f2aa5d2afedd24e60308d98082da0abdb8d12d8eda63"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-roof-roundtiles-6x6-runtime-0.mesh",
+      "sha256": "a90ffbc7f9fe63f18e7b3d262a19bd7d39178e0d875fc6afce18c26d4b6a3c3f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-roof-roundtiles-6x6-runtime-1.mesh",
+      "sha256": "8bed613a97e378473c41e7d3f8452aa9d9cce2b6de197683539b760f7df23146"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-roof-roundtiles-6x6.json",
+      "sha256": "d1a76a72c43f3e93de2c7dfd1540dafe5655c92d9eec04e2c88cb33ae80d5acf"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-stone-foundation-runtime-0.mesh",
+      "sha256": "d63543ab01d4c1f6ac26756507e4939f46f8f1e7bc2bf501dbd2c2774ce7c432"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-stone-foundation.json",
+      "sha256": "d643d0d180aa432f8d193bb639e5e79bb8b6a8d38297b9d9823f88a088c6d5d6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-door-flat-runtime-0.mesh",
+      "sha256": "164fcdcd8921c5d7c6718f9990ce0ed90186b5a17cac123c905e7371c13423c9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-door-flat-runtime-1.mesh",
+      "sha256": "fac5ed9d14d477005f3412d7ec827c615336f6da632443bf2e6d28fbcc9a2be1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-door-flat-runtime-2.mesh",
+      "sha256": "2952720182c93c04e117f514e04194108ff9ae32131ae7a2f8de96a95691e2b6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-door-flat.json",
+      "sha256": "36495fd3f5745e3222cae14e4dd111b6d34be30809fea7109d1106ae4668ad74"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-straight-runtime-0.mesh",
+      "sha256": "164fcdcd8921c5d7c6718f9990ce0ed90186b5a17cac123c905e7371c13423c9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-straight-runtime-1.mesh",
+      "sha256": "d781dda59795e828e1d8b7d5d16242bfe76aca97519a941e9538a19d2ed41abe"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-straight-runtime-2.mesh",
+      "sha256": "a3fe72506b091f1070f40acc5a3e23b5c73cc94732b40bf1f59ae9e3ac2881b7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-straight.json",
+      "sha256": "d8866ad7da101f5abdead167e71d07334ca1ddda975cfad182b401aa39656f8f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-window-wide-flat-runtime-0.mesh",
+      "sha256": "6c33b83f87e9a0707f656ec01138db8de56123630563ec496e7f2ef62f5feb8a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-window-wide-flat-runtime-1.mesh",
+      "sha256": "88c6a93f691a8415be2600c66af0cffe323c2e1215cc98fa9f5a57616e634ea2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-window-wide-flat-runtime-2.mesh",
+      "sha256": "3195e9a6d2b7ec88445db9935b519062ffe725dda8f4e16576d0b1374abb9e76"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-wall-unevenbrick-window-wide-flat.json",
+      "sha256": "6e9476c7aee4a24e9c89ff9188e4df8071de219caa1b06af775c9d17ce3d2cf1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-window-wide-flat1-runtime-0.mesh",
+      "sha256": "6e31c7c2ae765dde1c51c6290fe6a1c9efbd8c05d5355c47954b5ae3a39d4ed0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-window-wide-flat1-runtime-1.mesh",
+      "sha256": "63956875f1fe1600942ebadbddffb7b86e6a38bf08e699bfe464dcfd643ca6b8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets\\models\\kit-window-wide-flat1.json",
+      "sha256": "7c7cb8af17ac8fb7f1b3387d80778486f132fed9b2ccfb40cdf31605a5f1e6b3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\19th-century-obelisc-monument\\license.txt",
+      "sha256": "6b90a78b131bf7f1d3b6e64801f0e9ba88be00cf18b4663a76be39ef579007cf"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\19th-century-obelisc-monument\\scene.bin",
+      "sha256": "0d9eb86fa4421e5a7d686f10113c5e3055b2ae535a397c5870cf2b5cdf664e45"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\19th-century-obelisc-monument\\scene.gltf",
+      "sha256": "4fb331ff02669e230156195b7c644da47a4a2e05d45843114f02b64b2ff91d32"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\19th-century-obelisc-monument\\textures\\Obelisk_BAKED_baseColor.jpeg",
+      "sha256": "80ed4e13070f41f8db5e6041d08eb4afea6d8a0b72844f128fcb129417bf138f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\19th-century-obelisc-monument\\textures\\Obelisk_BAKED_metallicRoughness.png",
+      "sha256": "52feb858674f65ee3231ea1d24b246ebc82b02fa102d5cbaebe76e75154dc8e2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\19th-century-obelisc-monument\\textures\\Obelisk_BAKED_normal.jpeg",
+      "sha256": "12e9717d390710975fe50917eb7bfc5b001d53ed76ad20fd185e341c031e4314"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\license.txt",
+      "sha256": "b8524d61d1302b877635e5c9df4c9877b233db4ae0e5849d35e3a7c4dc38fd88"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\scene.bin",
+      "sha256": "c24829a4ae10ddbfba6175bd452730bee306bed0fdb39d69cd59f936ae620842"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\scene.gltf",
+      "sha256": "00681dba728dc78b0b648e1dffd7b721ed79d0963c5ab0787305f32355858572"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Col_BAKED.001_baseColor.jpeg",
+      "sha256": "79ba64c3b9883fc709223b9f65c18c788d35ac76cabf86b3e46eede218f96ac6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Col_BAKED.001_metallicRoughness.png",
+      "sha256": "a6acd7ea5d53f117a7708f127f19559184ea7e44d70c765353d02d14f3532f10"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Col_BAKED.001_normal.jpeg",
+      "sha256": "4f64613508df45a8355f9fb7667dc914db28eb580cb9b09afa7900f66c956093"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Colund_BAKED_baseColor.jpeg",
+      "sha256": "aae36c85459e720de700953a3df2f9a2be4a17b89ee4103b2a2b8c0f863de08d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Colund_BAKED_metallicRoughness.png",
+      "sha256": "10d1677abcf455ac87517764c6c3d1d5f0ae508f32803453d51c98efbc1baa1a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Colund_BAKED_normal.jpeg",
+      "sha256": "0ac71b8b3c5097b74c0ddb11e496e773af614e74c0b7d248519293a5dc100a4f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Dach_BAKED_baseColor.jpeg",
+      "sha256": "c07510fb327e11f1eca0e9faa46a0f3809abd15ab0d7bfbb450cc05ecbbcc569"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Dach_BAKED_metallicRoughness.png",
+      "sha256": "3c85b209d46fa6815960887c7ab7677c2016ec9b703702d947e3832412d08584"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Dach_BAKED_normal.jpeg",
+      "sha256": "205bed9f8076dfaaca66a33d10c49058a33cfb654bb0adacd0f2e753d233f6bb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Middle_BAKED_baseColor.jpeg",
+      "sha256": "2ac2f7a64b02ef17919b1d6c1f4b3b43b2d2eaad62e4d4a3528538c580fbd208"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Middle_BAKED_metallicRoughness.png",
+      "sha256": "53973f5b5ca85cfb2b2b6dbcee4276a022fd8cf65c4b16f45596c32401dc52ab"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\OrientalBrunnen_BAKED_baseColor.jpeg",
+      "sha256": "fa3f51de0a66a3711d49ce9eb813b4554f983c3beff43926cbe5ff09edb555c2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\OrientalBrunnen_BAKED_metallicRoughness.png",
+      "sha256": "88e67dc00919ebcabd7a6fcd6bfca4237655d3099ffdef7a16bce728b37452fe"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Waende_BAKED_baseColor.jpeg",
+      "sha256": "3237c870c03d63cbde9812bd3d4a274a11e1af73d2ab4b7b693de846774e7133"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Waende_BAKED_metallicRoughness.png",
+      "sha256": "b9383122eb713e40c805461407e8b25f7a414f2ea1fa2f5dcc1cded74da60c66"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\EurasianTowers\\textures\\Waende_BAKED_normal.jpeg",
+      "sha256": "f282578721fe76c5acdbf363448ba331f56ad289138ecff77c42821be75201a4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Medieval Village MegaKit[Standard]\\License_Standard.txt",
+      "sha256": "ec6fd5004514cb0515a7dc1065f474644d31698861597b32e1745945ffec71de"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\license.txt",
+      "sha256": "540d6e13cfcd814c531762dd83393b9a34f59edf37b63b0b9bcea94747ac6d15"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\scene.bin",
+      "sha256": "0a30741b8b0e16d29a4d5a98960a7e972059b9f362a1725fdf309485062ece09"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\scene.gltf",
+      "sha256": "7449167ff1de6cbe8c959c0a25871d5f41e850adcd91a62bc089d9206e058dc3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Atlas_BAKED_baseColor.jpeg",
+      "sha256": "3fb0450f93b7b8a5c0565bc664300babcdb622638cbe6fa8d4102498f0fd08f4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Atlas_BAKED_metallicRoughness.png",
+      "sha256": "50ddeb5a47760aa952cb040e2fa711c111cc6ffa65e5508843eb90e09b11a41e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Atlas_BAKED_normal.png",
+      "sha256": "056b9ed5391b62074134b10d4d8dc0f694c9835788541b4e98009f77eae2b0d3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Bogengang_BAKED_baseColor.jpeg",
+      "sha256": "162de77199096e1aaa667149698cfbf1b43af3a6cad87ca9aa889fb45d661541"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Bogengang_BAKED_metallicRoughness.png",
+      "sha256": "98f8b32256f59870dd41a842889d6bcd67006f2825c72f466560d336a2c36b6a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Bogengang_BAKED_normal.png",
+      "sha256": "035747a159444b58927bcba8dc41d25f70d7afdf66d9299d0286ca60b99f3ad2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Kapittell_BAKED.001_baseColor.jpeg",
+      "sha256": "a4f46582e9754ec972f37952f4b8cd285bab621a1422e5e2360807a8e43df094"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Kapittell_BAKED.001_metallicRoughness.png",
+      "sha256": "402cab755f9d451dc709b79faccd79f07b9e54977062e33de4d196c799bd4d00"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Kapittell_BAKED.001_normal.png",
+      "sha256": "a2455668fde379276359b13f8de9d627f71bbcef6d6af85a557b3304f9cc131f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Ornams_BAKED_baseColor.jpeg",
+      "sha256": "62192c7c4d39f4cc8fca104d433c9712990753b0a27b64736c582c42d6f2bf21"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Ornams_BAKED_metallicRoughness.png",
+      "sha256": "13039269dad9356d03bc05084f1908290294db9075b13e059fdbe55f2fead3d8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\Ornams_BAKED_normal.png",
+      "sha256": "ab861eba473737bbeedf87cf68484d3f5026ff930c9047499b66b02f9352a8ac"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\SaeulBasis_BAKED_baseColor.jpeg",
+      "sha256": "988bc14ec4a5107c00b8eeb1c212a29dbb6eb6f4664231c616f30bf8a3efc669"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\SaeulBasis_BAKED_metallicRoughness.png",
+      "sha256": "ba04ff74f886a661eae49592320687f44ae614f5ebd010a1209b1c30541f263f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\MedievalPalace\\textures\\SaeulBasis_BAKED_normal.png",
+      "sha256": "a6608b77de6b4f71d6e50472ea3bdaddae6d0dcde58fe5b450e3045abf10b876"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\LICENSE.txt",
+      "sha256": "11e934b9b0843718f2b8f44fd6d3494172f67f66ace894de4220530032ba0dfc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\attic_gable_timber.glb",
+      "sha256": "af1451e1c00576dac245169739bf491b3d2ef3774eee7953522c2bac0bf694e3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\door_round.glb",
+      "sha256": "e0b4cd9bad9bce2cba0af4e08d4609975457f1c900abadc725e897ddf48277af"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\floor_in_planks_dark.glb",
+      "sha256": "f768452802afc89b8f3a2035013798ac7d1ea7b3cafc86cfadec097f30096d93"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\post_timber.glb",
+      "sha256": "74c57b90ade0b240301bb577d69704a689bc9d63869d682c1a755434394f4d1c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\roof_clay.glb",
+      "sha256": "8cd7df09d1e4cc032ca47857c4ef31915f465b86d47f5aaedfc1917bf3ff7e54"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\roof_ridge_clay.glb",
+      "sha256": "9a295de2707305542e096ebb4d5299fc4014da0b8b86e6859ca628de47da935b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\roof_ridge_slate.glb",
+      "sha256": "8e4cf36075a42f3f16baa65496ca85694d236779ed3966f397cb78445afe8ffb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\roof_slate.glb",
+      "sha256": "0c1fc0901a11032d00dd813e642f90465bf7eaaef0f85b7746cb6dd1615118c8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\wall_out_stone.glb",
+      "sha256": "a8f6a7c0cbecbaf0c3d5e7308f3f02b91a0c81843d65108f55a551b82c5a4329"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\wall_out_timber.glb",
+      "sha256": "2208bff9fb3dfd6c76f242008009ccac881879896e71dc8e828ad20c43f6f75a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\wall_out_timber_doorway.glb",
+      "sha256": "1bcf2b6bdc14c7841706579828376ab6e05d26fdca846ce279398a80f23f40e1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\Seahill_Towns_Complete\\Models\\GLB\\wall_out_timber_window.glb",
+      "sha256": "807d165b38cb83858c26359ebb73fd2e07e52f19cab8a1d94d3e06b6840779f5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\license.txt",
+      "sha256": "0a1fc893c53cbe139147f0faa0f3862f30fc04fd9f2158d577c5f0c51d485f97"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\scene.bin",
+      "sha256": "4a7d36d33101d528836bdf45a07596a5a441e1835b84f0b793bc1d29c0d9fcc7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\scene.gltf",
+      "sha256": "7e00803f99d903c82189483d9fc030ab829f110dd4e1ef3fb12622c7edfa3d93"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\Anubis_baseColor.jpeg",
+      "sha256": "fed2acf1eab3e76e7e3d82dd87ca1b438696c10f5c6cb91f353a9633f1f6c4b9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\Anubis_metallicRoughness.png",
+      "sha256": "788a8611a032edcda7e1803a78c743bc9a53be3dc0bef2f32a8e9118cbfe6d25"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\Anubis_normal.png",
+      "sha256": "63d97f93379cf3d94024fda9ca832f9ff48da5eef57b7b249c735b211de4f85e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\EgyptianPlaster_baseColor.jpeg",
+      "sha256": "372dd48d4d0e83cc4e09177c4e72c8d8e56bc7527d574f3ba4db17eeef6dc76d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\EgyptianPlaster_metallicRoughness.png",
+      "sha256": "6929d53e718d55784b34fe8169523c5298b1160765403ced9c471988959e8e67"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\EgyptianPlaster_normal.png",
+      "sha256": "8f8feea0ee8892f5c5bcb1ed340b38122f1e74c4cd678cc4bccc9d9b77844a87"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\Sphynx_baseColor.jpeg",
+      "sha256": "ef631c84f941bb023fc105c64c2381acc4a991bb61cce34e46dd980867952a52"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\Sphynx_metallicRoughness.png",
+      "sha256": "9dfa40c56f84acac1c2d139ea030d31dc83e5599d25f5ba232b35597bfa3bc6d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_egypt_modular_museum\\textures\\Sphynx_normal.png",
+      "sha256": "f6df958a13d0245fac7c2d135663c3ff930277a01e355202413c8cc86d537777"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_ruins_modular\\license.txt",
+      "sha256": "b2f9a32cd053ef559e4a9fec5d26caa3dec95b2bf1cf2b4d8f022d0ed8fa311d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_ruins_modular\\scene.bin",
+      "sha256": "ec2d013476cdf8a44f4b824979654d5f27102d8aca6878ad7f26d54d8e9d6328"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_ruins_modular\\scene.gltf",
+      "sha256": "e1926506d734523ea3fa2ffc0f19d688d0b3a9d0877c4f084b04d1e68b3bef27"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\ancient_ruins_modular\\textures\\lambert1_normal.png",
+      "sha256": "52de91b1bbb0effd2de85924eb055b5d2941546ab8342989c5fbb73fda713a5b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\license.txt",
+      "sha256": "6b5c778e70653a7dfa757e237ed58b656e4b4acb362300d851589d6d9c9987f3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\scene.bin",
+      "sha256": "7dcb605d288f0763f78f7393ab174fc5946e809883956b12280f9eb51aba4823"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\scene.gltf",
+      "sha256": "40161e3479495cdea1f2acc43c2bd685034f8efe4666d29c5c5654cdd19fb72e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_1_baseColor.jpeg",
+      "sha256": "54bb0e1079fb3cfed5f5d8bcb6f22ab0cee0f6e0a48eedbbbd8e0582c4741351"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_1_metallicRoughness.png",
+      "sha256": "570b211c19d5dc0040be5f90b2d92e36e89517179a54247a6a084426a39911da"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_2_baseColor.jpeg",
+      "sha256": "8412b49ef12a3c87f77d641b510c18a4d614f73cff0994d844f044d85b7d5ac3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_2_metallicRoughness.png",
+      "sha256": "a8124663a57229d08cf91ce23c14da9ec06ae1a5b335c8ed0ac172dd928bc2ef"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_3_baseColor.jpeg",
+      "sha256": "1f8af1dcbd2a2a945f618983d99e75378d468370dddd8dde487ead2e7fc74547"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_3_metallicRoughness.png",
+      "sha256": "35d44045ca2146ed6800311a65b4bca31187f9f9817be78158189bde0396c869"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_4_baseColor.jpeg",
+      "sha256": "06f589b8ae7b3f1ed009efb3d5fd4905b6e6b20824d15afabdec746b0a7417ac"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_4_metallicRoughness.png",
+      "sha256": "fcefb650d449a86d3c156eee340c27a55fa5d7ca58153f5e9fecae1a96a8790f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_5_baseColor.jpeg",
+      "sha256": "c4f8ff3407f8629adc03a3176fac63aa9f8e2c07da1f062ff242e0ee35e0422f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_5_metallicRoughness.png",
+      "sha256": "32568abe996b688f4abfaa9bff614b94c86e85ed363011ab6452aaa25b0bb6c4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_6_baseColor.jpeg",
+      "sha256": "92621e86f10539f8692a65aa414fa95f2801defd170357464db42b5f9a4a049d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Facade_Flr_6_metallicRoughness.png",
+      "sha256": "2daf370638b5cf63d80431717d4d903116081b745cc824c02a6860fc68f810a3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Firstfloor_1_baseColor.jpeg",
+      "sha256": "16f29e0ab46bef63fd6ada8b9391747cc35705ffb1c117824dd20a5c7f36ce0a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Firstfloor_1_metallicRoughness.png",
+      "sha256": "4eead762c63c4594c1d9248c2477e95da06f585eb57d4f53e0fd403f654055b2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Maskedstuff_1_baseColor.jpeg",
+      "sha256": "630f62b91aab4f222478f0a38678c3ca65e0fb64c9d016dc084bbb7951a2dda2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Maskedstuff_1_metallicRoughness.png",
+      "sha256": "ff4e3d1b2557ed6cb0bf2973c7ec99487d24c265e9a095513bc698de56fdf6cb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Wall_1_baseColor.jpeg",
+      "sha256": "d9ea4abcb2d5e90838149b4b35a71a7488914c28b97cc6c600dd4b1bfc9c7c20"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Brownstone_Wall_1_metallicRoughness.png",
+      "sha256": "5c5d132ac748b23174f2fc36657be26893fbb69fe7871c6ec4f144f038d3e482"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Midcity_Facade_FLR_1_baseColor.jpeg",
+      "sha256": "90dc26bca90a42578cb0a1455648e9f3242b79680f25140cbd25bed3dcda03bb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\brownstone_building_set\\textures\\Midcity_Facade_FLR_1_metallicRoughness.png",
+      "sha256": "798f4cad51305712b44d472bbf53cfe6f13770a0e0cb59d93ab915b4ed911c7d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\license.txt",
+      "sha256": "a148235c922d06ef46f35c82a892bf7cfa2551fe2a7d987f1b16a444df62ef61"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\scene.bin",
+      "sha256": "ee586f28d8052ac40ddef404fcbe7f78e5eaa9349d5804e243c13490fd01ba33"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\scene.gltf",
+      "sha256": "2894b24241088f3ed215651e94c97eea0c62e8b7c82cba38939b20284156f2d6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Pillar_Bulb_01_baseColor.png",
+      "sha256": "90b8786beb0ea39c369187c12fe3b942892498a2a17ac600684d5310fb60e403"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Pillar_Bulb_01_metallicRoughness.png",
+      "sha256": "d7ec82653b06f323ae58f950a0eeb13506eee245374bc203e303bd4337b08ae1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Pillar_Bulb_01_normal.png",
+      "sha256": "6fa9414c11f4cd6550db58721d57e256bd54b3ffb20904bae3fc523582e70ba0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Tower_Dome_01_baseColor.png",
+      "sha256": "6b9022f505f169eaecb50ec2754f81d252d891254aa4c9b88cf69b0e694c0b5c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Tower_Dome_01_metallicRoughness.png",
+      "sha256": "607baa29f9635aca0b4be92eab20e727f9bdb26083c8d7ced5ccaf4f6fccda34"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Tower_Dome_01_normal.png",
+      "sha256": "cdda2e82837ea9bd79ca7796dc4fb57218b9ed7441bf1b4e6a86203790d8b509"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Tower_Medium_01_baseColor.png",
+      "sha256": "2f328ea314201988ed927578b8348ff77f1198086f73276083cf3ff37eba7eeb"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Tower_Medium_01_metallicRoughness.png",
+      "sha256": "af52dfdac7880edfa8cf1c95a0a64dad2f16d24e4bf028736cd64c12d91f9baf"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert__fortress__towers\\textures\\Tower_Medium_01_normal.png",
+      "sha256": "a49cd9932cb8a0961a3fccb1cf9e0c526225787263fe01dd1d8b72e8b4d753c4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\license.txt",
+      "sha256": "c888f746412fc349c086040a34e6e0d77e2a2bcbefa1d165a578c9277ec361cd"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\scene.bin",
+      "sha256": "09479f5ac4d9ccd604be31943fa5b76dafb762e86af94b349e0ca2320539c4da"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\scene.gltf",
+      "sha256": "93e744487aea8dc7851d707d1d71b4d9aa58d738611ff7c8fa9c6e908f2a4aee"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\DesertTemple_RailBlock_01_baseColor.png",
+      "sha256": "70368775808429470797fed8a67059e21d2433b4ccab3fab3569b895b3200b6e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\DesertTemple_RailBlock_01_metallicRoughness.png",
+      "sha256": "a29e98a3102b8d765aa82dbf7c2a0ff1b4a57462920338a4b1040a4ad63c13b7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\DesertTemple_RailBlock_01_normal.png",
+      "sha256": "e7a265a11fd165fa972e50030f9003132ea26ff8583b79426d7719333e53f471"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\DesertTemple_RailBlock_02_baseColor.png",
+      "sha256": "9d8849278102dbf444bfe8fdb0f507f43929908df569b546b317f98cb5f52be9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\DesertTemple_RailBlock_02_metallicRoughness.png",
+      "sha256": "7c642606b3bc44af8795c019fe945bd44ca9cf048fedfc298fb4b5a8e88da010"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\DesertTemple_RailBlock_02_normal.png",
+      "sha256": "8460aa13301bbc95cbbb85a4a7295adb5c83cc2fc2d2854d2a870ebb76e76dd1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Floor_Tilable_01_baseColor.png",
+      "sha256": "e5a1c98fb2d69311e00f6dfcddfbc7c202e06d95f501b9ad04dc78ed70b81104"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Floor_Tilable_01_metallicRoughness.png",
+      "sha256": "b9ef5726504656d9ff6b526d54e428222474816b6efeb32459a244bcefc3b2a0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Floor_Tilable_01_normal.png",
+      "sha256": "844a4bde501340a7d84b8b5fd1be7061f0e4fd9b3f6cdea2092fb6c09c6060b4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Platform_01_baseColor.png",
+      "sha256": "02578a66c692a6be73c0f3362c72fcb739c9ceba94a96682e75cc455251b83cd"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Platform_01_metallicRoughness.png",
+      "sha256": "d9ad0b15b568438dd3c2f43aaac760854a623f906a97619388457037f7658da6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Platform_01_normal.png",
+      "sha256": "2cdc5e5669186a6f118b0fc8619e4e80b88cf011e22417c9b5715a55c8bb7c37"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_Extension_baseColor.png",
+      "sha256": "cf2b4d2f140bcc55d8716b5221d092ccf5399dc171cdd589b17048af07759865"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_Extension_metallicRoughness.png",
+      "sha256": "0ce699af6e5874b490f24139bc7855111b14b4617ea6caf3f9477d0966e53a90"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_Extension_normal.png",
+      "sha256": "1c407662ef8bb2639d18e8d39fbafd2978c9fd638165342a480f0411d894facd"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_Pillar_baseColor.png",
+      "sha256": "5a33a59daf8190e7b18a5cec0350912f5b6b2ff1800a998ab7191e10cbdca30d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_Pillar_metallicRoughness.png",
+      "sha256": "81a65e4fa3a3324f7fd6ee20a41c30c961d657dc492578187c3992e48e11e9d0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_Pillar_normal.png",
+      "sha256": "f731940cc8d100dfd2d63daf735f3651b140fbe471fd6ceeb315c92320a74c3c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_baseColor.png",
+      "sha256": "367d85645d8bba86336540b2480feab6001369d8aee9fc4fd03eb4bb60a0b459"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_metallicRoughness.png",
+      "sha256": "03825054d59e0ddf851dc685b2dba8b7de85f16649727f003a4b4f577e290795"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Portal_04_normal.png",
+      "sha256": "e5f934aeae698fdec956b31d500d90da0f1599ad968d6f5b49310b61471360b5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Stair_02_baseColor.png",
+      "sha256": "70374d763ce489e220aae8385324edca05c635231479469093ae5be12c2f160b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Stair_02_metallicRoughness.png",
+      "sha256": "0f796fb27926874ca84df0fe5249934a1e5243c4c8c5097710312ae4c54b807a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_floor\\textures\\Structure_Source_Stair_02_normal.png",
+      "sha256": "bfaf3abf703395fdda1a3165f4d4595b588f57a071f438c52493074bdca91173"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\license.txt",
+      "sha256": "b69eb79b67c7c45d0bc735c780be88950b1b037ed650dccabca5b5f6373770c1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\scene.bin",
+      "sha256": "47bfc7b99ed7b1fb90ecfc16365899cbeb63ecbf8677beab18db39ab7a091894"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\scene.gltf",
+      "sha256": "bcb4628caf3e1a20131d4c339b87b26b0f17ba6c1d32ebe3f2c147a3e232f44a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Stair_01_baseColor.png",
+      "sha256": "77d4f5402f10d8ac28a9d95b1da863edb045a9590b5ff41bd4ee618023150443"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Stair_01_metallicRoughness.png",
+      "sha256": "f865d26c9dc1fd9a37c54fb81a1a145487c85fef01e8d7f463c2f98b6c15b834"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Stair_01_normal.png",
+      "sha256": "3656a9843a0983825e71e0317a8d332e52d3eb9b483630ed3c6630249ad2ee92"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Stair_Corner_Support_01_baseColor.png",
+      "sha256": "acf21555a4ecd9844cb7d512866be6586e50f7aef518728e6c1f2fef2ecb5de1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Stair_Corner_Support_01_metallicRoughness.png",
+      "sha256": "a8fa3a360c3a140d9a372b5733e1ef453761bb1034b033ced738c6b1b27cc65a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Stair_Corner_Support_01_normal.png",
+      "sha256": "a7931b9451d8ce674f92d32d2e611b89c271774b38ea474850db04205e0113a3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Stair_Support_01_baseColor.png",
+      "sha256": "4ce3fdf9d6566cdb993642c690f4087f2ef7e86a501a8fc9112d7ea9c0d96f91"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Stair_Support_01_metallicRoughness.png",
+      "sha256": "882b42ab88f948a2f3d94649ec243dcd76799ae6ca6f28f1b49316a0c93a22db"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Stair_Support_01_normal.png",
+      "sha256": "32aa2c7a4de96092dafa03c1f100b2720626fe9849b35eeea46096a503dae4d6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_02_baseColor.png",
+      "sha256": "6e223e35c8cfb062653061585f4abd58e31d22e2c9acc4bb382d0b0f0d4776de"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_02_metallicRoughness.png",
+      "sha256": "76e8a78573e45d097d69f9a2c7d949fd76e6c5e91778090bc58566c706b58e91"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_02_normal.png",
+      "sha256": "b0616fb0c35e63594ad5cf95c365ed9ab49be175cb78f90588dbca2908489e2c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_03_baseColor.png",
+      "sha256": "a2afbfd13e7f5212cdb5df7461a72b4b9acbd1830248d5474f255fcad6382e72"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_03_metallicRoughness.png",
+      "sha256": "adf6edf5e020214ab8760f3221fe2951c40db486c6d83727822308af9cf1e904"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_03_normal.png",
+      "sha256": "c81578ffcd3ff1baba11a91fc9d1b7013622a57ae6952110caf364cf8f1e3711"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_Support_01_baseColor.png",
+      "sha256": "7e6e3ac9dd995d43f1f857cc01c8bbd76d37ec5fc82cfb147b864215e7dd3a03"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_Support_01_metallicRoughness.png",
+      "sha256": "5b4e471e536b5746ea489fbeb96eecccc5f2d175ee63c621684b9b034871a7b8"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Structure_Source_Walkway_Support_01_normal.png",
+      "sha256": "22ecb4013aeb4875911c6fb3b76dea2f806427ca34d6469774e0363b8805a644"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Walkway01_baseColor.png",
+      "sha256": "c4a82f261dc7f7e0c452306ea54cca2d9b24185e45e8c6d5f93024932d013c5b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Walkway01_metallicRoughness.png",
+      "sha256": "a38f00016bc108a086cccb5eaf49538056deea37aba7490cb4337dcff8180992"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walkways\\textures\\Walkway01_normal.png",
+      "sha256": "1acfe6d6a5c0c61a35ad95e20c47821a0e9fa11869432eb2fa9339ea7ed75c51"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\license.txt",
+      "sha256": "d78d487b30d2691b4349da6463e466957de6502b3920df256568f5d26164e8e9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\scene.bin",
+      "sha256": "cfd9b54aa768247394bbd88710a737a785dc5bac9543ffcf7d67b6f932c57c68"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\scene.gltf",
+      "sha256": "946a81a39ade6906dab10269a80f983b1e4a1429fa80d5ef99be38c09d918b91"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_WallBlock_01_baseColor.png",
+      "sha256": "f524adaf7805f519f985bcb8cdb879898251d0e4873989e15c436d181f41a48e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_WallBlock_01_metallicRoughness.png",
+      "sha256": "5a00533d51437c7e74e5f82580027e783ed8a352f84f9900dc84ff83488ad024"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_WallBlock_01_normal.png",
+      "sha256": "1631f7789e98cc4a6107c1e9437b133df3559f8102910b46bf5fba945f6e10db"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_Wall_Angled_03_baseColor.png",
+      "sha256": "dad9c97ef0671413687b35cc307e9f77196b18504d1c9b625f3f21c13e14a0da"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_Wall_Angled_03_metallicRoughness.png",
+      "sha256": "b31f39a5aab36946d80fdb66d39abce9e91cd4aebc2f0940e6ed7b5d084c5e99"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_Wall_Angled_03_normal.png",
+      "sha256": "ed46cab101bda26acc377835b3449249f6d0cd82520a055a80cc84c1c610629a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_Wall_Angled_04_baseColor.png",
+      "sha256": "1b15fc9b13e90cf2413f4974d8d27e8c9186e2db661c22d0972a7d5bb6e14f7b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_Wall_Angled_04_metallicRoughness.png",
+      "sha256": "2273a5a790b4b17f1e882cd5fe0f0b52ef9b00232482e5cd697fef46f9ae6b58"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\DesertTemple_Wall_Angled_04_normal.png",
+      "sha256": "e596303a836dccc6652bcab4afd8cc889dac860462fdc8ab1c28a3598f32622f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Structure_Source_WallBlock_02_baseColor.png",
+      "sha256": "ec89c672082a8fa79d9bd526fb15cfa5aae52defa39b8c5e4c5b81b7be8d59dc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Structure_Source_WallBlock_02_metallicRoughness.png",
+      "sha256": "eedcaefa010152dd487b7805c832238ac221d52a3c86fbd0a48f2644f0cc4684"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Structure_Source_WallBlock_02_normal.png",
+      "sha256": "3f4a85bd88a2ad758dba3505ed923be37cbdfb243816257928248d2a04973ab6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Structure_Source_WallBlock_03_baseColor.png",
+      "sha256": "8efd0b19c02f7183c45974aa0a1b6639f150928e3ee5905bd5168194235b42fc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Structure_Source_WallBlock_03_metallicRoughness.png",
+      "sha256": "da23ab6e7af2fd7b0bc8142dd14ef818036e2fb0358ef253767bde4045e285e6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Structure_Source_WallBlock_03_normal.png",
+      "sha256": "e8b80d3e17edff0c7c94677ee65eb792edbb2c16f1ffa990f7d4705575913a37"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Angled_01_baseColor.png",
+      "sha256": "be9b6aaa219430d4d210bf8d77b8af1cfb8f3dde3611dbcf3dc548ca3bca8811"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Angled_01_metallicRoughness.png",
+      "sha256": "6a5217df0acfe47f986e477b8ea30fe203e71f5c0f5d2b0fa01645a656dcbdff"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Angled_01_normal.png",
+      "sha256": "43213655c2333f8c79e720c53d6b920f785c5915e3c64ab1ec72684ffd2bb596"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Angled_02_baseColor.png",
+      "sha256": "e69ee7e7e45584450acf45a7975f513a64b4dc293a4f3e8beeaa066bb96adaa5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Angled_02_metallicRoughness.png",
+      "sha256": "4d90651edd21a1d58668c9b2c81909d5c994c0b764cd335dcbf671ab5c61fe61"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Angled_02_normal.png",
+      "sha256": "ba2a823a3c4ab9c8de60a8c788d3a40d0dbe1521efaa37cdebed051190a0a90a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Tall_01_baseColor.png",
+      "sha256": "8eee9ef73d0c75d2e890ddd9cfaf981d2ed72c87ddb0418e9b2aff1f908cf450"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Tall_01_metallicRoughness.png",
+      "sha256": "5bcc1ac2cdf4dc5d8b90a74a35923b5cfcd32c18691ef832733652ec21154696"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Tall_01_normal.png",
+      "sha256": "87b18260109fc5b8fccd930e526d823158838535a08e70e2a94b2984220601e0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Tall_02_baseColor.png",
+      "sha256": "318ecad4ec25067d2e89412211f516afca8a84321a24c5c2114c67e76e05f1f0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Tall_02_metallicRoughness.png",
+      "sha256": "99edaf4c96c9bec1914d07ba087b2723e9584140adc9251b642a4962fbf9be68"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\desert_fortress_walls\\textures\\Wall_Tall_02_normal.png",
+      "sha256": "62d167d70cef7d0fb95d31f686e7fa010980395dcbd911fdfc1cf384e9bb942c"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\license.txt",
+      "sha256": "c0c88e22733a5fd6c3ed2da97b8f7d92c445cc582a2cd328429b1bf1778603ee"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\scene.bin",
+      "sha256": "b1db51bbacfa350927e6dfe2279bead0ae50cfcee6a53000b6a672200236b369"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\scene.gltf",
+      "sha256": "181a8cb20224017f7e6f46974ed04e36a79100fefec5cb8614d2529dc8a2c68d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Brownstone_Facade_Flr_2_baseColor.jpeg",
+      "sha256": "8a17f8806f6a8a3700d529eec8bcb3602628a32ad5858109c552e6520726de85"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Brownstone_Facade_Flr_2_metallicRoughness.png",
+      "sha256": "3fd50ff71d835653166520a5c2b1fb2d6b5d2fee81255459b97716441e803bb7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Brownstone_Firstfloor_1_baseColor.jpeg",
+      "sha256": "fc97f30348a761028922bdede1087fe716081255f8e234a76cab9c76402e4c42"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Brownstone_Firstfloor_1_metallicRoughness.png",
+      "sha256": "0a51055d00baf67cf30647bfd2ff1af4aec0641213d478b45eed901cd2766b82"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Concrete_FLR_1_baseColor.jpeg",
+      "sha256": "08f578aabc1861be0de9e8e2b47b7a0a2511e7e8a7f5c983904756c7208656ee"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_1_baseColor.jpeg",
+      "sha256": "91802a3fb6cd52966f6491d5cd3c9f763eee9e5ec7dd23714b1622ad9a5c429a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_1_metallicRoughness.png",
+      "sha256": "83dfd42aa276e82f162356ee251804e0b5a545ed2d5c121ab07b4749d687dcc9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_2_baseColor.jpeg",
+      "sha256": "eba2757f5a34f5c394608fa7f1fd6c803a3edb6e0e94f8153d480bfa6531e075"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_2_metallicRoughness.png",
+      "sha256": "c7e34adbd1f2b055423c3ee7b19be0f7789d9025adfe6a073559a5e5eb16b303"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_3_baseColor.jpeg",
+      "sha256": "58069efb6c551311bc841fc36457006df4cfada48fff87b4bf6131c39c7de87f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_3_metallicRoughness.png",
+      "sha256": "104f97da6d1a5306806a7e28612b941c99f0e60e5761735574a44af054783f6d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_4_baseColor.jpeg",
+      "sha256": "cf3f3eb72f06d05b734276cc5cf143da30da3522e7e3249dbe11544d104c4868"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_4_metallicRoughness.png",
+      "sha256": "1105ee0f5fba39b25fbe2242fc5fb388b4d58d654f2888ffe918617593fdbabc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_6_baseColor.jpeg",
+      "sha256": "5e81af8b6a19e161862ae9a1e3828c1c39e6cc7a2731b702e0ed8b3bb0798cc2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_6_metallicRoughness.png",
+      "sha256": "088e29aab0b650a29d6c9df64713c915fab3e68298d2261a744a0da134a4b199"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_7_baseColor.jpeg",
+      "sha256": "1a82b51a7ef2e672e5efff1bfb7d12d4fd5393d833942117ee6b56e0b21d2052"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_7_metallicRoughness.png",
+      "sha256": "e8bd0a31171a2295553eb6ffb07edbd822005d5533ea1eafa4aef31ea80f8fcc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_8_baseColor.jpeg",
+      "sha256": "230a0099034c88a9a6a1e55e73e13099a1581412922ea1c43a6b2a69e1f511a0"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Facade_FLR_8_metallicRoughness.png",
+      "sha256": "865fc35be16d5df2f2c41eec2d45242b304c1748d4a5ff30ec64637c04e22dc2"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Firstfloor_FLR_2_baseColor.jpeg",
+      "sha256": "ced660b4b2b9488b45feb8f846ac3a9788099fdd8bee5fc90185b5d71eb4d5d3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Firstfloor_FLR_2_metallicRoughness.png",
+      "sha256": "407c29802b73df11f222469798efbeb3cd18fcac950ec7132282e5ad549a3e27"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Firstfloortrim_FLR_1_baseColor.jpeg",
+      "sha256": "3bc691fae5e085d00ab1979e02e03816079cb2b6e27093d25cf01edcee46f3e9"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Firstfloortrim_FLR_1_metallicRoughness.png",
+      "sha256": "e6f9722f61ef115585dbc279b291f553c01af88dcf2da3a22a35905f555193d5"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_International_Side_1_baseColor.jpeg",
+      "sha256": "f32d63afd02952a43289c08dd1b3e03658207cb0e19976954d8d6fc1a73a7708"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_International_Side_1_metallicRoughness.png",
+      "sha256": "9ad4d8196c32dd64981236b9bd8bdf76658a236e246045571d9f7ddf599c9d9e"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Maskedstuff_1_baseColor.jpeg",
+      "sha256": "500f72870b46df7bb4304221962ce4f2514fb6fae2eba723245d8dbc5b349bbc"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Maskedstuff_1_metallicRoughness.png",
+      "sha256": "33ceb94ec809868e5c21f415aa2cf6914a0995c89ed9a59ec2b3f0038625e132"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Modern_Firstfloor_FLR_1_baseColor.jpeg",
+      "sha256": "e965c0ee68af4d90e17d72010c26d44949c7ea8a4e7ec92136b1744679fad6e4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\downtown-buildings-set\\textures\\Downtown_Modern_Firstfloor_FLR_1_metallicRoughness.png",
+      "sha256": "e6e95aca10209f80617534db53a9fe310fa744d4962f960aae400523598a9410"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\license.txt",
+      "sha256": "f02646d7b4616f44ccb37f3f096f9d690277ae95315511fff82832ffa3c87802"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\scene.bin",
+      "sha256": "d26e12566b0fd9420a4c56d79cce1a83151a2c2ec6a0cd9593e975c588478932"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\scene.gltf",
+      "sha256": "dbbce4b7e3337d1db8ca830ce96f0172e5af4725b40652e61cab6c38e9fdcee4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Bridgemetal_1_baseColor.jpeg",
+      "sha256": "fe0e6cb9e98e01fc0d836ac35643b8574b14ccafbd3cd0b0249c6b0abb623202"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Bridgemetal_1_metallicRoughness.png",
+      "sha256": "faa5f79a27e49d6c02e9a54bed7d781fba4829805f6fd2654f658d277d5a35d6"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Facade_Flr_1_baseColor.jpeg",
+      "sha256": "0cffcf4c80f2b1c75b765654b985d6ab8aa212fc3d0d243e180f012b8b5653c7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Facade_Flr_1_metallicRoughness.png",
+      "sha256": "cf0f166b131fa684c0b8eda319b168d8f95c0dde82af233e213d058465a1ae9b"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Maskedstuff_1_baseColor.jpeg",
+      "sha256": "5c02a95e2ef3b08a7ecfc058744c085be17801e384a2c2043a10d2df424a64e1"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Maskedstuff_1_metallicRoughness.png",
+      "sha256": "12892b279aaa5f63dcbc91998cf8ba3c86025a8168ee2cd9edbe9dc4a98d0956"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Roof_1_baseColor.jpeg",
+      "sha256": "3cf4a913d2d74ac1108e7526cafcec13fb9b8d5e21a36d81177945d46bc555a7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Roof_1_metallicRoughness.png",
+      "sha256": "57df635b1186edd620ddab56297e6967a17a94f359a678c8f305204ed48ab81f"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Trim_FLR_1_Dif_baseColor.jpeg",
+      "sha256": "56e9e58b1231d9a421309758cba3c692de459605f22f3cf6998e903c59a42826"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Trim_FLR_1_Dif_metallicRoughness.png",
+      "sha256": "f0ae8ffddae2f1c806be980ebf74ba220e9f666fe5d75c4c469827f26a104521"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Walls_FLR_1_baseColor.jpeg",
+      "sha256": "7e9b38159374db3cfae7ce8aaadc2644db47a828fbefbefc46539bd84552969d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Walls_FLR_1_metallicRoughness.png",
+      "sha256": "850ee8c54d6cf9ddb180180f0416a3324099d62726c8b139339f2f8ecc75e356"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Walls_FLR_2_baseColor.jpeg",
+      "sha256": "e3c8399cefb08c91314237c84c14b8849f1b6060ff53f61206e351cae93a4a9d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Walls_FLR_2_metallicRoughness.png",
+      "sha256": "2b1349be0bf0f5654191a3cb1da55080cb715d7d5060e87d6cdae5fb358f055a"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Walls_FLR_4_baseColor.jpeg",
+      "sha256": "f9b5e78f3a58c16f52b553007dc6d3e63f59f6edbcc36a227e63a1c2ed35f6e3"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Walls_FLR_4_metallicRoughness.png",
+      "sha256": "361e6dcccc6a150547a2664d481cb90a86eb07f0a762f4c93b3874c56f07120d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Windows_FLR_1_baseColor.jpeg",
+      "sha256": "0082dc375b8b0da59476f10d2a09a0e67c4fad617083e9ba3395e6ea9f6b3658"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\industrial_buildings_set\\textures\\Industrial_Windows_FLR_1_metallicRoughness.png",
+      "sha256": "5faed4c4d7691f71f4a7b8afda62fab600c9e82d704b227a6c35a18a27c76788"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\license.txt",
+      "sha256": "535fed00131dd9b748793268e52b99393866d3a24502eb09ecc1cde5a0666804"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\scene.bin",
+      "sha256": "f3f61831cd5ed3e3af869bce2cdd11c8c5be44e5b6f6ce733f2382af9b6eac7d"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\scene.gltf",
+      "sha256": "a506e28f5eb847c6afcc6314a4896c3cf7048598b45e542996806015e0c8ac22"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.01_BAKED_baseColor.jpeg",
+      "sha256": "e64f281649ad2d53f8412e325a24f9a480f16199fd9efe7ade657d85875abaea"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.01_BAKED_metallicRoughness.png",
+      "sha256": "820c291671f21c813b5f952e9dc4f3d7bb3c13c43f4e1612dfc1e83cc9dc8a98"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.01_BAKED_normal.jpeg",
+      "sha256": "96e8636afa9139f78e8c0690459dadf580cf984a0af5c0d88a1b82933625f351"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.02_BAKED_baseColor.jpeg",
+      "sha256": "2577d9da3bf4a5696fbf7bbbf5f9dcbee26a814e65aea19dcd4dece6e1bd89c4"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.02_BAKED_metallicRoughness.png",
+      "sha256": "4b3b30e7d2d0e796b191cc5ebcce98f077b581633b2c73ea59f28df4665ff216"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.02_BAKED_normal.jpeg",
+      "sha256": "01b357c3cbbb87a5c646add6266870ce202958f69af82d808765088a05430623"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.03_BAKED_baseColor.jpeg",
+      "sha256": "def15c5034a0362792b663fac0617b4dbe511f0748200c39858b5bb18f501a63"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.03_BAKED_metallicRoughness.png",
+      "sha256": "c4aae53e41fe6bbe2a5e173f64b8bfa9afe949828bd9cd0364736b05127b1225"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.03_BAKED_normal.jpeg",
+      "sha256": "b7c37ef746c0cf1b8f640c6ae20f817b1e6eeda8f08087c0dc92355fd13f3ba7"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.04_BAKED_baseColor.jpeg",
+      "sha256": "0722d7b6b60d7494dfdf63e8377bc7e77c5c0ba91a118e08224d30b93da53479"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.04_BAKED_metallicRoughness.png",
+      "sha256": "bbcb6f3b75caf1b19bbe12cdbadfa4f77f03e4944eb559703cafcbe7bb9cc325"
+    },
+    {
+      "path": "E:\\Projects\\StargateGame\\assets_itch\\neogothical pier architectural\\textures\\Pfeiler.04_BAKED_normal.jpeg",
+      "sha256": "4c35376dcab9aac26a1acb331b4c1754a729c0625cdcd5f6887d1765612f3a82"
+    }
+  ],
+  "exclusions": [
+    {
+      "pack": "brownstone_building_set",
+      "group": 82,
+      "excluded": "footprint exceeds compact-city lot",
+      "size": [
+        68.28184127807617,
+        16.59431457519532,
+        20.559728622436523
+      ]
+    },
+    {
+      "pack": "industrial_buildings_set",
+      "group": 8,
+      "excluded": "footprint exceeds compact-city lot",
+      "size": [
+        43.499136217219494,
+        25.825355366848104,
+        83.26596492385636
+      ]
+    },
+    {
+      "pack": "industrial_buildings_set",
+      "group": 15,
+      "excluded": "footprint exceeds compact-city lot",
+      "size": [
+        46.53480830326771,
+        24.730413736396315,
+        95.3020519030124
+      ]
+    },
+    {
+      "pack": "industrial_buildings_set",
+      "group": 19,
+      "excluded": "footprint exceeds compact-city lot",
+      "size": [
+        33.00015926361084,
+        18.26602319228701,
+        135.8000087738037
+      ]
+    },
+    {
+      "pack": "industrial_buildings_set",
+      "group": 89,
+      "excluded": "footprint exceeds compact-city lot",
+      "size": [
+        99.2946881324417,
+        89.07670438289648,
+        191.09333263527597
+      ]
+    }
+  ]
+}

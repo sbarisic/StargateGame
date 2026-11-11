@@ -1,0 +1,279 @@
+{
+  "version": 1,
+  "source": "Stargate Network extraction/terrain_library",
+  "units": "metres, Y-up, bottom-centred",
+  "models": [
+    {
+      "model": "Leave-Tree-01a",
+      "source": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Leave-Tree-01a.gltf",
+      "collision_source": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Leave-Tree-01a_Lod2.gltf",
+      "wood_triangles": 502,
+      "height_m": 16.672313690185547,
+      "lods": [
+        "Leave-Tree-01a_Lod1",
+        "Leave-Tree-01a_Lod2"
+      ]
+    },
+    {
+      "model": "Broadleaf_Desktop",
+      "source": "source_exports/speedtree/broadleaf/Broadleaf_Desktop.gltf",
+      "collision_source": "source_exports/speedtree/broadleaf/Broadleaf_Desktop.gltf",
+      "wood_triangles": 5094,
+      "height_m": 2.6922850608825684,
+      "lods": []
+    },
+    {
+      "model": "BlueSpruce_Desktop_Winter",
+      "source": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter.gltf",
+      "collision_source": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter.gltf",
+      "wood_triangles": 8155,
+      "height_m": 19.0843505859375,
+      "lods": []
+    },
+    {
+      "model": "BlueSpruce_Desktop_Winter2",
+      "source": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter2.gltf",
+      "collision_source": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter2.gltf",
+      "wood_triangles": 6326,
+      "height_m": 16.102075576782227,
+      "lods": []
+    },
+    {
+      "model": "BlueSpruce_Desktop_Winter3",
+      "source": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter3.gltf",
+      "collision_source": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter3.gltf",
+      "wood_triangles": 7652,
+      "height_m": 18.93878746032715,
+      "lods": []
+    },
+    {
+      "model": "European_White_Birch_Hero_Winter",
+      "source": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter.gltf",
+      "collision_source": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Lod2.gltf",
+      "wood_triangles": 340,
+      "height_m": 17.057954788208008,
+      "lods": [
+        "European_White_Birch_Hero_Winter_Lod1",
+        "European_White_Birch_Hero_Winter_Lod2"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Fir-Tree/Tree_Bark_D.png",
+      "sha256": "69fe004a911289d0461578cdd42f2261e4f81360681004da13cfbe0b69d4410d"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Fir-Tree/Tree_Bark_N.png",
+      "sha256": "05e2e3e275d8cbe5cbc32fbc3c1c6cc379b86e3a9a4320f6d81fbbe283cfed6e"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Branch_D.png",
+      "sha256": "068548b34c74433b6376ecd89af4a81df58bd9a181ce5d515ae461f5e8fc6d1e"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Branch_Inst2.mat",
+      "sha256": "cc18deac924dbb350377745b2e61b74735c2ac7cc5874a3439d1edc928e5ebfd"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Branch_Inst2.props.txt",
+      "sha256": "041b5f8483bcd20a14871a112a43d7488e6ef270a6092d14db5cd83def28943a"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Branch_N.png",
+      "sha256": "4ad73b0012f7913bcadf9477261733927e861d397c230f4d055f033c706bb814"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Leave-Tree-01a.bin",
+      "sha256": "731e311e0179693d7903244722757e20d63a68b41f562ec74bfd02fb7a9a68f9"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Leave-Tree-01a.gltf",
+      "sha256": "31fe6a1404edbdeed46500470e087396ab7dd992b21c58c7f735565efdb8e3fc"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Leave-Tree-01a_Lod1.bin",
+      "sha256": "b316f7ea5a81467549049ff435a6352c3310dd23c1f857d34258705ce8dd3a15"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Leave-Tree-01a_Lod1.gltf",
+      "sha256": "748510f7b1f7ac3093506251e20996a760f436632a2c5c319a9bbbfb2ea66483"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Leave-Tree-01a_Lod2.bin",
+      "sha256": "f7533a92ed94df669e0ab59bcbb20e34d92b010a4667e785407de3ac2ed3c7ff"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Leave-Tree-01a_Lod2.gltf",
+      "sha256": "2f04593fae3f2bc5447c5e468bb3ed84601913c60361d1f24b6ade392fd9ab12"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Trunk_Inst2.mat",
+      "sha256": "0556673c27b3624a4bce67577f67fabad3491c7aefd8b745d34e3a4a25b6a39b"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Trees/Leave-Tree/Trunk_Inst2.props.txt",
+      "sha256": "db7660fa639244fe3366d7cb635b6abec6a6e1bcb36e481d5a77fc24f7fa26e1"
+    },
+    {
+      "path": "source_exports/speedtree/broadleaf/Broadleaf_Desktop.bin",
+      "sha256": "e351477bcf9fe447e38b232583f188f428052bc4d696ece5cdb10642ebd5d87b"
+    },
+    {
+      "path": "source_exports/speedtree/broadleaf/Broadleaf_Desktop.gltf",
+      "sha256": "267ddfdc2f6f79ab4a3bd4d4da9c3a4bf81f4123c26dfde4abafb26c68a42143"
+    },
+    {
+      "path": "source_exports/speedtree/broadleaf/Broadleaf_Desktop_Branches_Mat.mat",
+      "sha256": "fbf5fa50b6881114c1d6c9bd29e8874944a5ef3b55bcc5815836cb4e6bf9a542"
+    },
+    {
+      "path": "source_exports/speedtree/broadleaf/Broadleaf_Desktop_Branches_Mat.props.txt",
+      "sha256": "ed810015723310c1a0823097ae3ebabfd5cf0afd80df6008d2d3271e9997bc51"
+    },
+    {
+      "path": "source_exports/speedtree/broadleaf/BroadleafBark_Normal_Tex.png",
+      "sha256": "8ef5cefb0cc419fa7ba9fd715422a154619f200ee248ba53855319191727ce15"
+    },
+    {
+      "path": "source_exports/speedtree/broadleaf/BroadleafBark_Tex.png",
+      "sha256": "08b52dae3c5a2bdf2559c24dc8b740d03312fd724db90864191a88f1157c4efe"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter.bin",
+      "sha256": "d626cd5fb50c2a8d413607cdfdd9e2177dc5aed9a0f19bb5daed283e8864ee83"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter.gltf",
+      "sha256": "5beb2a85cebcb15ba311669a85de4b8c2aeafc2880ec7ce4ccb85ece61e3845d"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter2.bin",
+      "sha256": "4c58738910facf55f2c3bf4f1b96381e9308a710d382f556b1c865a7f6699265"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter2.gltf",
+      "sha256": "11783a44776af34456cb936fe138b51cd05f9d27ad669f3a6dcc0c49cf325e90"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter3.bin",
+      "sha256": "8bec654c19f3bb52332b9bb7aced1548d7d8dfc7bb8d783b1380df0f61cb178d"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter3.gltf",
+      "sha256": "45f9706f6bc5778940768308e9a25c73421c2dcfb14ed263d95cbc4c21e1cfc6"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter_Atlas_Normal_Tex.png",
+      "sha256": "af94c8470ce6806e56aad4eefa28cc909be19ea544bd9f425ea5c526f0e19c2f"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter_Atlas_Tex.png",
+      "sha256": "fddd1d6e036b7783012f163c67246c2727d525f4c552b4d0e0f4ad69481b3d16"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter_Branches_Mat.mat",
+      "sha256": "d5e7fbcf38b187cc2a1c4247307cee9abbfe4769eab06ce9aa6e4ddff235904a"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter_Branches_Mat.props.txt",
+      "sha256": "e9020e222a7fb6868141ef7e67f99838240a95f378c7666137916fc45a4f894a"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter_Fronds_Mat.mat",
+      "sha256": "8358d44b91b0672b178d5f4fb258f3cdc31d2093c1833d677a633a145b661610"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter_Fronds_Mat.props.txt",
+      "sha256": "51068aaf95949d4047a0c965c57d3af0442c7c8cfd6a83fa8649c92b871e73a8"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter_Leaves_Mat.mat",
+      "sha256": "8358d44b91b0672b178d5f4fb258f3cdc31d2093c1833d677a633a145b661610"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruce_Desktop_Winter_Leaves_Mat.props.txt",
+      "sha256": "ee25e1fe57e38f49c049d5e48847958f370089770b1735e390943ca6d390210e"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruceBark_Normal_Tex.png",
+      "sha256": "ae7840c407bd64dc98c094bf0156cc1c1a0d2f2af6deb4240edc91d6f830a437"
+    },
+    {
+      "path": "source_exports/speedtree/spruce/BlueSpruceBark_Tex.png",
+      "sha256": "1c5a4c48d991c11c2b0717ba115818f18ba1cf1fbdb053a93ac5cac3185ce503"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter.bin",
+      "sha256": "bc57444149b5c844807cff2bca32f737c258c3193e8e803b1ee4dccf28671996"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter.gltf",
+      "sha256": "93cc2a0987dc4d5a5b3de1f60ceebd550513e7d17d695f7dca4f0e0e2c33b2b0"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Atlas_Normal_Tex.png",
+      "sha256": "1a854edffef4642da43048fd86b787ae0d2a3c3a9e7e77f51212bc9d1d89b17c"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Atlas_Tex.png",
+      "sha256": "03040f66ac348aae3c98ec3eb1963caa314f644d87ee9e7db36bf64c3cb67446"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Branches_2_Mat.mat",
+      "sha256": "b940ff8ab85e33a3d416a6b51f48c3d5a992e24fa762d6ef4b85b973937b0322"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Branches_2_Mat.props.txt",
+      "sha256": "cc3d6c87907816369c8c1eb3c4df46291b412f4ce161c671aeb67a1ea849f4c2"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Branches_Mat.mat",
+      "sha256": "b940ff8ab85e33a3d416a6b51f48c3d5a992e24fa762d6ef4b85b973937b0322"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Branches_Mat.props.txt",
+      "sha256": "bfea5a1051ca2bc9cb8e181316b27837b364aa793b084579505adb07a4647893"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Fronds_Mat.mat",
+      "sha256": "53b1833977efb5c50b8c3404433710bb18cf966c5ff9d67c89d65b1c3c60dd4f"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Fronds_Mat.props.txt",
+      "sha256": "c98b9bdd9c97defa73318b0fe5c018412107c7de7a8b652d2ebc2928b07e0e4f"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Leaves_Mat.mat",
+      "sha256": "53b1833977efb5c50b8c3404433710bb18cf966c5ff9d67c89d65b1c3c60dd4f"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Leaves_Mat.props.txt",
+      "sha256": "0f377dc6f5f30a7de4c01887f48ab391f9ee200b82afdac431224d8085399fb1"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Lod1.bin",
+      "sha256": "ecd1295d68f3b30ae8c437c4cad3c5c7e852576f1aaf2310222a6247d037fcd3"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Lod1.gltf",
+      "sha256": "ddfa7cebb7b71788cd22b1edd7da36f0f3266f1bdb1a8e64156f26f05714b4c1"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Lod2.bin",
+      "sha256": "e57c2c222ffb4db40a27385f48212b382e212f6076fa62e46b34520131a68403"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/European_White_Birch_Hero_Winter_Lod2.gltf",
+      "sha256": "16a97379e22f5a8caf5d1ac8c58690d0fb82079aba8d918ecdb36811f9575c58"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/WhiteBirchBark_Normal_Tex.png",
+      "sha256": "65bebc047b21b6d693fc16753b00eddf2174d3b233e1eeb95815b710c25234aa"
+    },
+    {
+      "path": "source_exports/speedtree/White_Birch/WhiteBirchBark_Tex.png",
+      "sha256": "bfc3a2f89c8e87f6e739a18465727830cc94061093c94aead36bdc20f94d417e"
+    }
+  ]
+}

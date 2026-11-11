@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <!-- Keep command-line/parallel agent builds unchanged unless explicitly opted in. -->
+    <CookAssets Condition="'$(CookAssets)' == '' and '$(BuildingInsideVisualStudio)' == 'true' and '$(CookedAssetPackage)' == '' and '$(UseLooseAssets)' != 'true'">true</CookAssets>
+    <AssetPython Condition="'$(AssetPython)' == ''">python</AssetPython>
+    <AssetCookRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</AssetCookRoot>
+    <AssetCookCache Condition="'$(AssetCookCache)' == ''">$(AssetCookRoot)\artifacts\cooked</AssetCookCache>
+    <CookedAssetPacks Condition="'$(CookAssets)' == 'true' and '$(CookedAssetPacks)' == ''">$(AssetCookCache)\packs</CookedAssetPacks>
+    <!-- MSBuild is incremental; VS's separate fast check misses removed assets. -->
+    <DisableFastUpToDateCheck Condition="'$(CookAssets)' == 'true'">true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+</Project>

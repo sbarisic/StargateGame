@@ -1,0 +1,28 @@
+{
+  "model": "MoreRealisticTree_01",
+  "woodTriangles": 19999,
+  "leafTriangles": 80000,
+  "sourceLeaves": 84290,
+  "retainedWoodComponents": 400,
+  "leafScale": 1.379055156619923,
+  "source": {
+    "scene.gltf": "9a4201314ef6108f0eccde7bbd430833fcb9f8fbc267e4a7df15e76387365bc9",
+    "scene.bin": "8c42cc0c0f66a91283d7d6b2e2eecb0775ef4be1d57f8926c557c3e317fada64"
+  },
+  "outputSha256": "a1b35e95537267cceb0e5f2c586b51c3de74b6f4509aa3bdca3dab98fcfef4b3",
+  "tool": "tools/refine_tree_detail.py",
+  "author": "Nicholas-3D",
+  "license": "CC BY 4.0",
+  "triangles": 99999,
+  "plantingOrigin": [
+    0.3026456832885742,
+    0.0,
+    -0.6623021364212036
+  ],
+  "importer": "tools/import_tree_detail.py",
+  "outputs": {
+    "MoreRealisticTree_01_detail_0.mesh": "0a42c4d31879abca3a6030e586ddbc2787e3f409e0431fe1e2de0bc969751b69",
+    "MoreRealisticTree_01_detail_1.mesh": "bce1d8c0a76b62e0ae947a88d4f5f6e727349116510d9b05831c6eabf37031eb"
+  },
+  "scope": "Near render only. Original LOD sources, bounds, collision and IDs unchanged."
+}

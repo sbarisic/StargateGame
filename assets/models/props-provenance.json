@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "conversion": "glTF scene transforms; metres Y-up; collider-centred; flipped UV V and normal green; textures capped at 2048",
+  "sources": [
+    {
+      "model": "wooden-crate",
+      "sizeMetres": [
+        1.0,
+        1.0000000000000002,
+        1.0000000000000002
+      ],
+      "vertices": 492,
+      "sourceMesh": 0
+    },
+    {
+      "source": "assets_itch\\wooden_box",
+      "files": [
+        {
+          "path": "license.txt",
+          "sha256": "fbab3bf0fea65ced5cd8b109bb9a260b644f02b4a7f014d32a15911c742aa94f"
+        },
+        {
+          "path": "scene.bin",
+          "sha256": "e832a9008578707a0374b2a89796ab962a9b253f08dd3ae4766bd215b9299e17"
+        },
+        {
+          "path": "scene.gltf",
+          "sha256": "850e82cc9dc16ea5e0b7379a44703a5f618378b577f6a54416cf947f7b1d6ce3"
+        },
+        {
+          "path": "textures\\Wooden_box_01_mtl_baseColor.png",
+          "sha256": "f0787ba9816ae918e97bf44cbd2b557dd6b77b9012868267d99075bbc1deb6ee"
+        },
+        {
+          "path": "textures\\Wooden_box_01_mtl_metallicRoughness.png",
+          "sha256": "5cc7ba5b69f8b14d1239822782c63635cfaa45d6a02b78ac9906c41e556f4186"
+        },
+        {
+          "path": "textures\\Wooden_box_01_mtl_normal.png",
+          "sha256": "4bb12dadb871b4a24e3673c1d2e9cc2cfeb053dc775a043c5c12f891e4e37fe9"
+        }
+      ]
+    },
+    {
+      "model": "barrel-black",
+      "sizeMetres": [
+        0.726051390631838,
+        1.184398624649674,
+        0.7246186666648384
+      ],
+      "vertices": 17100,
+      "sourceMesh": 0
+    },
+    {
+      "model": "barrel-red",
+      "sizeMetres": [
+        0.726051390631838,
+        1.184398624649674,
+        0.7246186666648384
+      ],
+      "vertices": 17100,
+      "sourceMesh": 1
+    },
+    {
+      "source": "assets_itch\\barrel",
+      "files": [
+        {
+          "path": "license.txt",
+          "sha256": "92453c3c6c03233649ef6896591ea7ebfe7e3a33ed78e4b2705232bd1afcc2c1"
+        },
+        {
+          "path": "scene.bin",
+          "sha256": "b060ea40d55fefc2856bb787370182718b2ece095bd16d1864d251ca976c35b4"
+        },
+        {
+          "path": "scene.gltf",
+          "sha256": "83071840b989ce57050f771cb1221a4c8ca38867dba051b6c9fe56eb3a029588"
+        },
+        {
+          "path": "textures\\material_baseColor.png",
+          "sha256": "4c6686d106faf9dd66853567b88e6225d090e38bccef6884f8ffa5fec31cede1"
+        },
+        {
+          "path": "textures\\material_metallicRoughness.png",
+          "sha256": "f9aedc7c44cbba7278e3c55ae3d79ad2abf870be5388338a8160404a76627754"
+        },
+        {
+          "path": "textures\\material_normal.png",
+          "sha256": "0116bd25deb95220bfb9791ec2233110fda2c03f2f1f3d361c97a975cee0f2bc"
+        }
+      ]
+    }
+  ]
+}

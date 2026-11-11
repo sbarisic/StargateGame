@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../assets/models/rocks-bounds.json" LogicalName="RockBounds" />
+    <EmbeddedResource Include="../../assets/models/trees-bounds.json" LogicalName="TreeBounds" />
+    <EmbeddedResource Include="../../assets/models/tree-pack-bounds.json" LogicalName="TreePackBounds" />
+    <EmbeddedResource Include="../../assets/models/realistic-trees-bounds.json" LogicalName="RealisticTreeBounds" />
+    <ProjectReference Include="../StargateGame.Shared/StargateGame.Shared.csproj" />
+    <ProjectReference Include="../../vendor/LayerProcGen/LayerProcGen.csproj" />
+    <Compile Include="../../thirdparty/FastNoiseLite/CSharp/FastNoiseLite.cs" Link="Dependencies/FastNoiseLite.cs" />
+  </ItemGroup>
+</Project>

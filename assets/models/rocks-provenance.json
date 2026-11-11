@@ -1,0 +1,405 @@
+{
+  "version": 1,
+  "source": "Stargate Network extraction/terrain_library",
+  "units": "metres, Y-up, bottom-centred",
+  "textures": "Recovered albedo with inherited linear material tint; DX normal RGB; opaque, capped at 2048px",
+  "models": [
+    {
+      "model": "Stone_01",
+      "source": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_01.gltf",
+      "collision_source": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_01_Lod2.gltf",
+      "collision_triangles": 750,
+      "size_metres": [
+        2.5035207271575928,
+        2.1123738288879395,
+        3.8655600547790527
+      ]
+    },
+    {
+      "model": "Stone_02",
+      "source": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_02.gltf",
+      "collision_source": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_02_Lod2.gltf",
+      "collision_triangles": 750,
+      "size_metres": [
+        1.001408338546753,
+        0.8449496030807495,
+        1.5462241172790527
+      ]
+    },
+    {
+      "model": "Stone_03",
+      "source": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_03.gltf",
+      "collision_source": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_03_Lod2.gltf",
+      "collision_triangles": 750,
+      "size_metres": [
+        4.172533988952637,
+        3.520623207092285,
+        6.442600250244141
+      ]
+    },
+    {
+      "model": "SM_rock_sandstone",
+      "source": "source_exports/Master/temp/Megascans/SM_rock_sandstone.gltf",
+      "collision_source": "source_exports/Master/temp/Megascans/SM_rock_sandstone_Lod1.gltf",
+      "collision_triangles": 489,
+      "size_metres": [
+        8.54286003112793,
+        1.8242099285125732,
+        8.564180374145508
+      ]
+    },
+    {
+      "model": "SM_rock_sandstone2",
+      "source": "source_exports/Master/temp/Megascans/SM_rock_sandstone2.gltf",
+      "collision_source": "source_exports/Master/temp/Megascans/SM_rock_sandstone2_Lod1.gltf",
+      "collision_triangles": 561,
+      "size_metres": [
+        6.164839744567871,
+        5.012110233306885,
+        5.806419849395752
+      ]
+    },
+    {
+      "model": "SM_Rock_Sandstone_01",
+      "source": "source_exports/Megascans/SM_Rock_Sandstone_01.gltf",
+      "collision_source": "source_exports/Megascans/SM_Rock_Sandstone_01.gltf",
+      "collision_triangles": 3100,
+      "size_metres": [
+        0.33924099802970886,
+        0.07445299625396729,
+        0.3216649889945984
+      ]
+    },
+    {
+      "model": "SM_Rock_Sandstone_02",
+      "source": "source_exports/Megascans/SM_Rock_Sandstone_02.gltf",
+      "collision_source": "source_exports/Megascans/SM_Rock_Sandstone_02.gltf",
+      "collision_triangles": 9394,
+      "size_metres": [
+        0.18810999393463135,
+        0.1387370079755783,
+        0.3036630153656006
+      ]
+    },
+    {
+      "model": "SM_Rock_Sandstone_03",
+      "source": "source_exports/Megascans/SM_Rock_Sandstone_03.gltf",
+      "collision_source": "source_exports/Megascans/SM_Rock_Sandstone_03.gltf",
+      "collision_triangles": 9972,
+      "size_metres": [
+        0.34130799770355225,
+        0.07863299548625946,
+        0.39315497875213623
+      ]
+    },
+    {
+      "model": "SM_Rock_Sandstone_04",
+      "source": "source_exports/Megascans/SM_Rock_Sandstone_04.gltf",
+      "collision_source": "source_exports/Megascans/SM_Rock_Sandstone_04.gltf",
+      "collision_triangles": 11186,
+      "size_metres": [
+        0.23811200261116028,
+        0.08257699757814407,
+        0.2086549997329712
+      ]
+    },
+    {
+      "model": "rock_ground_1",
+      "source": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_1.gltf",
+      "collision_source": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_1.gltf",
+      "collision_triangles": 20,
+      "size_metres": [
+        0.16386303305625916,
+        0.07562384009361267,
+        0.13920685648918152
+      ]
+    },
+    {
+      "model": "rock_ground_2",
+      "source": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_2.gltf",
+      "collision_source": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_2.gltf",
+      "collision_triangles": 33,
+      "size_metres": [
+        0.10120758414268494,
+        0.09864279627799988,
+        0.19108344614505768
+      ]
+    },
+    {
+      "model": "rock_ground_3",
+      "source": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_3.gltf",
+      "collision_source": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_3.gltf",
+      "collision_triangles": 39,
+      "size_metres": [
+        0.17726831138134003,
+        0.07745688408613205,
+        0.15735337138175964
+      ]
+    },
+    {
+      "model": "rock_ground_4",
+      "source": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_4.gltf",
+      "collision_source": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_4.gltf",
+      "collision_triangles": 24,
+      "size_metres": [
+        0.05985352396965027,
+        0.04149199277162552,
+        0.08540983498096466
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_01.bin",
+      "sha256": "7b0201e864ed153c8da898092b1ebaca868bdbff23a622b601f961dc1aeba88f"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_01.gltf",
+      "sha256": "1131f020bf2844aa8cc30243090ca88066f07481c19724b43cec0166027f7035"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_01_D.png",
+      "sha256": "d1b6ae15a0f590a61e9d3d9543cb0d376ac57842f31b3ef32a2a927464c86c82"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_01_Lod2.bin",
+      "sha256": "08a56108532bfa16314352e5400a26ae5707e57a4290d4c8d6e732f9d2a6c39b"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_01_Lod2.gltf",
+      "sha256": "09d8460b5505609878a77c14e024c8eb9a4a47c91c0430125c622bee05b1c98f"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_01_M.props.txt",
+      "sha256": "c542a76d5e8b662549d6aa24ca0dd08ebe25af957348132211f0d6a0329470b1"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_02.bin",
+      "sha256": "c47c144bdb5779316532f44b763b4929f187bbcb33479469f87a6e1f1c603c79"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_02.gltf",
+      "sha256": "cde9e0acb88a8cf0a403b0aef9f216f9a01a7339a51e59fbe9c91bf650a98b36"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_02_Lod2.bin",
+      "sha256": "44f03a5d320f7a2fb1b459c1733337dc44880aa2b03f7879f38953b288271fde"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_02_Lod2.gltf",
+      "sha256": "a6435da3136670255838a62ebc06f484e627ec24cc6025b42da9940ffc4cdcc1"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_03.bin",
+      "sha256": "f5b96c3aaf15def75512003b88c7863069dbe383babc43574ec2ff08c205634a"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_03.gltf",
+      "sha256": "c6e7e858df3984d0e679a307b2ec99568dd1fc204a2ecb798a6b9e84b9dfe92c"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_03_Lod2.bin",
+      "sha256": "ab7b5ef03dc5df9a974cdcf24561f7a9b3c0e49a45f030109d6af9aa79ad44ef"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_03_Lod2.gltf",
+      "sha256": "775ffde6b4e8f754f495ae2d8f5c7e168d78335312ff3a46a55b8f6e8c2666b1"
+    },
+    {
+      "path": "source_exports/LandscapeAutoMaterial/Meshes/Stones/Stone_Default002a_N.png",
+      "sha256": "61ed4f460fc766cc01b3dd75d551f58527e0261d0cfd1743531ff97d4217ef70"
+    },
+    {
+      "path": "source_exports/Master/Materials/MM_MasterProps.props.txt",
+      "sha256": "0bf6e6aabe86eb9e7865824d0699c2f350fb32e5aa59a8848d50294630a485df"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/MI_rock_sandstone.props.txt",
+      "sha256": "4c2d20917e6c2e30186afdcfd65d0cc0f919d54eb0a1cb9e00e378f07e213f62"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/MI_rock_sandstone2.props.txt",
+      "sha256": "09c260eb6a4ed7a83bb2a15cdbaf5274aeb21866a759fdb6111c9d755e79301c"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/MI_wood_log.props.txt",
+      "sha256": "1874c419df2f5ba8fb474e4a35b17679569391188cadd9042421c1ab6b35c564"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/SM_rock_sandstone.bin",
+      "sha256": "45878423334a1a9bd1983da21168a4f028a45561cb100743a714499921111f96"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/SM_rock_sandstone.gltf",
+      "sha256": "b9c2b03bf11450a4a036bb2f20460421a2b28b1a29abfda1bf2f5363b2d69f12"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/SM_rock_sandstone2.bin",
+      "sha256": "c167709b5c846f9e346c4c6288147f3f3dad843446bfbf8ccd9df56bfb7a43f4"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/SM_rock_sandstone2.gltf",
+      "sha256": "b5a62d9fcd7597edec309d188a08cf6567ac8caef5108dbab850e60bb082b955"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/SM_rock_sandstone2_Lod1.bin",
+      "sha256": "f2f94f240e7fef0d7e18a56099d5c87814bde9b2d41ec7abbcaabbb676221dd1"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/SM_rock_sandstone2_Lod1.gltf",
+      "sha256": "607a82b5caeb75d60708eea5706d8669e18c4a6ad156f6ee1c63457c7e53b9fb"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/SM_rock_sandstone_Lod1.bin",
+      "sha256": "5384d7e7053a703f90e24f600668b2f2afff4befc43e62914959c73a21aa0f5d"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/SM_rock_sandstone_Lod1.gltf",
+      "sha256": "aab3a61e919f3e1e23ad4caa0fc3f8e388dbdb9a077594ea730f8806441be347"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/Textures/T_rock_sandstone2_D.png",
+      "sha256": "c5b00c6321980e04e3376d33290c29e06145b6cf5ce82f013a7b925cb48e9127"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/Textures/T_rock_sandstone2_N.png",
+      "sha256": "65619b8bccda358b13ba64b962e315c50172fbdcb24694f59ffd054cda9317ca"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/Textures/T_rock_sandstone_D.png",
+      "sha256": "16d9188d5b5453f3ab19b6d25900a4344b3d1ede274aeb9d7ff7ca9a6bf4a1f2"
+    },
+    {
+      "path": "source_exports/Master/temp/Megascans/Textures/T_rock_sandstone_N.png",
+      "sha256": "e6f815717fecdc6303a094ffe127707ed40ff9e3d74b3f173584c0bcf30ecfea"
+    },
+    {
+      "path": "source_exports/Megascans/Materials/M_Rock_Sandstone.props.txt",
+      "sha256": "5fadc749d6b119aef67fc38d584b13fd9e1927d75cce49103406532d79e12615"
+    },
+    {
+      "path": "source_exports/Megascans/Materials/MI_Rock_Sandstone_01.props.txt",
+      "sha256": "b8343fc5cfbd3b72994b84a5379444bf77f45e49a487ba353006284afd3f8753"
+    },
+    {
+      "path": "source_exports/Megascans/Materials/MI_Rock_Sandstone_02.props.txt",
+      "sha256": "c43fa824b5254e5dd157d3c5c754fbad4ba9473b964bf4bf6262fdf3f1b15b7e"
+    },
+    {
+      "path": "source_exports/Megascans/Materials/MI_Rock_Sandstone_03.props.txt",
+      "sha256": "d0399d9ad9b32e9ed6f91306abf33484bf676e40c86330d75b9c0fbed09945ab"
+    },
+    {
+      "path": "source_exports/Megascans/Materials/MI_Rock_Sandstone_04.props.txt",
+      "sha256": "cb16ce39b43f0721d41297fab9e53ff6972b13aa73e1b10edc2f631abc2e25f2"
+    },
+    {
+      "path": "source_exports/Megascans/SM_Rock_Sandstone_01.bin",
+      "sha256": "cc6b9a531e498b3f80e9b9da6b31731e764f3be4a595ec2cb11cc48b0ef6b1a5"
+    },
+    {
+      "path": "source_exports/Megascans/SM_Rock_Sandstone_01.gltf",
+      "sha256": "689d1b649df182853006b1c76eee8144fb0e570ec410b07dd7b171758ca605f4"
+    },
+    {
+      "path": "source_exports/Megascans/SM_Rock_Sandstone_02.bin",
+      "sha256": "abbf46c8398a31a67e46e2ece282e9a5b33b422b995999330650b3e70e156b93"
+    },
+    {
+      "path": "source_exports/Megascans/SM_Rock_Sandstone_02.gltf",
+      "sha256": "2cf7512da0854c208907442a3e893ddea9ff89b9d39bd5ef0a88523baf660c9c"
+    },
+    {
+      "path": "source_exports/Megascans/SM_Rock_Sandstone_03.bin",
+      "sha256": "003d51951e7386c810549a025b85bafff435eb5f4d594cbafda3664da4fd6101"
+    },
+    {
+      "path": "source_exports/Megascans/SM_Rock_Sandstone_03.gltf",
+      "sha256": "fcb293a13d7e218b751474e31e8805fb6e9853a76c03e54ede5653a47f12ec88"
+    },
+    {
+      "path": "source_exports/Megascans/SM_Rock_Sandstone_04.bin",
+      "sha256": "739d5b17f4da393d52d2773b8ab6624a8a2b03716f3d92dbf84a5c771694455b"
+    },
+    {
+      "path": "source_exports/Megascans/SM_Rock_Sandstone_04.gltf",
+      "sha256": "22461bd369c4166e1a7a6a59f9a41e4f94a9eb253adbae4fc4c3510dfabea137"
+    },
+    {
+      "path": "source_exports/Megascans/Textures/Rock_Sandstone_04_Albedo.png",
+      "sha256": "262f868c9d43a8052d12ea380b15a805357dd7aad33ba0a887dd877e6a4ec6a0"
+    },
+    {
+      "path": "source_exports/Megascans/Textures/Rock_Sandstone_04_N.png",
+      "sha256": "95ae98f77a643e5db633c3977e1fbc0c288464ee53b62e3314412019b397b272"
+    },
+    {
+      "path": "source_exports/Megascans/Textures/SM_Rock_Sandstone_02_Albedo.png",
+      "sha256": "0650aead49815e48881f3e4f87cb144a9461ef2ccd79a5cd8ba603a47e2916b8"
+    },
+    {
+      "path": "source_exports/Megascans/Textures/SM_Rock_Sandstone_02_N.png",
+      "sha256": "cc16b5b51087aa4bcfee5e8c67f2081130985569ae10b1e593fae8e90d57f362"
+    },
+    {
+      "path": "source_exports/Megascans/Textures/SM_Rock_Sandstone_03_Albedo.png",
+      "sha256": "463601a37c9c44e357b0e881cd79979acd171d30b5c4b8fa87c15db89c870a84"
+    },
+    {
+      "path": "source_exports/Megascans/Textures/SM_Rock_Sandstone_03_N.png",
+      "sha256": "318a067e58e1392be8fa846fe6f3f98f8068ad649ce8a511b144eb92cef7aac2"
+    },
+    {
+      "path": "source_exports/Megascans/Textures/T_Rock_Sandstone_01_Albedo.png",
+      "sha256": "709c995221bcb5883760b935932ac713626013582b4fbd7e28d911cab0fe8895"
+    },
+    {
+      "path": "source_exports/Megascans/Textures/T_Rock_Sandstone_01_N.png",
+      "sha256": "ceac5ca206fcf7cd708823b4182e7540adaed6d11c0a5b9687d5dbfa8600de29"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Materials/ground_rocks.props.txt",
+      "sha256": "b513cba49a89726b40468f69a3c64204d36aa359e836a1d24545114d82a0ad29"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_1.bin",
+      "sha256": "e35c9df1c4cf8265b064800130b30f554bd0878bfa84b9756905f2e643db821e"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_1.gltf",
+      "sha256": "004dc44ba7f24c9724bc5e344ce1d48c60ed4633c5b7948afb2d08777169d9a5"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_2.bin",
+      "sha256": "9262649a9d2975ae3c7ad385133908934a320fdabae7c72a139f47fdb2ae4708"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_2.gltf",
+      "sha256": "16fd0756bf256a1d5f140271b217f5f19811687bc2794063b9aa89281ef7a061"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_3.bin",
+      "sha256": "2fefb5d05171e132a12024ca87f10fc6b7638589361fcae1c836763dc0d72d97"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_3.gltf",
+      "sha256": "18e131af8559012c469be4ca5111a016b7e4894953e619559e30e452fa9d74e4"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_4.bin",
+      "sha256": "16d0dee008c33d54c0d5439756c93cb4219564fddce9f82ce906bcbfcb6d0c05"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Meshes/rock_ground_4.gltf",
+      "sha256": "6156e23a0063b172517a7d8a17e1f2723a5f6365f7be2e3728dad3e423870fbd"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Textures/ground_rock_d.png",
+      "sha256": "56a549540d29deb91bbb8aecf2dc4f84187bc3fa42c83e086d01604ca4614868"
+    },
+    {
+      "path": "source_exports/PhotoR_Landscape_4/Textures/ground_rock_n.png",
+      "sha256": "8a00f502fbf066bffb63865ae8e1ede8b064b99dba24ff6e6d4673540d1bbec3"
+    }
+  ]
+}

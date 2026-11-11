@@ -1,0 +1,17 @@
+# Track code, small metadata and attribution only. Model/collision payloads,
+# including JSON prefab triangle arrays, belong to the local asset library.
+*
+!*/
+!.gitignore
+!shaders/**
+!**/*.md
+!**/*license*.txt
+!**/*License*.txt
+!**/*LICENSE*.txt
+!**/licenses/*.txt
+!**/*provenance*.json
+!**/*manifest.json
+!models/*-bounds.json
+!settlements/templates.json
+!furnishings/catalog.json
+!furnishings/interiors.json

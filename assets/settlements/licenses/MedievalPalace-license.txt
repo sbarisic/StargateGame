@@ -1,0 +1,11 @@
+Model Information:
+* title:	Medieval Palace Architecture - Asset Pack
+* source:	https://sketchfab.com/3d-models/medieval-palace-architecture-asset-pack-4ea57d0a1a1b40d4b67b24048ead55a2
+* author:	Samuel Francis Johnson (Oneironauticus) (https://sketchfab.com/oneironauticus)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Medieval Palace Architecture - Asset Pack" (https://sketchfab.com/3d-models/medieval-palace-architecture-asset-pack-4ea57d0a1a1b40d4b67b24048ead55a2) by Samuel Francis Johnson (Oneironauticus) (https://sketchfab.com/oneironauticus) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

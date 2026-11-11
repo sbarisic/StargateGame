@@ -1,0 +1,28 @@
+{
+  "stargate": {
+    "parts": [
+      "SM_Stargate_GlyphTrack",
+      "SM_Stargate_Segment"
+    ],
+    "vertices": 25036,
+    "triangles": 42079,
+    "sourceHashes": {
+      "stargate_19.mesh": "d512f16edcb4e4e48530e803c0ca2aaf2cba6b28f2d1dd45036a566cd4656fca",
+      "stargate_20.mesh": "36b07e052c9b3c3cbd19bb227acbbcdc5c5490286e6bf41e35960e1e74a313fa"
+    },
+    "sha256": "2e38458e834f7419ab972f13f409efef1de0465478fa95fde8eb1998a69ac608"
+  },
+  "dhd": {
+    "parts": [
+      "SM_DHD_Base",
+      "SM_DHD_Dome"
+    ],
+    "vertices": 4437,
+    "triangles": 8438,
+    "sourceHashes": {
+      "dhd_00.mesh": "0d79a0f1797cc62f1e8fa8af65a1c56bd5f3d10b15751d8dfad057c1fa1fedbb",
+      "dhd_01.mesh": "a6030f350e5eab1f97bbd2e2456fce6d426d8f8c322472d16472b5ac71fdebe9"
+    },
+    "sha256": "6a54275df5740ea609fff27a1b876eac9b6c10c9aec5c17dced6fb7169d06af1"
+  }
+}

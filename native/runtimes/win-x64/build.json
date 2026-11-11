@@ -1,0 +1,35 @@
+{
+  "rid": "win-x64",
+  "sources": {
+    "joltc": "2bbcf73b1bec261e0351814662922f1b4784454c",
+    "JoltPhysics": "e77f175595e64cb44218cc9d9d56fc365ad0e36a"
+  },
+  "cmakeOptions": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCROSS_PLATFORM_DETERMINISTIC=ON",
+    "-DDOUBLE_PRECISION=OFF",
+    "-DJPH_SAMPLES=OFF",
+    "-DJPH_TESTS=OFF",
+    "-DINTERPROCEDURAL_OPTIMIZATION=OFF",
+    "-DJPH_USE_DX12=OFF",
+    "-DJPH_USE_VK=OFF",
+    "-DJPH_USE_MTL=OFF",
+    "-DFLOATING_POINT_EXCEPTIONS_ENABLED=OFF",
+    "-DUSE_SSE4_1=OFF",
+    "-DUSE_SSE4_2=OFF",
+    "-DUSE_AVX=OFF",
+    "-DUSE_AVX2=OFF",
+    "-DUSE_AVX512=OFF",
+    "-DUSE_LZCNT=OFF",
+    "-DUSE_TZCNT=OFF",
+    "-DUSE_F16C=OFF",
+    "-DUSE_FMADD=OFF",
+    "-DJOLT_PHYSICS_ROOT=E:/Projects/StargateGame/thirdparty/JoltPhysics",
+    "-G",
+    "Visual Studio 17 2022",
+    "-A",
+    "x64"
+  ],
+  "bridgeSha256": "584d74fb2fd5980ad67b5928c28792157b54b00b41578495fb77739a5c44c1f2",
+  "sha256": "81245b9a835990b3e92c1c6658459eb2a09f2f1a2ccd04f6c7e605180a40a728"
+}

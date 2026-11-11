@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../scripts/VisualStudioAssets.props" />
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0-windows10.0.17763.0</TargetFramework><PlatformTarget>x64</PlatformTarget></PropertyGroup>
+  <ItemGroup Condition="'$(CookedAssetPackage)' != ''">
+    <Content Include="$(CookedAssetPackage)" Link="assets/models.sga" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="../../TREE_PROTOTYPE.md" Link="TREE_PROTOTYPE.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../CODE_REVIEW.md" Link="CODE_REVIEW.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../ASSET_LOADING.md" Link="ASSET_LOADING.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../PLANET_GENERATOR.md" Link="PLANET_GENERATOR.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../STARGATE_TRAVEL.md" Link="STARGATE_TRAVEL.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../SETTLEMENTS.md" Link="SETTLEMENTS.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../STREAMING.md" Link="STREAMING.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../vendor/miniaudio/LICENSE" Link="licenses/miniaudio-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../vendor/licenses/RaylibGame-Audio-LICENSE.txt" Link="licenses/RaylibGame-Audio-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../AUDIO.md" Link="AUDIO.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="../StargateGame.Audio/StargateGame.Audio.csproj" />
+    <ProjectReference Include="../StargateGame.Shared/StargateGame.Shared.csproj" />
+    <ProjectReference Include="../../thirdparty/FishGfx/FishGfx/FishGfx.csproj" />
+    <Content Include="../../assets/**/*" Exclude="../../assets/**/*.tmp;../../assets/**/*.importing.png" Link="assets/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(CookedAssetPackage)' != '' or '$(CookedAssetPacks)' != ''">
+    <Content Remove="../../assets/models/**/*.png;../../assets/models/**/*.mesh;../../assets/models/**/*.mips.gz;../../assets/vegetation/prototype/**/*.bin;../../assets/characters/**/*.png;../../assets/characters/**/*.gz;../../assets/foliage/**/*.mesh;../../assets/foliage/**/*.gz" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(CookedAssetPacks)' != ''">
+    <!-- The catalog is authoritative for these resources; do not ship duplicate loose bakes. -->
+    <Content Remove="../../assets/shaders/**/*;../../assets/terrain/**/*;../../assets/vegetation/**/*;../../assets/foliage/**/*;../../assets/gate-effects/**/*;../../assets/building/**/*.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StargateGame.Physics\StargateGame.Physics.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseLooseAssets)' == 'true'">
+    <Content Include="$(AssetCookCache)/models/**/*" Link="assets/vegetation/models/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Import Project="../../scripts/VisualStudioAssets.targets" />
+<ItemGroup><ProjectReference Include="../StargateGame.Testing/StargateGame.Testing.csproj" /></ItemGroup>
+<ItemGroup>
+<ProjectReference Include="../StargateGame.Server/StargateGame.Server.csproj" ReferenceOutputAssembly="false" OutputItemType="LocalTestingRuntime" />
+<ProjectReference Include="../StargateGame.Harness/StargateGame.Harness.csproj" ReferenceOutputAssembly="false" OutputItemType="LocalTestingRuntime" />
+</ItemGroup>
+  <!-- ResolveProjectReferences supplies the actual paths for this configuration,
+       platform, RID and output layout, including VS-managed dependency builds.
+       This development-only manifest is not copied into published packages. -->
+  <Target Name="WriteLocalTestingRuntime" AfterTargets="CopyFilesToOutputDirectory"
+          DependsOnTargets="ResolveProjectReferences" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Condition="'@(LocalTestingRuntime->Count())' != '2'"
+           Text="Local Testing requires the Server and Harness project references to be built in the selected configuration." />
+    <ItemGroup>
+      <LocalTestingPaths Include="$(TargetPath);@(LocalTestingRuntime->'%(FullPath)')" />
+      <LocalTestingPaths Include="development-assets=$([System.IO.Path]::GetFullPath('$(AssetCookCache)/dev-override'))"
+                         Condition="'$(CookAssets)' == 'true' and Exists('$(AssetCookCache)/dev-override/manifest.json')" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(TargetDir)testing-runtime.paths"
+                      Lines="@(LocalTestingPaths)"
+                      Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup><FileWrites Include="$(TargetDir)testing-runtime.paths" /></ItemGroup>
+  </Target>
+</Project>

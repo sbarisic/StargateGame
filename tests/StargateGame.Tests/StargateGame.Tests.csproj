@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/StargateGame.Client/CanopyLod.cs" Link="CanopyLod.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientPlanetDebug.cs" Link="ClientPlanetDebug.cs" />
+    <Compile Include="../../src/StargateGame.Client/CanopyMipSelection.cs" Link="CanopyMipSelection.cs" />
+    <Compile Include="../../src/StargateGame.Client/MountedAssetStore.cs" Link="MountedAssetStore.cs" />
+    <Compile Include="../../src/StargateGame.Client/CookedAssets.cs" Link="CookedAssets.cs" />
+    <Compile Include="../../src/StargateGame.Client/TerrainPaletteData.cs" Link="TerrainPaletteData.cs" />
+    <Compile Include="../../src/StargateGame.Client/TerrainGrass.cs" Link="TerrainGrass.cs" />
+    <Compile Include="../../src/StargateGame.Client/GateTransition.cs" Link="GateTransition.cs" />
+    <Compile Include="../../src/StargateGame.Client/AddressBookState.cs" Link="AddressBookState.cs" />
+    <Compile Include="../../src/StargateGame.Client/AudioOcclusion.cs" Link="AudioOcclusion.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientAudio.cs" Link="ClientAudio.cs" />
+    <Compile Include="../../src/StargateGame.Client/DeviceIdentity.cs" Link="DeviceIdentity.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientTravel.cs" Link="ClientTravel.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientSession.cs" Link="ClientSession.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientDialing.cs" Link="ClientDialing.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientCharacters.cs" Link="ClientCharacters.cs" />
+    <Compile Include="../../src/StargateGame.Client/PredictionClock.cs" Link="PredictionClock.cs" />
+    <Compile Include="../../src/StargateGame.Client/PredictionPresentation.cs" Link="PredictionPresentation.cs" />
+    <Compile Include="../../src/StargateGame.Client/RemotePresentation.cs" Link="RemotePresentation.cs" />
+    <Compile Include="../../src/StargateGame.Client/FoliageState.cs" Link="FoliageState.cs" />
+    <Compile Include="../../src/StargateGame.Client/DesertDustState.cs" Link="DesertDustState.cs" />
+    <Compile Include="../../src/StargateGame.Client/SurfaceEcology.cs" Link="SurfaceEcology.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientWeapons.cs" Link="ClientWeapons.cs" />
+    <Compile Include="../../src/StargateGame.Client/HybridGrassState.cs" Link="HybridGrassState.cs" />
+    <Compile Include="../../src/StargateGame.Client/EnvironmentState.cs" Link="EnvironmentState.cs" />
+    <Compile Include="../../src/StargateGame.Client/AtmosphereIllumination.cs" Link="AtmosphereIllumination.cs" />
+    <Compile Include="../../src/StargateGame.Client/DhdGlyphState.cs" Link="DhdGlyphState.cs" />
+    <Compile Include="../../src/StargateGame.Client/DhdAddressHint.cs" Link="DhdAddressHint.cs" />
+    <Compile Include="../../src/StargateGame.Client/EventHorizonState.cs" Link="EventHorizonState.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientBuilding.cs" Link="ClientBuilding.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientStreaming.cs" Link="ClientStreaming.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientTerrain.cs" Link="ClientTerrain.cs" />
+    <ProjectReference Include="../../src/StargateGame.Shared/StargateGame.Shared.csproj" />
+    <ProjectReference Include="../../src/StargateGame.Server/StargateGame.Server.csproj" />
+    <ProjectReference Include="..\..\src\StargateGame.Physics\StargateGame.Physics.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "source": "User-supplied assets_itch/Tree Pack 3D",
+  "blender": "5.2.1 LTS",
+  "units": "Authored units treated as metres; Y-up; trunk-root centred",
+  "materials_linear_rgb": {
+    "bark": [
+      0.085,
+      0.06,
+      0.037
+    ],
+    "leaves": [
+      0.035,
+      0.18,
+      0.018
+    ],
+    "autumn": [
+      0.34,
+      0.155,
+      0.035
+    ]
+  },
+  "license": "No license or author notice supplied inside this local pack; no redistribution license inferred.",
+  "models": [
+    {
+      "model": "TreePack3D_1",
+      "source": "1/Tree 1.obj",
+      "shift": [
+        0.0,
+        -1.0286309719085693,
+        0.0
+      ],
+      "height_m": 7.85820198059082,
+      "triangles_per_lod": [
+        44544,
+        16355,
+        4760
+      ],
+      "wood_collision_triangles": 2371
+    },
+    {
+      "model": "TreePack3D_2",
+      "source": "2/Tree2.obj",
+      "shift": [
+        0.0021066665649414062,
+        0.0,
+        0.0007634981884621084
+      ],
+      "height_m": 9.172614097595215,
+      "triangles_per_lod": [
+        63716,
+        22701,
+        6531
+      ],
+      "wood_collision_triangles": 4679
+    },
+    {
+      "model": "TreePack3D_3",
+      "source": "3/Tree 3.obj",
+      "shift": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "height_m": 16.28641700744629,
+      "triangles_per_lod": [
+        43332,
+        15344,
+        4403
+      ],
+      "wood_collision_triangles": 3573
+    },
+    {
+      "model": "TreePack3D_4",
+      "source": "4/Tree 4.obj",
+      "shift": [
+        -1.0257139205932617,
+        -0.9116309881210327,
+        -4.098268508911133
+      ],
+      "height_m": 19.841768264770508,
+      "triangles_per_lod": [
+        29312,
+        12265,
+        10538
+      ],
+      "wood_collision_triangles": 9798
+    },
+    {
+      "model": "TreePack3D_5",
+      "source": "5/Tree 5.obj",
+      "shift": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "height_m": 5.112045764923096,
+      "triangles_per_lod": [
+        38268,
+        14487,
+        4264
+      ],
+      "wood_collision_triangles": 800
+    }
+  ],
+  "sources": [
+    {
+      "path": "1/Tree 1.mtl",
+      "sha256": "d4815485b8dade0ffa2cc5ce497f8232d0f868ba36043eb6b1b0a09592315ae3"
+    },
+    {
+      "path": "1/Tree 1.obj",
+      "sha256": "b2cf8abc34085037f7fe097c46c2044bc9646b8b262deb731231b5c13fcd8fb2"
+    },
+    {
+      "path": "2/Tree2.mtl",
+      "sha256": "f55eb38b7f8b2278ed68995652ca2d9ee9eb82bc4f656c4ace4bbf4614a69473"
+    },
+    {
+      "path": "2/Tree2.obj",
+      "sha256": "e50391946b69685fbc2b296cb68f8b38d74f8adafb4c9583fdfe69fb1480ec42"
+    },
+    {
+      "path": "3/Tree 3.mtl",
+      "sha256": "8846587742e9906d0fcc444aa04bee4999040090da604644762f246bfcec4ecc"
+    },
+    {
+      "path": "3/Tree 3.obj",
+      "sha256": "944fde89f2d2ee079b895deb54816de123a4f5fe84a8130734cbca47af73d166"
+    },
+    {
+      "path": "4/Tree 4.mtl",
+      "sha256": "7cd8af14a21313c4a0350b2b7932914042b1e5bacc1445b17256d43dd6c81101"
+    },
+    {
+      "path": "4/Tree 4.obj",
+      "sha256": "c8d1f3bb7e9f04257f313046b43c51bcc5e90afd2aac5f2a3c40b24509a421f2"
+    },
+    {
+      "path": "5/Tree 5.mtl",
+      "sha256": "1d60b7b0b966ef2ed05b164f2f8bfa9a523ad57fd834b833f2f4bd94c6c96c60"
+    },
+    {
+      "path": "5/Tree 5.obj",
+      "sha256": "d3733a29d6e71894223f5ccd240f0a5a0a5c1cc0f3f35b6556c1623c2aba3807"
+    }
+  ]
+}
