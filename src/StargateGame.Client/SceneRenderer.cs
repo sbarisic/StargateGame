@@ -208,6 +208,7 @@ sealed partial class SceneRenderer : IDisposable
         for (int i = resources.Count - 1; i >= 0; i--)
             resources[i].Dispose();
         resources.Clear();
+        ClearCables();
     }
     int dynamicDebugLineCount;
     public double DebugLineCpuMilliseconds

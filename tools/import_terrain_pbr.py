@@ -327,3 +327,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    from import_paving_materials import install as install_paving
+    install_paving()

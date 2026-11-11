@@ -47,6 +47,7 @@ sealed partial class GameApp
     }
     bool PaletteInput(InputManager input)
     {
+        if(cableTool)return false;
         ReflowPalette();
         if (buildPaletteOpen && (!input.IsKeyDown(Key.B) && !paletteInspectionHolding || paused))
         {

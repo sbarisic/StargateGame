@@ -157,7 +157,7 @@ sealed partial class GameApp
         if (session is null && !UiPreview)
             return;
         var l = Layout;
-        var h = session is null ? new HudPresentation("Preview world / a long expedition world name", 1, 359, true, false, !paused && !bookOpen && !buildPaletteOpen) : HudPresentation.Read(session, yaw, paused || bookOpen || buildPaletteOpen || planetPanel, session.Carrying || dhdHover >= 0 || buildMode);
+        var h = session is null ? new HudPresentation("Preview world / a long expedition world name", 1, 359, true, false, !paused && !bookOpen && !buildPaletteOpen && !spawnMenuOpen) : HudPresentation.Read(session, yaw, paused || bookOpen || buildPaletteOpen || spawnMenuOpen || planetPanel, session.Carrying || dhdHover >= 0 || buildMode);
         Panel(pass, l.Identity);
         Text(pass, l.Identity.X + 14, l.Identity.Y + 10, "STARGATE / FIRST LANDING", 18, UiTheme.Amber);
         Text(pass, l.Identity.X + 14, l.Identity.Y + 36, Fit(h.World, 272, 14), 14, UiTheme.Text);
@@ -204,7 +204,16 @@ sealed partial class GameApp
             Text(pass, l.Equipment.X + 112, l.Equipment.Y + 36, "PREVIEW", 14);
             return;
         }
-        if (pickupHint.Length > 0)
+        DrawCableHud(pass);
+        if (physicsGunEquipped && !spawnMenuOpen && !paused)
+        {
+            float width = Math.Min(680, UiWidth - 40);
+            float x = (UiWidth - width) / 2, y = UiHeight - 100;
+            Panel(pass, new(x, y, width, 54));
+            Text(pass, x + 12, y + 8, "PHYSICS GUN / Hold Left mouse to grab / Release to drop", 14, UiTheme.Amber);
+            Text(pass, x + 12, y + 30, "Wheel: distance / E + Mouse: rotate / G: rifle", 14);
+        }
+        else if (pickupHint.Length > 0 && !spawnMenuOpen && !cableTool)
         {
             float x = UiWidth / 2f - 120, y = UiHeight / 2f + 36;
             Panel(pass, new(x - 10, y - 5, 260, 36));

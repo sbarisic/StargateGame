@@ -149,7 +149,7 @@ except ImportError:
     raise SystemExit(0)
 from mathutils import Vector
 
-for prefab in catalog:
+for prefab in ([dict(id="wooden-crate"), dict(id="barrel-red")] if "--spawn-icons" in sys.argv else catalog):
     if not prefab.get("selectable", True):
         continue
     key = prefab["id"]

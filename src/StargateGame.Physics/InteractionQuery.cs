@@ -24,6 +24,18 @@ public sealed partial class PhysicsWorld
         => BuildingQuery.Ray(eye, aim, distance, ignore).Piece is not null ||
            InteractionBlocked(eye, aim, distance, ignorePlayer: player, ignoreBuildings: true);
     // Native broad/narrow phase uses the live clipped shapes, not reconstructed meshes.
+    public Vector3? SpawnSurface(Vector3 origin, Vector3 direction, float distance, int player)
+    {
+        lock (NativeGate)
+        {
+            interactionFilter ??= Native.Own(new InteractionFilter());
+            interactionFilter.Ignore = BodyID.Invalid;
+            interactionFilter.Player = characters.TryGetValue(player, out var c) ? c.InnerBodyID : BodyID.Invalid;
+            interactionFilter.Buildings = null;
+            return system.NarrowPhaseQuery.CastRay(new Ray(origin,direction*distance),out var hit,bodyFilter:interactionFilter)
+                ? origin+direction*(distance*hit.Fraction) : null;
+        }
+    }
     public bool InteractionBlocked(Vector3 origin, Vector3 direction, float distance, string? ignoreEntity = null, int ignorePlayer = 0, int ignoreProp = 0, bool ignoreBuildings = false)
     {
         if (distance <= 0)

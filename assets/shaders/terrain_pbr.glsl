@@ -2,9 +2,9 @@ uniform vec2 uTerrainWind;
 uniform float uRoadPaved;
 #include "surface_ecology.glsl"
 uniform sampler2DArray uTerrainColor,uTerrainNormal,uTerrainMasks;
-uniform float uTerrainMetres[8],uTerrainGain[8],uTerrainNormalStrength[8],uTerrainHeightStrength[8];uniform int uTerrainBiome;
-uniform float uTerrainGrass[8];
-uniform float uTerrainRelief[8],uTerrainParallaxRange;
+uniform float uTerrainMetres[11],uTerrainGain[11],uTerrainNormalStrength[11],uTerrainHeightStrength[11];uniform int uTerrainBiome;
+uniform float uTerrainGrass[11];
+uniform float uTerrainRelief[11],uTerrainParallaxRange;
 uniform int uTerrainParallaxSteps;
 struct TerrainSurface {vec3 color;vec3 normal;float ao;float rough;float height;float grass;float shadow;};
 float terrainTraceHeight(int id,vec2 uv,vec2 dx,vec2 dy,float cover){
@@ -125,9 +125,9 @@ TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance,vec2 h
  float paved=uRoadPaved;float road=material.r;
  if(road>.01){
   // Reuse the biome's stone/soil material so roads retain ground detail.
-  int pathLayer=paved>.5?rock:(uTerrainBiome==0?6:uTerrainBiome==1?2:5);
+  int pathLayer=paved>.5?8+int(mod(floor(p.z/22.),3.)):(uTerrainBiome==0?6:uTerrainBiome==1?2:5);
   TerrainSurface path=terrainLayer(pathLayer,p,g,distance);
-  vec3 tint=mix(vec3(.8,.66,.48),vec3(.83,.8,.74),paved);
+  vec3 tint=mix(vec3(.8,.66,.48),vec3(1.),paved);
   r.color=mix(r.color,path.color*tint,road);
   r.shadow=mix(r.shadow,path.shadow,road);
   r.grass*=1.-smoothstep(0.,.04,road);

@@ -1,0 +1,6 @@
+{
+  "source": "assets_itch\\weapons\\raygun",
+  "credits": "# Credits\n\n- asset_dqdLbAnr6H93gwDPtM3HZUAR (\"Chrome ray gun\", title by Patch) by Scenario (Scenario, https://huggingface.co/datasets/scenario-labs/3d-collection/blob/55b4c002b4c1529fc48da3dff98516c3069bfa3f/assets/scenario_asset_dqdLbAnr6H93gwDPtM3HZUAR/output.glb), licensed Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/). AI-generated with Tripo P2 image-to-3D. Changed by Patch: pivot moved to the bottom centre, credit and license added to the file metadata, simplified LODs added.\n\nLicense: Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/). Its full text is in LICENSES/.\nFrom Scenario: https://huggingface.co/datasets/scenario-labs/3d-collection/blob/55b4c002b4c1529fc48da3dff98516c3069bfa3f/assets/scenario_asset_dqdLbAnr6H93gwDPtM3HZUAR/output.glb\n",
+  "license": "CC-BY-4.0",
+  "tool": "tools/import_physics_gun.py"
+}

@@ -26,16 +26,16 @@ sealed partial class SceneRenderer
     CancellationTokenSource surfaceCancellation = new();
     WorldChanges? surfaceState;
     int surfaceRevision;
-    float[] terrainMetres = new float[8], terrainGain = new float[8], terrainNormalStrength = new float[8], terrainHeightStrength = new float[8];
-    float[] terrainRelief = new float[8];
-    float[] terrainGrass = new float[8];
+    float[] terrainMetres = new float[11], terrainGain = new float[11], terrainNormalStrength = new float[11], terrainHeightStrength = new float[11];
+    float[] terrainRelief = new float[11];
+    float[] terrainGrass = new float[11];
     public bool TerrainParallaxEnabled
     {
         get;
         set;
     } = true;
     public double TerrainGpuMilliseconds => gpuTimer.TerrainMilliseconds;
-    public long TerrainMaterialBytes => (terrainPbr is null ? 0 : (long)terrainSize * terrainSize * 4 * 3 * 8 * 4 / 3) + (surfaceField is null ? 0 : 2048L * 2048 * 16);
+    public long TerrainMaterialBytes => (terrainPbr is null ? 0 : (long)terrainSize * terrainSize * 4 * 3 * 11 * 4 / 3) + (surfaceField is null ? 0 : 2048L * 2048 * 16);
     public int SurfaceMapCount => surfaceMaps.Count;
     public double SurfaceCpuMilliseconds
     {
@@ -111,7 +111,7 @@ sealed partial class SceneRenderer
         {
             float aniso = graphics.Capabilities.SupportsAnisotropy ? Math.Min(8, graphics.Capabilities.MaximumAnisotropy) : 1;
             for (int i = 0; i < 3; i++)
-                maps[i] = graphics.CreateTexture(new TextureDescriptor(size, size, TextureFormat.RGBA8Unorm, dimension: TextureDimension.Texture2DArray, mipLevels: 1 + (int)MathF.Log2(size), arrayLayers: 8, sampling: new(TextureFilter.LinearMipmapLinear, TextureFilter.Linear, TextureWrap.Repeat, TextureWrap.Repeat, anisotropy: aniso)));
+                maps[i] = graphics.CreateTexture(new TextureDescriptor(size, size, TextureFormat.RGBA8Unorm, dimension: TextureDimension.Texture2DArray, mipLevels: 1 + (int)MathF.Log2(size), arrayLayers: 11, sampling: new(TextureFilter.LinearMipmapLinear, TextureFilter.Linear, TextureWrap.Repeat, TextureWrap.Repeat, anisotropy: aniso)));
             return maps;
         }
         catch
@@ -170,7 +170,7 @@ sealed partial class SceneRenderer
             terrainPbr = AllocatePalette(1);
             byte[][] pixels = [ [90, 100, 85, 255], [128, 128, 255, 128], [255, 200, 0, 255] ];
             for (int map = 0; map < 3; map++)
-                for (int layer = 0; layer < 8; layer++)
+                for (int layer = 0; layer < 11; layer++)
                     terrainPbr[map].Write<byte>(pixels[map], TextureDataFormat.RGBA8Unorm, new TextureArrayRegion(0, 0, layer, 1, 1, 1));
             Array.Fill(terrainMetres, 1);
             Array.Fill(terrainGain, 1);
@@ -298,7 +298,7 @@ sealed partial class SceneRenderer
             GraphicsQuality.High => 40f,
             _ => 28f
         });
-        p.SetUniform("uRoadPaved", World.Definition.Settlements?.Outcome == "city" ? 1f : 0f);
+        p.SetUniform("uRoadPaved", World.Definition.Settlements?.Roads.Any(r => r.Paved) == true ? 1f : 0f);
         p.SetUniform("uTerrainMetres", terrainMetres);
         p.SetUniform("uTerrainGain", terrainGain);
         p.SetUniform("uTerrainNormalStrength", terrainNormalStrength);

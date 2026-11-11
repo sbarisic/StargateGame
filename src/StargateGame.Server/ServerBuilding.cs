@@ -99,6 +99,11 @@ public sealed partial class GameServer
             Fail("World update in progress; try again.");
             return true;
         }
+        if (cmd.Action == "spawn-prop")
+        {
+            SpawnSandboxProp(s,cmd);
+            return true;
+        }
         BuildEdit result;
         if (cmd.Action == "clear")
         {

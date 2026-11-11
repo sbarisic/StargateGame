@@ -7,7 +7,81 @@ namespace StargateGame.Shared;
 /// <summary>Small deterministic developer worlds. Never materialized into universe saves.</summary>
 public static class GraphicsFixture
 {
-    public const int Version = 6;
+    public const int Version = 9;
+    // A medium village occupies the flat east side, clear of the gate, stairs
+    // and water stations. Keep plot 1 at the original interior bookmark.
+    static SettlementLayout SandboxVillage()
+    {
+        List<SettlementPlot> plots = [];
+        List<SettlementRoad> roads = [];
+        (float X, float Z, int Rotation)[] homes =
+        [
+            (25,25,0), (45,27,1), (66,24,11),
+            (29,47,11), (50,49,0), (72,46,1),
+            (23,69,1), (47,71,11), (68,68,0),
+            (29,91,0), (52,93,1), (75,90,11)
+        ];
+        // Sample shallow quadratic curves into the shared road representation,
+        // so paving and vegetation use exactly the same curved footprint.
+        SettlementRoad[] Curve(Vector3 a, Vector3 b, float bend, float width)
+        {
+            var delta = b-a;
+            float length = delta.Length();
+            if (length < .01f) return [];
+            var control = (a+b)*.5f + new Vector3(-delta.Z,0,delta.X)/length*bend;
+            int count = Math.Clamp((int)MathF.Ceiling(length/3), 3, 20);
+            List<SettlementRoad> segments = [];
+            var last = a;
+            for (int i=1;i<=count;i++)
+            {
+                float t=(float)i/count, u=1-t;
+                var point=u*u*a+2*u*t*control+t*t*b;
+                segments.Add(new(last,point,width*.7f,true));
+                last=point;
+            }
+            return segments.ToArray();
+        }
+        Vector3 previous = new(13,0,10);
+        for (int row = 0; row < 4; row++)
+        {
+            float z = 16 + row * 22;
+            Vector3 a = new(14 + row % 2 * 3,0,z), b = new(72,0,z+1);
+            roads.AddRange(Curve(previous,a,row % 2 == 0 ? 2 : -2,4)); previous=a;
+            // Only two through-lanes; alternate rows have short dead-end spurs.
+            if (row % 2 != 0) b = new(34,0,z+1);
+            var lanes = Curve(a,b,row % 2 == 0 ? -4 : 2.5f,3.5f);
+            roads.AddRange(lanes);
+            for (int column = 0; column < 3; column++)
+            {
+                int index = row * 3 + column, id = index + 1;
+                var h = homes[index];
+                string model = $"settlement-mega-house-{index % 4 + 1}";
+                Vector3 position = new(h.X,0,h.Z);
+                plots.Add(new(id,1,model,position,h.Rotation));
+                // Four houses keep grass approaches instead of adding a path
+                // to every door and recreating a dense street grid.
+                if (row % 2 != 0 && column > 0) continue;
+                var rotation = Matrix4x4.CreateRotationY(-h.Rotation * MathF.PI / 6);
+                var entrance = SettlementTemplates.Get(model).Entrances[0];
+                var outside = Vector3.Transform(new Vector3(entrance[0],0,entrance[2]),rotation)+position;
+                var outward = Vector3.TransformNormal(-Vector3.UnitZ,rotation);
+                var threshold = outside - outward * .8f;
+                var porch = outside + outward * 1.2f;
+                Vector3 nearest = default; float best = float.MaxValue;
+                foreach (var lane in lanes)
+                {
+                    var direction = lane.B-lane.A;
+                    var point = lane.A+direction*Math.Clamp(Vector3.Dot(porch-lane.A,direction)/direction.LengthSquared(),0,1);
+                    float distance = Vector3.DistanceSquared(porch,point);
+                    if(distance<best){best=distance;nearest=point;}
+                }
+                roads.AddRange(Curve(threshold,porch,0,1.6f));
+                roads.AddRange(Curve(porch,nearest,column % 2 == 0 ? .8f : -.8f,1.6f));
+            }
+        }
+        return new(SettlementSettings.Version, "village", "mega",
+            [new(1, new(48, 0, 59), "village", 12, 12)], plots.ToArray(), roads.ToArray(), []);
+    }
     public static bool Forest(PlanetDefinition d) => d.Fixture == "gate-pair" && d.Preset == "temperate";
     public static float ForestPathX(float z) => 30 + (-z - 20) * .25f + 3 * MathF.Sin((-z - 20) * .065f);
     public static float ForestPathDistance(float x, float z) => z is <= -17 and >= -86 ? Math.Abs(Math.Abs(x) - ForestPathX(z)) : float.PositiveInfinity;
@@ -29,6 +103,10 @@ public static class GraphicsFixture
             {
                 uint seed = Hash(unchecked((uint)x * 73856093u ^ (uint)z * 19349663u) ^ 7319u);
                 var p = new Vector3(x + (Unit(seed + 1) - .5f) * 2, 0, z + (Unit(seed + 2) - .5f) * 2);
+                // Village footprints plus crown clearance; retain the forest
+                // stations to the north and west.
+                if (p.X > 0 && p.X < 88 && p.Z > 4 && p.Z < 124)
+                    continue;
                 // Twenty-one metres of crown clearance for the enlarged world trees.
                 if (Math.Abs(p.X) < 45 && p.Z > -38 && p.Z < 44)
                     continue;
@@ -79,6 +157,7 @@ public static class GraphicsFixture
             Enumerable.Range(0, 8).Select(i => scene == "gate-pair" ? new Vector3(-3 + i % 4 * 2, 0, 9 + i / 4 * 2) : new Vector3(i % 4 * 2, 0, 8 + i / 4 * 2)).ToArray(), entities.ToArray())
         {
             Fixture = scene,
+            Settlements = scene == "gate-pair" ? SandboxVillage() : null,
             GeneratorVersion = PlanetSettings.Version,
             Preset = preset,
             UniverseId = Id("graphics-fixtures"),
@@ -128,7 +207,21 @@ public static class GraphicsFixture
                 h[i] = (int)MathF.Round(height * 1000);
                 if (height < -.35f)
                     w[i] = -350;
-                m[i * 4] = 180;
+                m[i * 4] = d.Fixture == "gate-pair" ? (byte)0 : (byte)180;
+                if (d.Settlements is { } village && wx >= 9 && wx <= 86 && wz >= 8 && wz <= 100)
+                {
+                    float road = 0;
+                    var point = new Vector2(wx, wz);
+                    foreach (var lane in village.Roads)
+                    {
+                        var a = new Vector2(lane.A.X, lane.A.Z);
+                        var delta = new Vector2(lane.B.X, lane.B.Z) - a;
+                        float t = Math.Clamp(Vector2.Dot(point - a, delta) / Math.Max(delta.LengthSquared(), .001f), 0, 1);
+                        float distance = Vector2.Distance(point, a + delta * t);
+                        road = Math.Max(road, 1 - Smooth(lane.Width * .5f, lane.Width * .5f + .7f, distance));
+                    }
+                    m[i * 4] = (byte)MathF.Round(road * 255);
+                }
                 m[i * 4 + 1] = 45;
                 m[i * 4 + 2] = 25;
                 m[i * 4 + 3] = 5;

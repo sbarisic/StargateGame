@@ -123,7 +123,7 @@ sealed partial class ClientSession : IDisposable
                     remotePresentation.Clear();
                     remotePresentation.Add(baseline);
                     lastTarget = Math.Max(lastTarget, baseline.Tick);
-                    pendingCarry = CarryAction.None;
+                    pendingCarry = CarryAction.None; pendingPropRotation = default; pendingCarryScroll = 0;
                     pendingGrab = default;
                     long sentSequence = sequence;
                     Arrived(message);
@@ -153,6 +153,7 @@ sealed partial class ClientSession : IDisposable
                     continue;
                 if (message.Kind == "snapshot" && message.LocationId != Guid.Empty && message.LocationId != World.Definition.LocationId)
                     continue;
+                if (HandleCables(message)) continue;
                 if (HandleBuilding(message))
                     continue;
                 if (HandleTerrain(message))
@@ -239,9 +240,17 @@ sealed partial class ClientSession : IDisposable
     public bool ShowItemNotice => Now < ItemNoticeUntil;
     CarryAction pendingCarry;
     Guid pendingGrab;
-    public bool Carrying => Physics.IsCarrying(localId) || pendingCarry == CarryAction.Grab;
+    Vector2 pendingPropRotation;
+    float pendingCarryScroll;
+    public void ScrollCarriedProp(float amount)
+    {
+        if (float.IsFinite(amount)) pendingCarryScroll = Math.Clamp(pendingCarryScroll + amount, -32, 32);
+    }
+    public void RotateProp(Vector2 delta) => pendingPropRotation = Vector2.Clamp(pendingPropRotation + delta, new(-1), new(1));
+    public bool Carrying => Physics.IsCarrying(localId) || pendingCarry is CarryAction.Grab or CarryAction.PhysicsGrab;
     public void Carry(CarryAction action, Guid item = default)
     {
+        if (action is CarryAction.Drop or CarryAction.Throw) { pendingPropRotation = default; pendingCarryScroll = 0; }
         pendingCarry = action;
         pendingGrab = item;
     }
@@ -254,6 +263,7 @@ sealed partial class ClientSession : IDisposable
             yaw = Local.Yaw;
             pitch = Local.Pitch;
         }
+        PollCables();
         pendingJump |= jump;
         long target = Math.Min((long)Math.Floor(clock.PredictionTime(Now)), ServerTick + 24);
         if (activationTick > 0 && transfer?.Preparation.SwitchPlanet == true)
@@ -269,7 +279,14 @@ sealed partial class ClientSession : IDisposable
         // render frame. Previously only the final tick received fresh input.
         for (long tick = Math.Max(lastTarget, prediction.Simulation.Tick) + 1; tick <= target; tick++)
         {
-            var input = new PlayerInput(++sequence, strafe, forward, yaw, pitch, walk, pendingJump, tick, rise, dive, pendingCarry, pendingGrab, crouch);
+            if (pendingCarry == CarryAction.None && !TransitLocked && Physics.IsCarrying(localId) && Math.Abs(pendingCarryScroll) >= 1)
+            {
+                pendingCarry = pendingCarryScroll > 0 ? CarryAction.PushFarther : CarryAction.PullCloser;
+                pendingCarryScroll -= Math.Sign(pendingCarryScroll);
+            }
+            if (TransitLocked || !Carrying) pendingCarryScroll = 0;
+            var input = new PlayerInput(++sequence, strafe, forward, yaw, pitch, walk, pendingJump, tick, rise, dive, pendingCarry, pendingGrab, crouch, TransitLocked ? default : pendingPropRotation);
+            pendingPropRotation = default;
             pendingCarry = CarryAction.None;
             pendingGrab = default;
             pendingJump = false;

@@ -152,6 +152,9 @@ public sealed partial class GameServer : IAsyncDisposable
         }
         finally
         {
+            foreach (var state in cableLocations.Values)
+                if (state.Saving is not null)
+                    try { await state.Saving; } catch (Exception error) { Console.Error.WriteLine("Cable shutdown save: " + error.Message); }
             foreach (var session in AllSessions)
                 session.Peer.Dispose();
         }
@@ -220,6 +223,7 @@ public sealed partial class GameServer : IAsyncDisposable
         // After closing, moving props continue until they naturally sleep.
         if (sessions.Count == 0 && transition is null && preparing is null && !TravelBusy(context) && !UnattendedPhysicsActive(context))
             return;
+        TickCables();
         TickWeapons();
         PollBuildLookups();
         PollGalaxyLookups();
@@ -360,6 +364,7 @@ public sealed partial class GameServer : IAsyncDisposable
         if (HandleWeapons(session, message)) return true;
         if (HandleCharacter(session, message))
             return true;
+        if (HandleCables(session, message)) return true;
         if (message.Kind == "build")
             return HandleBuild(session, message);
         if (HandleTerrainMessage(session, message, out bool result))
@@ -432,6 +437,9 @@ public sealed partial class GameServer : IAsyncDisposable
         {
             while (!HomeDebugBusy && accepted.TryDequeue(out var socket))
                 socket.Dispose();
+            foreach (var state in cableLocations.Values)
+                if (state.Saving is not null)
+                    try { await state.Saving; } catch (Exception error) { Console.Error.WriteLine("Cable shutdown save: " + error.Message); }
             foreach (var session in AllSessions)
                 session.Peer.Dispose();
             foreach (var session in AllSessions)

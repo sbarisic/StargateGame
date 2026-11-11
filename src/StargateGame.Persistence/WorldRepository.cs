@@ -52,7 +52,7 @@ public sealed partial class WorldRepository : IAsyncDisposable
                 db.Open();
                 Execute(db, "PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON;");
                 int version = Convert.ToInt32(Scalar(db, "PRAGMA user_version;"));
-                if (version > 9)
+                if (version > 10)
                     throw new InvalidDataException("Save schema is newer than this server.");
                 if (version == 0)
                 {
@@ -142,6 +142,7 @@ public sealed partial class WorldRepository : IAsyncDisposable
                     MigrateWeapons(db);
                     migration.Commit();
                 }
+                Execute(db, "CREATE TABLE IF NOT EXISTS cables(location TEXT PRIMARY KEY,revision INTEGER NOT NULL,json TEXT NOT NULL); PRAGMA user_version=10;");
                 RecoverTransits(db);
                 UniverseId = Guid.Parse((string)Scalar(db, "SELECT value FROM metadata WHERE key='universe';")!);
                 ready.SetResult();

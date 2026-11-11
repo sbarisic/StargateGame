@@ -74,8 +74,16 @@ static class SurfaceEcology
                 bool reserved = planet is not null && (planet.Spawns.Any(s => Vector2.DistanceSquared(new(s.X, s.Z), new(wx, wz)) < 2.25f) || planet.Entities.Any(e =>
                     e.Model == "stargate" && Math.Abs(wx - e.Position.X) < 3.4f && wz - e.Position.Z > -1.5f && wz - e.Position.Z < 19 ||
                     e.Model == "dhd" && Vector2.DistanceSquared(new(e.Position.X, e.Position.Z), new(wx, wz)) < 1.69f));
+                bool roadPath = planet?.Settlements?.Roads.Any(lane =>
+                {
+                    var a = new Vector2(lane.A.X,lane.A.Z);
+                    var delta = new Vector2(lane.B.X,lane.B.Z)-a;
+                    var point = new Vector2(wx,wz);
+                    float t = Math.Clamp(Vector2.Dot(point-a,delta)/Math.Max(delta.LengthSquared(),.001f),0,1);
+                    return Vector2.Distance(point,a+delta*t) < lane.Width*.5f+(planet.Fixture == "gate-pair" ? .245f : .35f);
+                }) == true;
                 bool forestPath = planet is not null && GraphicsFixture.Forest(planet) && GraphicsFixture.ForestPathDistance(wx, wz) < 1.5f;
-                float available = water || reserved || forestPath || GroundCover.TerrainCoverage(c.Normal(ix, iz), c.Material(ix, iz)) <= 0 || obstacles.Any(o => o.Contains(p)) ? 0 : 1;
+                float available = water || reserved || forestPath || roadPath || GroundCover.TerrainCoverage(c.Normal(ix, iz), c.Material(ix, iz)) <= 0 || obstacles.Any(o => o.Contains(p)) ? 0 : 1;
                 int index = (z + 1) * 67 + x + 1;
                 data[index] = new(cover, wet, p.Y, available);
                 if (grass is not null)

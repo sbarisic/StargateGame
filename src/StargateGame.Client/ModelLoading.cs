@@ -14,7 +14,7 @@ sealed partial class SceneRenderer
     readonly Dictionary<string, IEnumerator<bool>> modelJobs = [];
     readonly HashSet<string> texturesLoading = [];
     long modelMeshBytes, modelTextureBytes, modelPreparingBytes;
-    public long ModelGpuBytes => modelMeshBytes + modelPreparingBytes + modelTextureBytes + refiningTextureBytes + prototypeBytes
+    public long ModelGpuBytes => CableGpuBytes + modelMeshBytes + modelPreparingBytes + modelTextureBytes + refiningTextureBytes + prototypeBytes
         + (military?.GpuBytes ?? 0) + (rifle?.GpuBytes ?? 0) + (preparingCharacter?.GpuBytes ?? 0) + waterTextureBytes;
     public double ModelUploadPeakMilliseconds
     {

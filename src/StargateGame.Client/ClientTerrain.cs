@@ -200,7 +200,7 @@ sealed partial class ClientSession
             case "terrain-commit":
                 if (transfer is null || message.TransferId != transfer.Preparation.TransferId || message.State is null || !readySent || (!relocating && activationTick == 0) || message.State.Tick != activationTick || message.State.Epoch <= prediction.Simulation.Epoch)
                     throw new InvalidDataException("Invalid terrain commit.");
-                if (transfer.Preparation.RegenerateHome) { PlanetVisualPending = true; BuildPending = false; BuildStatus = ""; LastBuildResult = null; pendingCarry = CarryAction.None; pendingGrab = default; }
+                if (transfer.Preparation.RegenerateHome) { PlanetVisualPending = true; BuildPending = false; BuildStatus = ""; LastBuildResult = null; pendingCarry = CarryAction.None; pendingPropRotation = default; pendingCarryScroll = 0; pendingGrab = default; }
                 var prep = transfer.Preparation;
                 var baseline = message.State;
                 var commitWatch = Stopwatch.StartNew();

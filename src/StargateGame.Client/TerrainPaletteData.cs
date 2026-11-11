@@ -6,19 +6,19 @@ namespace StargateGame.Client;
 // CPU-only decoding. No graphics objects or mutable world state cross threads.
 sealed record TerrainPaletteData(string Preset, int Size, float[] Metres, float[] Gain, float[] Normal, float[] Height, float[] Relief, TerrainPaletteData.Level[] Levels)
 {
-    public float[] GrassCoverage { get; init; } = new float[8];
+    public float[] GrassCoverage { get; init; } = new float[11];
     public sealed record Level(int Layer, int Map, int Mip, int Side, byte[] Bytes, string? AssetKey = null);
     public static TerrainPaletteData Load(string root, string preset, int size, CancellationToken token, CookedAssets? assets = null, string? meadowMaterial = null)
     {
         using var json = assets?.Store?.HasCatalog == true
             ? JsonDocument.Parse(assets.Read("terrain/pbr/manifest.json"))
             : JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "manifest.json")));
-        var entries = json.RootElement.GetProperty("palettes").GetProperty(preset).EnumerateArray().ToArray();
-        float[] metres = new float[8], gain = new float[8], normal = new float[8], height = new float[8], relief = new float[8], grass = new float[8];
+        var entries = json.RootElement.GetProperty("palettes").GetProperty(preset).EnumerateArray().Concat(json.RootElement.GetProperty("paving").EnumerateArray()).ToArray();
+        float[] metres = new float[11], gain = new float[11], normal = new float[11], height = new float[11], relief = new float[11], grass = new float[11];
         List<Level> levels = [];
         int skip = 11 - (int)MathF.Log2(size);
         byte[] scratch = new byte[65536];
-        for (int layer = 0; layer < 8; layer++)
+        for (int layer = 0; layer < 11; layer++)
         {
             token.ThrowIfCancellationRequested();
             metres[layer] = entries[layer].GetProperty("metres").GetSingle();

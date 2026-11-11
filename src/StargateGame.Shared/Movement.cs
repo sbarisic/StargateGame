@@ -1,14 +1,15 @@
 using System.Numerics;
 namespace StargateGame.Shared;
 
-public readonly record struct PlayerInput(long Sequence, float Strafe, float Forward, float Yaw, float Pitch, bool Walk, bool Jump, long TargetTick = 0, bool SwimRise = false, bool SwimDive = false, CarryAction Carry = CarryAction.None, Guid GrabItem = default, bool Crouch = false)
+public readonly record struct PlayerInput(long Sequence, float Strafe, float Forward, float Yaw, float Pitch, bool Walk, bool Jump, long TargetTick = 0, bool SwimRise = false, bool SwimDive = false, CarryAction Carry = CarryAction.None, Guid GrabItem = default, bool Crouch = false, Vector2 PropRotation = default)
 {
     [System.Text.Json.Serialization.JsonIgnore]
-    public bool IsValid => Enum.IsDefined(Carry) && (Carry != CarryAction.Grab || GrabItem != Guid.Empty) && Sequence > 0 && float.IsFinite(Strafe) && float.IsFinite(Forward)
+    public bool IsValid => Enum.IsDefined(Carry) && (Carry is not (CarryAction.Grab or CarryAction.PhysicsGrab) || GrabItem != Guid.Empty) && Sequence > 0 && float.IsFinite(Strafe) && float.IsFinite(Forward)
         && MathF.Abs(Strafe) <= 1 && MathF.Abs(Forward) <= 1 && float.IsFinite(Yaw)
+        && float.IsFinite(PropRotation.X) && float.IsFinite(PropRotation.Y) && PropRotation.LengthSquared() <= 4
         && MathF.Abs(Yaw) <= MathF.PI * 2 && float.IsFinite(Pitch) && MathF.Abs(Pitch) <= 1.55f;
-    [System.Text.Json.Serialization.JsonIgnore] public PlayerInput Held => this with { Jump = false, Carry = CarryAction.None, GrabItem = default };
-    [System.Text.Json.Serialization.JsonIgnore] public PlayerInput Neutral => this with { Strafe = 0, Forward = 0, Walk = false, Crouch = false, Jump = false, SwimRise = false, SwimDive = false, Carry = CarryAction.None, GrabItem = default };
+    [System.Text.Json.Serialization.JsonIgnore] public PlayerInput Held => this with { Jump = false, Carry = CarryAction.None, GrabItem = default, PropRotation = default };
+    [System.Text.Json.Serialization.JsonIgnore] public PlayerInput Neutral => this with { Strafe = 0, Forward = 0, Walk = false, Crouch = false, Jump = false, SwimRise = false, SwimDive = false, Carry = CarryAction.None, GrabItem = default, PropRotation = default };
 }
 public readonly record struct PlayerState(int Id, string Name, Vector3 Position, Vector3 Velocity, float Yaw, float Pitch, bool Grounded, long LastInput,
     int SupportId = 0, Vector3 GroundNormal = default, Vector3 GroundVelocity = default, bool Swimming = false, float Submersion = 0, GroundSurface Surface = GroundSurface.Unknown, Vector3 ArrivalMomentum = default, bool TransitFrozen = false, bool ArrivalMomentumActive = false,
@@ -19,6 +20,7 @@ public sealed record PhysicsSnapshot(long Tick, long Epoch, PlayerState[] Player
 
 public static class Movement
 {
+    public const float PhysicsGunRange = 100, PhysicsGunMinDistance = .5f;
     public const float Dt = 1f / 60, Radius = .32f, Height = 1.8f, EyeHeight = 1.65f;
     public const float CrouchHeight = 1.15f, CrouchEyeHeight = 1;
     public const float RunSpeed = 5.4f, WalkSpeed = 2.7f, CrouchSpeed = 1.8f, JumpSpeed = 5.1f, Gravity = 18;
@@ -76,8 +78,8 @@ public static class Movement
 
 public enum CarryAction
 {
-    None, Grab, Drop, Throw
+    None, Grab, Drop, Throw, PhysicsGrab, PullCloser, PushFarther
 }
-public sealed record CarryState(int Player, int Body, Guid PersistentId, Vector3 GrabOffset, Quaternion RelativeRotation, int BlockedTicks = 0);
+public sealed record CarryState(int Player, int Body, Guid PersistentId, Vector3 GrabOffset, Quaternion RelativeRotation, int BlockedTicks = 0, bool PhysicsGun = false, float Distance = 1.5f);
 
 public sealed record PropEntrySupport(int Body, float Height);

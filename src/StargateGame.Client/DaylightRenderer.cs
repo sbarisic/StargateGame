@@ -298,7 +298,10 @@ sealed partial class SceneRenderer
                 CullMode = CullMode.None
             }))
             using (gpuTimer.Measure(pass))
+            {
                 DrawActors(pass, depthShader, shadows.GetDynamicCascade(index).CasterFrustum, snapshot, true);
+                DrawCables(pass, depthShader, shadows.GetDynamicCascade(index).CasterFrustum, true);
+            }
             shadows.CompleteDynamicCascade(index);
             ShadowUpdates++;
         }
@@ -343,6 +346,7 @@ sealed partial class SceneRenderer
             using (shadows.CurrentFrame.Bind(shader, 9))
             {
                 DrawStatic(pass, shader, frustum, false);
+                DrawCables(pass, shader, frustum, false);
                 using (gpuTimer.Measure(pass, "character"))
                     DrawActors(pass, shader, frustum, snapshot, false);
             }
@@ -430,6 +434,7 @@ sealed partial class SceneRenderer
             else if (DebugWorld is not null)
                 DrawCachedPhysics(pass, camera);
             DrawBuildPreview(pass);
+            DrawPhysicsGunBeam(pass, camera);
         }
         DrawDemolition(frame, camera);
         DrawViewmodel(frame, camera, snapshot, time);

@@ -17,6 +17,8 @@ sealed partial class GameApp
             return;
         if (!input.IsMouseButtonDown(MouseButton.Left))
             carryMouseGuard = false;
+        if (CableInput(input)) return;
+        if (PhysicsGunInput(input)) return;
         if (paused || bookOpen || buildMode || buildPaletteOpen || session.TransitLocked)
         {
             if (session.Carrying)

@@ -8,10 +8,7 @@ public static class SandboxStations
     public static WorldChanges Create(PlanetDefinition world)
     {
         // Reuse production building assemblies, including their functional doors and furnishings.
-        var layout = new SettlementLayout(SettlementSettings.Version, "village", "mega",
-            [new(1, new(25, 0, 25), "village", 1, 1)],
-            [new(1, 1, "settlement-mega-house-1", new(25, 0, 25), 0)], [], []);
-        var generated = GeneratedBuildings.Create(world with { Settlements = layout });
+        var generated = GeneratedBuildings.Create(world);
         var structures = generated.Structures.ToList(); var pieces = generated.Pieces.ToList();
         void Piece(string name, Vector3 origin, PieceKind kind, string prefab = "")
         {

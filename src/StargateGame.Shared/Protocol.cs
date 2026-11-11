@@ -7,6 +7,9 @@ namespace StargateGame.Shared;
 
 public sealed record Message
 {
+    public CableCommand? CableCommand { get; init; }
+    public CableSnapshot? Cables { get; init; }
+    public CableReply? CableReply { get; init; }
     public WeaponRequest? WeaponCommand { get; init; }
     public WeaponResult? Weapons { get; init; }
     public bool RegenerateHome { get; init; }
@@ -269,7 +272,7 @@ public sealed record Message
 
 public static class Protocol
 {
-    public const int Version = 25, MaxFrameBytes = 65536;
+    public const int Version = 31, MaxFrameBytes = 65536;
     public static readonly JsonSerializerOptions Json = new() { IncludeFields = true, MaxDepth = 16 };
     public static async Task WriteAsync(Stream stream, Message message, CancellationToken token = default)
     {

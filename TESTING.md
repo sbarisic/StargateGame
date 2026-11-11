@@ -217,3 +217,139 @@ move aim between an assembly's children, open the picker or pause during a hold,
 and keep the button down after completion/rejection. Verify one request per hold,
 visible mesh tint/outline without flicker, dependency/generated-building errors,
 window resizing and saved/reloaded results.
+
+## Sandbox medium village
+
+Sandbox (gate-pair fixture revision 9) creates twelve furnished mega-kit houses
+east of the gate using four variants, staggered positions and 0/30/330 degree
+rotations. The original interior house/bookmark stays at (25, 0, 25). Two gently curved through-lanes and two short dead-end spurs connect to a winding
+approach. Eight houses have curved door paths; four keep grass approaches to
+avoid a dense street grid. Paths begin at the rotated door threshold.
+All widths are 70% of revision 8: approach 2.8 m, lanes 2.45 m, door paths 1.12 m.
+Road shoulders and fixture grass clearance are reduced proportionally. Curves
+are sampled into shared road segments for consistent paving and grass masks.
+House spacing leaves room for rotated roofs, paths and door swings. Gates,
+equipment, stairs and water remain separate; forest crowns are cleared nearby.
+Road masks follow the full lane/path network and explicitly suppress grass.
+
+The three supplied `assets_itch/textures/paving_floor_*` sets are imported by
+`python tools/import_paving_materials.py`, also invoked by the main terrain PBR
+importer. Terrain palettes contain eight biome layers plus three paving layers.
+Paved roads use these dedicated layers, including normal maps, AO, roughness,
+height relief and self-shadowing. Paving repeats every two metres and changes
+pattern between village street bands. GPU memory reporting includes all layers;
+the existing asynchronous mip upload and cooked-asset pipeline handles paving.
+The local source credits and file hashes are recorded in the terrain manifest.
+
+The fixture definition carries the layout, and SandboxStations uses it for
+buildings, functional doors, furnishings and interior resets. Restart/reset
+Sandbox with matching client/server builds to generate revision 9. No builds,
+tests or playtests were run; material generation is part of implementation.
+
+## Sandbox hold-Q spawn menu
+
+Hold Q in live Sandbox to open the prop picker and release the cursor. Select the
+rendered Box or Barrel thumbnail, then click a visible world surface outside the
+panel. Release Q to close and resume mouse-look. Escape closes until Q is released.
+The menu suppresses movement, firing, building and pickup input while open and is
+unavailable during pause, travel or other modal panels. Spawn requests use the
+rendered camera's cursor ray; the server repeats the ray against live collision
+within 40 m, checks camera proximity/visibility and free prop volume, and inserts
+an upright dynamic prop through the existing replicated registry. Existing limits
+of five requests per second and 64 live props apply. Failures appear in the menu.
+
+Generate the two thumbnails with Blender background
+`tools/assemble_building_prefabs.py -- --spawn-icons --refresh-icons`.
+Both PNGs were generated from the actual prop meshes and materials. The new
+`spawn-prop` build action requires matching protocol-26 client/server builds.
+No builds, tests or playtests were run.
+
+
+### Sandbox physics gun and Q-menu clicks
+
+Hold Q and click the rendered Box or Barrel thumbnail to spawn immediately at
+the last cursor position over the world (initially the crosshair). Clicking the
+world while Q is held spawns another selected prop. A nearby surface is required.
+
+Press G in Sandbox to switch between the rifle and the supplied Chrome ray gun.
+Hold left mouse to grab a dynamic prop within 100 metres; aim to move it, use the
+wheel to change distance, and E + mouse movement to rotate it (holding the camera still). Release left mouse or press
+right mouse to drop it. The hold uses a strong critically damped force controller and collision sweeps. Fast movement or obstruction does not time out a physics-gun hold. Buildings,
+terrain, stargates, and other fixed geometry cannot be grabbed. Opening Q or a
+modal screen releases the prop.
+
+Client and server must both use protocol 28. Generate the raygun assets with
+`blender --background --python tools/import_physics_gun.py`, then publish the
+asset overlay or cook the release pack. The model is Scenario's Chrome ray gun,
+CC-BY-4.0; full attribution is retained in
+`assets/models/physics-gun-provenance.json` from the supplied package credits.
+
+Implementation did not run builds, tests, profiling, or playtests. Manually check
+thumbnail spawning, grabbing/dropping, distance and rotation, static-object
+rejection, and collision against walls before accepting the feature.
+
+Physics-gun grabs explicitly resume completed-transit props and wake them immediately.
+Wheel input accumulates between simulation ticks in both directions; hold distance
+can decrease to 0.5 m (physical player/world collision still applies). Check inward
+and outward scrolling after grabbing a resting prop and a prop that crossed a gate.
+
+
+### Sandbox cables
+
+Hold Q, select the rendered Cable tool, then release Q. Left-click two surfaces
+to place a cable. While choosing the second point, the wheel adjusts extra slack
+in 5% increments (0–100%, initially 15%). Right-click cancels an unfinished cable
+or removes the highlighted cable; Escape exits. The Q panel selects black, blue,
+red, yellow, or green rubber, and 1, 2, or 4 cm diameter (default black, 2 cm).
+Click within 20 m; endpoint separation is limited to 100 m, with 256 cables per
+location. Surface markers and the hanging preview use the current selections.
+
+Endpoints on props and doors follow their rendered transforms. The client-only
+30 Hz rope solver uses gravity, damping, length constraints, and raycast contacts
+against static and dynamic collision geometry. Tubes have capped ends, smooth
+normals, distance-dependent radial detail, and dynamic shadows. Cables apply no
+forces and cannot block players or props. Pulling endpoints apart stretches the
+cable without breaking it; the placed rest length is retained. Approximate
+raycasts can miss thin geometry or fast motion. Simulation pauses beyond 150 m
+and uses a shared 4,096-query frame budget with round-robin scheduling.
+
+Cable messages, revision snapshots, and SQLite writes are separate from building
+edits: placing/removing cables does not rebuild collision, change physics epochs,
+or reset player prediction. Protocol 29 and save schema 10 require matching
+client/server builds. Persistent worlds store cables in their universe database;
+Sandbox's otherwise ephemeral fixture stores cable rows in
+`%LOCALAPPDATA%/StargateGame/Server/saves/sandbox-cables/cables.sqlite`, keyed by
+fixture location. Attachments whose owners no longer exist are removed; cables
+do not resurrect spawned props or user buildings when the fixture itself resets.
+There are no device ports, electricity, signals, or logical connections.
+
+Generate the icon with Blender running `tools/render_cable_icon.py`, then publish
+the development asset overlay. The icon and overlay were generated during
+implementation; no builds, tests, profiling runs, or playtests were run.
+
+Manual acceptance: exercise placement/cancel/removal and styles; move/rotate
+attached props and open doors; inspect floor/corner/crate draping, stretching,
+shadows, and distance transitions; reconnect and join with a second client;
+reload, demolish owners, unload chunks, and transport props through gates.
+Keep walking during edits and compare performance with many cables.
+
+Cable rendering now rounds solver corners with a subdivided quadratic curve and
+uses 12-sided near tubes (6 at distance). Picking and shadows use the smoothed
+shape. Default diameter is 5 cm; the menu offers 2, 5, and 10 cm. Saved cables
+from the initial thin style are upgraded once to 5 cm on location load.
+Requires matching protocol-30 builds. No builds or playtests run for this change.
+
+While the Cable tool is equipped, middle-click cycles diameter through 2, 5, 8,
+11, and 14 cm, then back to 2 cm. Default remains 5 cm. The HUD displays the
+current size; the placement preview updates immediately, including between
+endpoint clicks. The Q-menu size buttons use the same list. Existing placed
+cables retain their sizes. Requires matching protocol-31 builds. Builds and
+playtests remain deferred to the developer.
+
+Cable end rings now sit flush on their attachment surface, with their end-face
+planes parallel to that surface. Short normal-aligned exit sections blend into
+the smoothed hanging curve. Both ends use the owner's current presented normal,
+including rotating props and opening doors; preview, picking, and shadows use
+the same mesh. Check side/top/angled attachments and short cables at each diameter.
+This is a renderer change; no protocol or saved-cable changes are required.
+Builds and playtests remain deferred.

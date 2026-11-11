@@ -192,7 +192,8 @@ sealed partial class SceneRenderer
     void DrawViewmodel(RenderFrame frame, Camera camera, SceneFrame snapshot, float time)
     {
         viewmodelDrawn = false;
-        if (InspectionCamera) return;
+        if (InspectionCamera || CableToolEquipped) return;
+        if (PhysicsGunEquipped && !HideWeapon) { DrawPhysicsGun(frame, camera); return; }
         if (rifle is null || HideWeapon)
             return;
         var state = CharacterStates.GetValueOrDefault(snapshot.Local.Id) ?? new(snapshot.Local.Id, 0, true, false, "idle", 0);
@@ -220,24 +221,7 @@ sealed partial class SceneRenderer
             aimBlend = clip == "aim" ? 1 : 0;
         }
         rifle.Sample(clip, age, riflePose, loop);
-        if (viewmodelTarget?.Width != waterTarget!.Width || viewmodelTarget.Height != waterTarget.Height)
-        {
-            viewmodelTarget?.Dispose();
-            viewmodelTarget = null;
-            viewmodelMultisampleTarget?.Dispose();
-            viewmodelMultisampleTarget = null;
-            bool multisample = graphics.Capabilities.MaximumSamples >= 4;
-            if (!multisample && !viewmodelMsaaFallbackLogged)
-            {
-                viewmodelMsaaFallbackLogged = true;
-                Console.WriteLine($"Viewmodel 4x MSAA unavailable (sample limit {graphics.Capabilities.MaximumSamples}); using single-sample rendering.");
-            }
-            if (multisample)
-                viewmodelMultisampleTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height,
-                    [TextureFormat.RGBA16Float], TextureFormat.Depth32Float, sampleCount: 4));
-            viewmodelTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height,
-                [TextureFormat.RGBA16Float], multisample ? null : TextureFormat.Depth32Float));
-        }
+        PrepareViewmodelTarget();
         var viewCamera = new Camera { Position = camera.Position };
         viewCamera.LookAt(camera.Position + camera.WorldForwardNormal);
         float vertical = (60 - 15 * aimBlend) * MathF.PI / 180;
@@ -276,6 +260,33 @@ sealed partial class SceneRenderer
             shader.SetUniform("uHandInspection", 0);
             shader.SetUniform("uShadowComponents", 0);
         }
+        CompositeViewmodel(frame, camera);
+    }
+
+    void PrepareViewmodelTarget()
+    {
+        if (viewmodelTarget?.Width != waterTarget!.Width || viewmodelTarget.Height != waterTarget.Height)
+        {
+            viewmodelTarget?.Dispose();
+            viewmodelTarget = null;
+            viewmodelMultisampleTarget?.Dispose();
+            viewmodelMultisampleTarget = null;
+            bool multisample = graphics.Capabilities.MaximumSamples >= 4;
+            if (!multisample && !viewmodelMsaaFallbackLogged)
+            {
+                viewmodelMsaaFallbackLogged = true;
+                Console.WriteLine($"Viewmodel 4x MSAA unavailable (sample limit {graphics.Capabilities.MaximumSamples}); using single-sample rendering.");
+            }
+            if (multisample)
+                viewmodelMultisampleTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height,
+                    [TextureFormat.RGBA16Float], TextureFormat.Depth32Float, sampleCount: 4));
+            viewmodelTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height,
+                [TextureFormat.RGBA16Float], multisample ? null : TextureFormat.Depth32Float));
+        }
+    }
+
+    void CompositeViewmodel(RenderFrame frame, Camera camera)
+    {
         // Resolve only after the draw pass ends. RGB and alpha both contain
         // sample coverage, so composition must not multiply RGB by alpha again.
         if (viewmodelMultisampleTarget is not null)

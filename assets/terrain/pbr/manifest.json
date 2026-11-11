@@ -773,6 +773,63 @@
       "sha256": "40c7b48014cdfa57e483dc813a6117c2e894d4e32c40f38a4e9e01097c095ef8",
       "parallaxDepthMetres": 0.035,
       "grassCoverage": 0
+    },
+    "paving_floor_1": {
+      "file": "paving_floor_1.tpb.gz",
+      "sha256": "d315bd5b7c936f59623de752224f73594e6a111ed5f37b581043cec313e52cd3",
+      "normalConvention": "DirectX",
+      "normalStrength": 1.0,
+      "heightBlendStrength": 0.1,
+      "parallaxDepthMetres": 0.025,
+      "grassCoverage": 0.0,
+      "albedoGain": 1.0,
+      "tool": "tools/import_paving_materials.py",
+      "source": {
+        "assets_itch\\textures\\paving_floor_1\\assets\\materials\\floorPattern01\\floor_pattern_01_baseColor.jpg": "15700351c0e0d7bc7b1439382397b308cc8a017b42206ac214f9e9d6fb56bc3b",
+        "assets_itch\\textures\\paving_floor_1\\assets\\materials\\floorPattern01\\floor_pattern_01_normal.jpg": "5e49e3a70a53e9dd3ffdf12ecea67ef0364d5171529896c91c52c955567667f2",
+        "assets_itch\\textures\\paving_floor_1\\assets\\materials\\floorPattern01\\floor_pattern_01_ao.jpg": "e5d82d9f997edb6e1ae65270dd607c08e8bd3d2e7b6ffe873062d793bf59d20a",
+        "assets_itch\\textures\\paving_floor_1\\assets\\materials\\floorPattern01\\floor_pattern_01_roughness.jpg": "9888c63a78ce39d42f4afc50d8e0d22e9604c83195d6f8a1d1309167b0ebcd55",
+        "assets_itch\\textures\\paving_floor_1\\assets\\materials\\floorPattern01\\floor_pattern_01_displacement.jpg": "d8865944d937d3cc64c40ef3a919604a9cca6da154a0ef7b74a11a415ac65ed6"
+      },
+      "credits": "# Credits\n\n- \"Floor Pattern 01\" by Rob Tuytel (Poly Haven, https://polyhaven.com/a/floor_pattern_01), licensed CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Changed by Patch: 1K JPEG maps selected, credit added to each file.\n\nLicense: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Its full text is in LICENSES/.\nFrom Poly Haven: https://polyhaven.com/a/floor_pattern_01\n"
+    },
+    "paving_floor_2": {
+      "file": "paving_floor_2.tpb.gz",
+      "sha256": "060ffc6c56a57c91d9d566d17e30362424fb83f39d507d0840d3c0f95064326b",
+      "normalConvention": "DirectX",
+      "normalStrength": 1.0,
+      "heightBlendStrength": 0.1,
+      "parallaxDepthMetres": 0.025,
+      "grassCoverage": 0.0,
+      "albedoGain": 1.0,
+      "tool": "tools/import_paving_materials.py",
+      "source": {
+        "assets_itch\\textures\\paving_floor_2\\assets\\materials\\cobblestoneLarge01\\cobblestone_large_01_baseColor.jpg": "2c2e7a1234927c44d428e5039ca9aa5026594319c0fe363623a6cfbac1eeb052",
+        "assets_itch\\textures\\paving_floor_2\\assets\\materials\\cobblestoneLarge01\\cobblestone_large_01_normal.jpg": "8466f8b7c6e8b380bfaa799381a40179d1678b1e7d12e93c3ab1da6d487a01ef",
+        "assets_itch\\textures\\paving_floor_2\\assets\\materials\\cobblestoneLarge01\\cobblestone_large_01_ao.jpg": "ab885c75d0149a5c0522887142c88cdfd4ca96811dc6661a09246de634482d47",
+        "assets_itch\\textures\\paving_floor_2\\assets\\materials\\cobblestoneLarge01\\cobblestone_large_01_roughness.jpg": "98914de82468ccc9252acd5d97fb48d4a50acf251f3923a88f58f07a228bf85b",
+        "assets_itch\\textures\\paving_floor_2\\assets\\materials\\cobblestoneLarge01\\cobblestone_large_01_displacement.jpg": "ce7419b680a988aa52ee109285383009cafb283a1a254b5b66e61a1966ef6bc0"
+      },
+      "credits": "# Credits\n\n- \"Cobblestone Large 01\" by Rob Tuytel (Poly Haven, https://polyhaven.com/a/cobblestone_large_01), licensed CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Changed by Patch: 1K JPEG maps selected, credit added to each file.\n\nLicense: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Its full text is in LICENSES/.\nFrom Poly Haven: https://polyhaven.com/a/cobblestone_large_01\n"
+    },
+    "paving_floor_3": {
+      "file": "paving_floor_3.tpb.gz",
+      "sha256": "548215768be44592d0b82746a84612b2eb6f8defc47c5b91f5c2bd3e11345d05",
+      "normalConvention": "DirectX",
+      "normalStrength": 1.0,
+      "heightBlendStrength": 0.1,
+      "parallaxDepthMetres": 0.025,
+      "grassCoverage": 0.0,
+      "albedoGain": 1.0,
+      "tool": "tools/import_paving_materials.py",
+      "source": {
+        "assets_itch\\textures\\paving_floor_3\\assets\\materials\\pavingStones054\\pavingstones054_baseColor.jpg": "2730ee826148adf4dd0517bf7139b9401bf104207c3be48b8886f379048fe68f",
+        "assets_itch\\textures\\paving_floor_3\\assets\\materials\\pavingStones054\\pavingstones054_normal.jpg": "5c08c294f7f8d23ebedc1c610fee89abf5975565c0d0ae4d4c81b4f56f581ee1",
+        "assets_itch\\textures\\paving_floor_3\\assets\\materials\\pavingStones054\\pavingstones054_ao.jpg": "138e1e9f38250313d76f8fb34788d04a50219532645a13443f6b98257403e6c8",
+        "assets_itch\\textures\\paving_floor_3\\assets\\materials\\pavingStones054\\pavingstones054_roughness.jpg": "4addfc9d1241e39eb696c5ccb8c1802d09ae08361aaccd4fe3e16895de8ec83e",
+        "assets_itch\\textures\\paving_floor_3\\assets\\materials\\pavingStones054\\pavingstones054_displacement.jpg": "9d1d363087e00410554fe03c4c7a15234b577dc760b3c866ef368dfa91ef5095"
+      },
+      "credits": "# Credits\n\n- \"Paving Stones 054\" by ambientCG (ambientCG, https://ambientcg.com/a/PavingStones054), licensed CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Changed by Patch: 1K JPEG maps selected from the zip, credit added to each file.\n\nLicense: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/). Its full text is in LICENSES/.\nFrom ambientCG: https://ambientcg.com/a/PavingStones054\n"
     }
   },
   "palettes": {
@@ -902,5 +959,22 @@
         "role": "wet-bank"
       }
     ]
-  }
+  },
+  "paving": [
+    {
+      "role": "paving",
+      "material": "paving_floor_1",
+      "metres": 2.0
+    },
+    {
+      "role": "paving",
+      "material": "paving_floor_2",
+      "metres": 2.0
+    },
+    {
+      "role": "paving",
+      "material": "paving_floor_3",
+      "metres": 2.0
+    }
+  ]
 }

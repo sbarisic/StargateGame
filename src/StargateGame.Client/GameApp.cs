@@ -101,6 +101,13 @@ sealed partial class GameApp
                 bookScroll = Math.Max(0, bookScroll + (e.Offset.Y > 0 ? -1 : 1));
                 return;
             }
+            if(cableTool&&!spawnMenuOpen&&!paused){cableSlack=Math.Clamp(cableSlack+Math.Sign(e.Offset.Y)*.05f,0,1);return;}
+            if (physicsGunEquipped && !spawnMenuOpen && !paused && session?.Carrying==true)
+            {
+                session.ScrollCarriedProp(e.Offset.Y);
+                return;
+            }
+            if (spawnMenuOpen) return;
             if (buildPaletteOpen)
             {
                 palettePage = Math.Clamp(palettePage + (e.Offset.Y > 0 ? -1 : 1), 0, (BuildPaletteItemCount - 1) / Layout.PageSize);
@@ -129,7 +136,7 @@ sealed partial class GameApp
         // FishGfx reports previous - current; our look angles use current - previous.
         window.MouseDelta += (_, e) =>
         {
-            if (session is not null && !paused && !buildPaletteOpen && !Smoke)
+            if (session is not null && !paused && !buildPaletteOpen && !spawnMenuOpen && !Smoke)
                 mouseDelta -= e.Delta;
         };
         window.TextInput += (_, e) =>
@@ -233,12 +240,18 @@ sealed partial class GameApp
                         }
                         if (session.TransitLocked)
                             mouseDelta = Vector2.Zero;
-                        yaw = MathF.IEEERemainder(yaw + mouseDelta.X * .0025f, MathF.Tau);
-                        pitch = Math.Clamp(pitch - mouseDelta.Y * .0025f, -1.5f, 1.5f);
+                        if (physicsGunEquipped && input.IsKeyDown(Key.E) && session.Carrying &&
+                            !paused && !bookOpen && !inventoryOpen && !planetPanel && !spawnMenuOpen && !uiInputConsumed && !session.TransitLocked)
+                            session.RotateProp(mouseDelta * .005f);
+                        else
+                        {
+                            yaw = MathF.IEEERemainder(yaw + mouseDelta.X * .0025f, MathF.Tau);
+                            pitch = Math.Clamp(pitch - mouseDelta.Y * .0025f, -1.5f, 1.5f);
+                        }
                         // The synchronized prediction clock schedules fixed steps;
                         // sample input every rendered frame instead of quantizing twice.
-                        float forward = paused || session.PlanetVisualPending || buildPaletteOpen || uiInputConsumed ? 0 : (input.IsKeyDown(Key.W) ? 1 : 0) - (input.IsKeyDown(Key.S) ? 1 : 0);
-                        float strafe = paused || session.PlanetVisualPending || buildPaletteOpen || uiInputConsumed ? 0 : (input.IsKeyDown(Key.D) ? 1 : 0) - (input.IsKeyDown(Key.A) ? 1 : 0);
+                        float forward = paused || session.PlanetVisualPending || buildPaletteOpen || spawnMenuOpen || uiInputConsumed ? 0 : (input.IsKeyDown(Key.W) ? 1 : 0) - (input.IsKeyDown(Key.S) ? 1 : 0);
+                        float strafe = paused || session.PlanetVisualPending || buildPaletteOpen || spawnMenuOpen || uiInputConsumed ? 0 : (input.IsKeyDown(Key.D) ? 1 : 0) - (input.IsKeyDown(Key.A) ? 1 : 0);
                         if (Smoke && now - connectedAt < 1.5)
                             forward = .5f;
                         if ((testMovementReview || Smoke && args.Contains("--movement-check")))
@@ -268,7 +281,7 @@ sealed partial class GameApp
                         }
                         if (TestAutomated && !testMovementReview) { strafe = forward = 0; }
                         if (testMoveUntil > now) { strafe = testStrafe; forward = testForward; jumpQueued |= testJump; testJump = false; }
-                        session.Step(strafe, forward, yaw, pitch, (testMoveUntil > now && testWalk) || !TestAutomated && !paused && !session.PlanetVisualPending && !buildPaletteOpen && input.IsKeyDown(Key.LeftShift), jumpQueued && !paused && !buildPaletteOpen && !uiInputConsumed, !paused && !buildPaletteOpen && !uiInputConsumed && input.IsKeyDown(Key.Space), (testMoveUntil > now && testCrouch) || !TestAutomated && !paused && !buildPaletteOpen && !uiInputConsumed && input.IsKeyDown(Key.LeftControl), (testMoveUntil > now && testCrouch) || !TestAutomated && !paused && !buildPaletteOpen && !uiInputConsumed && input.IsKeyDown(Key.LeftControl));
+                        session.Step(strafe, forward, yaw, pitch, (testMoveUntil > now && testWalk) || !TestAutomated && !paused && !session.PlanetVisualPending && !buildPaletteOpen && !spawnMenuOpen && input.IsKeyDown(Key.LeftShift), jumpQueued && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed, !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.Space), (testMoveUntil > now && testCrouch) || !TestAutomated && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.LeftControl), (testMoveUntil > now && testCrouch) || !TestAutomated && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.LeftControl));
                         jumpQueued = false;
                         if (!bookInputConsumed && !uiInputConsumed && !uiMouseGuard && !session.TransitLocked)
                             BuildingInput(input);
@@ -389,6 +402,8 @@ sealed partial class GameApp
         scene?.ClearPlanet();
         buildMode = false;
         buildPaletteOpen = false;
+        spawnMenuOpen = false;
+        physicsGunEquipped = false; cableTool=false; cableStart=null; cablePreview=null;
         paletteMouseGuard = false;
         previewCommand = null;
         previewEdit = null;
@@ -409,6 +424,7 @@ sealed partial class GameApp
         CancelDemolition();
         scene?.Demolition(null, [], false);
         if (!value) exposureMenu = false;
+        if (value && spawnMenuOpen) SetSpawnMenu(false);
         if (value && buildPaletteOpen)
             SetBuildPalette(false);
         if (!value && audioSettingsDirty)
@@ -427,6 +443,14 @@ sealed partial class GameApp
     {
         bookInputConsumed = false;
         uiInputConsumed = session?.PlanetVisualPending == true;
+        if(!paused&&!bookOpen&&!inventoryOpen&&!planetPanel&&!spawnMenuOpen&&input.WasKeyPressed(Key.G))TogglePhysicsGun();
+        if(physicsGunEquipped && (paused||bookOpen||inventoryOpen||planetPanel||session?.TransitLocked==true))
+        {
+            if(session?.Carrying==true)session.Carry(CarryAction.Drop);
+            if(scene is not null)scene.PhysicsGunBeam=null;
+        }
+        if (SpawnMenuInput(input)) return;
+        if(cableTool && input.WasKeyPressed(Key.Escape)){ExitCable();uiInputConsumed=true;return;}
         if (TestingInput(input)) return;
         if (!input.IsMouseButtonDown(MouseButton.Left) && !input.IsMouseButtonDown(MouseButton.Right))
             uiMouseGuard = false;
@@ -790,6 +814,9 @@ sealed partial class GameApp
                 debugPhysics = true;
             if (args.Contains("--debug-collision"))
                 debugCollision = true;
+            scene.CableToolEquipped=cableTool;
+            scene.UpdateCableMarkers(session.Physics, presented!.Value.Bodies, cableTool&&!spawnMenuOpen&&!paused ? cableStart : null, cableTool&&!spawnMenuOpen&&!paused ? cableHover : null);
+            scene.UpdateCables(session.Physics, session.Cables, presented!.Value.Bodies, camera, now, cablePreview);
             scene.SetGraphics(graphicsSettings);
             scene.ShadowsEnabled = !args.Contains("--no-shadows");
             var snapshot = new SceneRenderer.SceneFrame(remotes, presented!.Value.Bodies, presented.Value.Player with
@@ -909,7 +936,9 @@ sealed partial class GameApp
                     if (debugCollision)
                         Text(pass, 24, UiHeight - 78, session.Physics.DebugGeometryIncomplete ? "Collision overlay: preparing nearby geometry" : "Collision overlay: ready", 14);
 
-                    if (bookOpen)
+                    if (spawnMenuOpen)
+                        DrawSpawnMenu(pass);
+                    else if (bookOpen)
                         DrawBook(pass);
                     else if (buildPaletteOpen)
                         DrawBuildingPalette(pass);
