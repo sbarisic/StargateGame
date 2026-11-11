@@ -55,7 +55,7 @@ sealed partial class SceneRenderer
     // and unrelated building jobs must not extend the arrival transition.
     public bool ArrivalRegionReady(Vector3 position) => ChunkCoordinate.At(position.X, position.Z).Around(1)
         .Where(c => c.Valid).All(c => resident.TryGetValue(c, out var mesh) && !mesh.Far);
-    public long ApproximateGpuBytes => TerrainMaterialBytes + FoliageBytes + DustBytes + WeatherParticleBytes + GrassBytes + ModelGpuBytes + resident.Values.Sum(r => (long)r.Vertices * 36);
+    public long ApproximateGpuBytes => demolitionMeshBytes + buildingBaseBytes + TerrainMaterialBytes + FoliageBytes + DustBytes + WeatherParticleBytes + GrassBytes + ModelGpuBytes + resident.Values.Sum(r => (long)r.Vertices * 36);
     public double LastUploadMilliseconds
     {
         get;

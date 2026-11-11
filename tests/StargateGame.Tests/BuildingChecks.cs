@@ -325,7 +325,15 @@ static class BuildingChecks
             await Pump(60, Math.Clamp(delta.X, -1, 1), Math.Clamp(-delta.Z, -1, 1));
         }
         await Pump(400);
-        var toggle = await Submit(new(Guid.NewGuid(), 0, "door", Target: door.Id));
+        Vector3 DoorHit()
+        {
+            var mesh = BuildingGeometry.Mesh(first.Changes, first.Changes.Pieces.Single(p=>p.Id==door.Id));
+            var bounds = BuildingGeometry.Bounds(mesh);
+            var eye = Movement.EyePosition(first.Local);
+            var direction = Vector3.Normalize((bounds.Min+bounds.Max)/2-eye);
+            return eye + direction * (BuildingGeometry.Ray(eye,direction,mesh,8) ?? throw new InvalidOperationException("Door is not in reach."));
+        }
+        var toggle = await Submit(new(Guid.NewGuid(), 0, "door", Target: door.Id, HitPoint: DoorHit()));
         Verify.Check(toggle.Success && first.Changes.Pieces.Single(p => p.Id == door.Id).Open, "server opens door with sweep clearance: " + toggle.Reason);
         var blocked = await Submit(new(Guid.NewGuid(), 0, "remove", Target: foundationId));
         Verify.Check(!blocked.Success && blocked.Dependents?.Length > 0, "server rejects demolition with dependent walls/doors");

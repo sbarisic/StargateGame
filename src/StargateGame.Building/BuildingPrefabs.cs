@@ -6,7 +6,7 @@ using StargateGame.Shared;
 namespace StargateGame.Building;
 
 public sealed record PrefabChild(string Prefab, float[] Offset, int Rotation = 0);
-public sealed record BuildingPrefab(string Id, string Title, string Group, string Role, float Width, float Depth, float Height, bool Ground, float[] Min, float[] Max, float[][][] Triangles, PrefabChild[]? Children = null, bool Selectable = true)
+public sealed record BuildingPrefab(string Id, string Title, string Group, string Role, float Width, float Depth, float Height, bool Ground, float[] Min, float[] Max, float[][][] Triangles, PrefabChild[]? Children = null, bool Selectable = true, float[][][]? BaseCourses = null, float[][][]? DoorSections = null, float[][]? DoorSeat = null, float[]? DoorPivot = null)
 {
     readonly Lazy<float[][][]> triangles = new(() => Triangles.Length == 0 ? BuildingPrefabs.LoadTriangles(Id) : Triangles);
     public float[][][] Triangles => triangles.Value;
@@ -60,7 +60,7 @@ public static class BuildingPrefabs
     public static string Hash
     {
         get;
-    } = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(data.Concat(generatedData).Concat(furnishingData).Concat(System.Text.Encoding.UTF8.GetBytes(FurnishingCatalog.Hash)).ToArray()));
+    } = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(data.Concat(generatedData).Concat(furnishingData).Concat(System.Text.Encoding.UTF8.GetBytes(FurnishingCatalog.Hash + ":foundation-footprints-player-stair-ramps-placement-volumes-v2-door-sections-targeting-removal-v1")).ToArray()));
     public static IReadOnlyList<BuildingPrefab> All
     {
         get;
@@ -94,8 +94,12 @@ public static class BuildingPrefabs
     public static BuildingPrefab Get(string id) => byId.TryGetValue(id, out var p) ? p : throw new ArgumentException("Unknown building prefab.");
     public static bool Known(string id) => id is not null && byId.ContainsKey(id);
     public static bool IsDoor(BuildingPiece p) => p.Kind == PieceKind.Door || p.Kind == PieceKind.Prefab && Get(p.Prefab).Role == "door";
-    public static Matrix4x4 Transform(StructureRecord s, BuildingPiece p) =>
-        Matrix4x4.CreateRotationY((p.Open && IsDoor(p) ? MathF.PI / 2 : 0) - p.Rotation * MathF.PI / 6) * Matrix4x4.CreateTranslation(p.Offset) * BuildingGeometry.Transform(s);
+    public static Matrix4x4 Transform(StructureRecord s, BuildingPiece p)
+    {
+        var pivot=p.Kind==PieceKind.Prefab && IsDoor(p) && Get(p.Prefab).DoorPivot is { } point ? V(point) : Vector3.Zero;
+        var swing=p.Open && IsDoor(p) ? Matrix4x4.CreateTranslation(-pivot)*Matrix4x4.CreateRotationY(MathF.PI/2)*Matrix4x4.CreateTranslation(pivot) : Matrix4x4.Identity;
+        return swing*Matrix4x4.CreateRotationY(-p.Rotation*MathF.PI/6)*Matrix4x4.CreateTranslation(p.Offset)*BuildingGeometry.Transform(s);
+    }
     public static BuildTriangle[] Mesh(StructureRecord s, BuildingPiece p)
     {
         var m = Transform(s, p);

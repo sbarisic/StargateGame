@@ -45,6 +45,11 @@ sealed partial class SceneRenderer
         set;
     }
     RenderTarget? viewmodelTarget;
+    RenderTarget? viewmodelMultisampleTarget;
+    static bool viewmodelMsaaFallbackLogged;
+    long ViewmodelTargetBytes =>
+        (long)(viewmodelTarget?.Width ?? 0) * (viewmodelTarget?.Height ?? 0) * (viewmodelMultisampleTarget is null ? 12 : 8)
+        + (long)(viewmodelMultisampleTarget?.Width ?? 0) * (viewmodelMultisampleTarget?.Height ?? 0) * 12 * (viewmodelMultisampleTarget?.SampleCount ?? 0);
     RenderTarget? viewmodelShadow;
     Matrix4x4 viewmodelShadowMatrix;
     ShaderProgram? viewmodelComposite;
@@ -218,7 +223,20 @@ sealed partial class SceneRenderer
         if (viewmodelTarget?.Width != waterTarget!.Width || viewmodelTarget.Height != waterTarget.Height)
         {
             viewmodelTarget?.Dispose();
-            viewmodelTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height, [TextureFormat.RGBA16Float], TextureFormat.Depth32Float));
+            viewmodelTarget = null;
+            viewmodelMultisampleTarget?.Dispose();
+            viewmodelMultisampleTarget = null;
+            bool multisample = graphics.Capabilities.MaximumSamples >= 4;
+            if (!multisample && !viewmodelMsaaFallbackLogged)
+            {
+                viewmodelMsaaFallbackLogged = true;
+                Console.WriteLine($"Viewmodel 4x MSAA unavailable (sample limit {graphics.Capabilities.MaximumSamples}); using single-sample rendering.");
+            }
+            if (multisample)
+                viewmodelMultisampleTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height,
+                    [TextureFormat.RGBA16Float], TextureFormat.Depth32Float, sampleCount: 4));
+            viewmodelTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height,
+                [TextureFormat.RGBA16Float], multisample ? null : TextureFormat.Depth32Float));
         }
         var viewCamera = new Camera { Position = camera.Position };
         viewCamera.LookAt(camera.Position + camera.WorldForwardNormal);
@@ -230,7 +248,7 @@ sealed partial class SceneRenderer
         var transform = Matrix4x4.CreateTranslation(0, bob - (LowerWeapon ? .22f : 0), 0) * cameraWorld;
         if (ShadowsEnabled && !HandShadowBaseline)
             DrawViewmodelShadow(frame, camera, snapshot, transform);
-        using (var pass = frame.BeginPass(viewmodelTarget, new RenderPassDescriptor { View = new(viewCamera), State = OpaqueState, ColorLoadAction = RenderLoadAction.Clear, ClearColor = new Color(0, 0, 0, 0), DepthLoadAction = RenderLoadAction.Clear }))
+        using (var pass = frame.BeginPass(viewmodelMultisampleTarget ?? viewmodelTarget, new RenderPassDescriptor { View = new(viewCamera), State = OpaqueState, ColorLoadAction = RenderLoadAction.Clear, ClearColor = new Color(0, 0, 0, 0), DepthLoadAction = RenderLoadAction.Clear }))
         using (gpuTimer.Measure(pass, "character"))
         using (pass.PushModel(transform))
         using (shadows.CurrentFrame.Bind(shader, 9))
@@ -258,9 +276,13 @@ sealed partial class SceneRenderer
             shader.SetUniform("uHandInspection", 0);
             shader.SetUniform("uShadowComponents", 0);
         }
+        // Resolve only after the draw pass ends. RGB and alpha both contain
+        // sample coverage, so composition must not multiply RGB by alpha again.
+        if (viewmodelMultisampleTarget is not null)
+            frame.ResolveColor(viewmodelMultisampleTarget, 0, viewmodelTarget, 0);
         viewmodelDrawn = true;
         viewmodelComposite ??= LoadProgram("fullscreen.vert", "viewmodel_composite.frag");
-        using (var pass = frame.BeginPass(waterTarget, new RenderPassDescriptor { View = new(camera), State = ScreenState with { BlendEnabled = true, SourceBlend = BlendFactor.SourceAlpha, DestinationBlend = BlendFactor.OneMinusSourceAlpha }, ColorLoadAction = RenderLoadAction.Load }))
+        using (var pass = frame.BeginPass(waterTarget, new RenderPassDescriptor { View = new(camera), State = ScreenState with { BlendEnabled = true, SourceBlend = BlendFactor.One, DestinationBlend = BlendFactor.OneMinusSourceAlpha }, ColorLoadAction = RenderLoadAction.Load }))
             Mesh(pass, screen, viewmodelTarget.ColorAttachments[0], viewmodelComposite);
     }
 
@@ -270,7 +292,7 @@ sealed partial class SceneRenderer
     {
         if (viewmodelShadow is null)
         {
-            viewmodelShadow = Own(graphics.CreateRenderTarget(new(1024, 1024, [], TextureFormat.Depth32Float)));
+            viewmodelShadow = Own(graphics.CreateRenderTarget(new(2048, 2048, [], TextureFormat.Depth32Float)));
             viewmodelShadow.DepthStencilAttachment.SetSampling(new(TextureFilter.Nearest, TextureFilter.Nearest,
                 TextureWrap.ClampToEdge, TextureWrap.ClampToEdge));
         }

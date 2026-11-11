@@ -188,7 +188,7 @@ public static class BuildingRules
                     continue;
             }
             if (Overlaps(mesh, Mesh(os, other)))
-                return Fail("Space is occupied by another building piece.");
+                return Fail("Space is occupied by " + (other.Kind == PieceKind.Prefab ? BuildingPrefabs.Get(other.Prefab).Title : other.Kind.ToString()) + ".");
         }
         var proposed = state with
         {
@@ -266,25 +266,6 @@ public static class BuildingRules
         }
         return state.Pieces.Where(p => p.Kind != PieceKind.Prefab && !strong.Contains(p.Id) && !weak.Contains(p.Id)).Select(p => p.Id).Concat(BuildingPrefabs.Unsupported(state)).ToArray();
     }
-    // SAT of projected convex footprints plus vertical interval. Conservatively reserves stairwells and window apertures.
-    public static bool Overlaps(BuildTriangle[] a, BuildTriangle[] b, float epsilon = .015f)
-    {
-        if (!Bounds(a).Intersects(Bounds(b), epsilon))
-            return false;
-        var av = a.SelectMany(t => new[] { t.A, t.B, t.C }).ToArray();
-        var bv = b.SelectMany(t => new[] { t.A, t.B, t.C }).ToArray();
-        foreach (var t in a.Concat(b))
-            foreach (var edge in new[] { t.B - t.A, t.C - t.B, t.A - t.C })
-            {
-                var axis = new Vector3(-edge.Z, 0, edge.X);
-                if (axis.LengthSquared() < 1e-8f)
-                    continue;
-                axis = Vector3.Normalize(axis);
-                float amin = av.Min(p => Vector3.Dot(p, axis)), amax = av.Max(p => Vector3.Dot(p, axis));
-                float bmin = bv.Min(p => Vector3.Dot(p, axis)), bmax = bv.Max(p => Vector3.Dot(p, axis));
-                if (amax <= bmin + epsilon || bmax <= amin + epsilon)
-                    return false;
-            }
-        return true;
-    }
+    public static bool Overlaps(BuildTriangle[] a, BuildTriangle[] b, float epsilon = .002f) =>
+        PlacementGeometry.Overlaps(a,b,epsilon);
 }

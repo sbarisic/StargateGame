@@ -23,6 +23,7 @@ sealed partial class GameApp
                 session.Carry(CarryAction.Drop);
             return;
         }
+
         if (session.Carrying)
         {
             pickupHint = "E Drop   Left click Throw";
@@ -39,7 +40,7 @@ sealed partial class GameApp
         var eye = camera.Position;
         var aim = camera.WorldForwardNormal;
         var prop = session.Physics.PickProp(session.Local.Id, eye, aim);
-        var door = input.WasKeyPressed(Key.E) ? PickPiece() : default;
+        var door = PickPiece();
         float doorDistance = door.Piece is { } piece && BuildingPrefabs.IsDoor(piece) ? Vector3.Distance(eye, door.Point) : float.PositiveInfinity;
         var storage = PickWeaponContainer(eye, aim);
         if (storage.Piece != Guid.Empty && storage.Distance < doorDistance && (prop.Prop is null || storage.Distance < prop.Distance))
@@ -53,6 +54,7 @@ sealed partial class GameApp
             pickupHint = "E Pick up";
         else if (float.IsFinite(doorDistance))
             pickupHint = "E Door";
+        if (session.InteractionFeedback.Length > 0) pickupHint = session.InteractionFeedback;
         if (!input.WasKeyPressed(Key.E))
             return;
         if (pickProp)
@@ -60,7 +62,7 @@ sealed partial class GameApp
             session.Carry(CarryAction.Grab, prop.Prop!.PersistentId);
             carryingConsumed = true;
         }
-        else if (float.IsFinite(doorDistance) && !session.Physics.InteractionBlocked(eye, aim, doorDistance - .03f, ignorePlayer: session.Local.Id))
-            session.Build(new(Guid.NewGuid(), session.Changes.Revision, "door", Target: door.Piece!.Id));
+        else if (float.IsFinite(doorDistance))
+            session.Build(new(Guid.NewGuid(), session.Changes.Revision, "door", Target: door.Piece!.Id, HitPoint: door.Point));
     }
 }

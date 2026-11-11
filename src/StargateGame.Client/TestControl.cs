@@ -2,6 +2,7 @@ using System.Numerics;
 using System.Text.Json;
 using FishGfx.Graphics;
 using StargateGame.Shared;
+using StargateGame.Building;
 using StargateGame.Testing;
 
 namespace StargateGame.Client;
@@ -143,7 +144,14 @@ sealed partial class GameApp
                 session.Carry(Enum.Parse<CarryAction>(r.Text("action"), true), r.Data.TryGetProperty("item", out _) ? r.Value<Guid>("item") : Guid.Empty);
                 break;
             case TestAction.Build:
-                session.Build(r.Value<BuildCommand>("command") with { RequestId = r.Id, Revision = session.Changes.Revision }); break;
+                var buildCommand = r.Value<BuildCommand>("command") with { RequestId = r.Id, Revision = session.Changes.Revision };
+                if (buildCommand.Action == "door" && buildCommand.HitPoint is null)
+                {
+                    var aimed = PickPiece();
+                    if (aimed.Piece?.Id != buildCommand.Target) throw new InvalidOperationException("Aim the rendered camera at the requested door.");
+                    buildCommand = buildCommand with { HitPoint = aimed.Point };
+                }
+                session.Build(buildCommand); break;
             case TestAction.Weapon:
                 if (session.Inventory is null || session.WeaponPending || session.TransitLocked) throw new InvalidOperationException("Inventory is not ready for an action.");
                 session.Weapon(r.Text("action"), r.Data.TryGetProperty("item", out _) ? r.Value<Guid>("item") : Guid.Empty,

@@ -68,7 +68,7 @@ public static class PrefabRules
         {
             Structures = state.Structures.Append(structure).ToArray()
         } : state;
-        var mesh = BuildingPrefabs.Mesh(structure, piece);
+        var mesh = PlacementGeometry.Occupied(structure, piece);
         var bounds = BuildingGeometry.Bounds(mesh);
         if (target is null || definition.Role == "foundation")
         {
@@ -92,18 +92,22 @@ public static class PrefabRules
                 bool same = Vector3.DistanceSquared(other.Offset, piece.Offset) < .0001f && other.Rotation == piece.Rotation;
                 bool sameLayer = od.Role == definition.Role || od.Role is "wall" or "window" or "doorway" && definition.Role is "wall" or "window" or "doorway";
                 if (same && sameLayer)
-                    return Fail("That socket is already occupied.", piece, draft);
-                if (other.Id == piece.Parent)
+                    return Fail("That socket is occupied by " + od.Title + ".", piece, draft);
+                if (PlacementGeometry.WallBaseContact(piece,other) || PlacementGeometry.WallBaseContact(other,piece) ||
+                    PlacementGeometry.WallTopContact(piece,other) || PlacementGeometry.WallTopContact(other,piece) ||
+                    PlacementGeometry.FoundationContact(piece,other) || PlacementGeometry.FoundationContact(other,piece))
+                    continue;
+                if (other.Id == piece.Parent && (definition.Role is not ("floor" or "landing") || od.Role is "foundation" or "stairs"))
                     continue;
                 // The supplied kit deliberately overlaps trim, jambs, roof eaves and corner posts.
-                if (definition.Role is "trim" or "frame" or "insert" or "roof" || od.Role is "trim" or "frame" or "insert" or "roof")
+                if (definition.Role is not ("floor" or "landing") && od.Role is not ("floor" or "landing") &&
+                    (definition.Role is "trim" or "frame" or "insert" or "roof" || od.Role is "trim" or "frame" or "insert" or "roof"))
                     continue;
                 if (od.Role is "wall" or "window" or "doorway" or "corner" && definition.Role is "wall" or "window" or "doorway" or "corner" && !same)
                     continue;
             }
-            var s = state.Structures.Single(s => s.Id == other.StructureId);
-            if (BuildingRules.Overlaps(mesh, BuildingGeometry.Mesh(s, other), .025f))
-                return Fail("Space is occupied by another building piece.", piece, draft);
+            if (BuildingRules.Overlaps(mesh, PlacementGeometry.Occupied(state, other), .002f))
+                return Fail("Space is occupied by " + (other.Kind == PieceKind.Prefab ? BuildingPrefabs.Get(other.Prefab).Title : other.Kind.ToString()) + ".", piece, draft);
         }
         return new(draft with
         {

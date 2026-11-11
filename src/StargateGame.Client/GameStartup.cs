@@ -37,8 +37,11 @@ sealed partial class GameApp
         assetPreparation = Task.Run(() =>
         {
             var clock = Stopwatch.StartNew();
+            string? development = args.Contains("--dev-assets")
+                ? Arguments.Get(args, "--dev-assets", "")
+                : loose ? null : StargateGame.Testing.SessionLauncher.DevelopmentAssets(AppContext.BaseDirectory);
             var assets = new CookedAssets(Path.Combine(AppContext.BaseDirectory, "assets"), loose,
-                args.Contains("--dev-assets") ? Arguments.Get(args, "--dev-assets", "") : null);
+                development);
             StartupTrace.Mark("asset-index-ready", clock.Elapsed.TotalMilliseconds, assets.IsCooked ? "cooked" : "loose");
             return assets;
         });

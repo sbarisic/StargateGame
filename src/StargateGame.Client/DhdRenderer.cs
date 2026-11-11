@@ -32,9 +32,16 @@ sealed partial class SceneRenderer
         if (DhdPreviewGlyphs.Length > 0)
             foreach (var dhd in dhds)
                 DhdGlyphs.SetGlyphs(dhd.Id, DhdPreviewGlyphs);
+        // Terrain can be playable before streamed DHD geometry is published.
+        // Recompute each frame so emission resumes as soon as the model arrives.
+        if (!models.ContainsKey("dhd") || !modelBounds.TryGetValue("dhd", out var bounds))
+        {
+            visibleLitDhds = [];
+            return;
+        }
         // Retain bloom targets during the pauses rather than reallocating every pulse.
         visibleLitDhds = dhds.Where(e => (DhdGlyphs.AnyEmission(e.Id) || DhdHintActive) &&
-            frustum.Intersects(new(modelBounds[e.Model].Min * e.Scale + e.Position, modelBounds[e.Model].Max * e.Scale + e.Position))).ToArray();
+            frustum.Intersects(new(bounds.Min * e.Scale + e.Position, bounds.Max * e.Scale + e.Position))).ToArray();
         if (visibleLitDhds.Length == 0)
             return;
         gateEmissionShader ??= LoadProgram("world.vert", "gate_emission.frag");
@@ -57,9 +64,11 @@ sealed partial class SceneRenderer
         });
         foreach (var dhd in visibleLitDhds)
         {
+            if (!models.TryGetValue(dhd.Model, out var parts))
+                continue;
             using var endpoint = SelectGate(dhd);
             using var transform = pass.PushModel(dhd.Transform);
-            foreach (var part in models[dhd.Model])
+            foreach (var part in parts)
             {
                 bool accepted = part.DhdOrb ? DhdGlyphs.IsOrbLit(dhd.Id) : DhdGlyphs.IsLit(dhd.Id, part.DhdKeyId);
                 float hint = part.DhdOrb ? 0 : DhdHint.ForKey(part.DhdKeyId);

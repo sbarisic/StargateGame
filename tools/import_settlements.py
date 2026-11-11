@@ -2,10 +2,12 @@
 Sources are never modified. Requires numpy/Pillow; no Blender or game runtime.
 """
 
-import hashlib, io, json, math, shutil, struct
+import hashlib, io, json, math, shutil, struct, sys
 from pathlib import Path
 import numpy as np
 from PIL import Image
+from building_base_geometry import repair_house, exterior_depth
+from build_door_collision import generate_doors
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "assets/models"
@@ -286,7 +288,13 @@ def export(name, parts, collision=None, role="settlement"):
 def template(
     name, parts, palette, kind="building", doors=None, collision=None, entry=None
 ):
+    courses = None
+    if name.startswith(("settlement-mega-house-", "settlement-seahill-house-")):
+        exterior = abs(bounds(runtime("kit-wall-unevenbrick-straight"))[0][2]) if palette == "mega" else exterior_depth(parts, collision)
+        parts, courses = repair_house(parts, collision, exterior)
     lo, hi = export(name, parts, collision)
+    if courses is not None:
+        prefabs[-1]["baseCourses"] = courses
     templates.append(
         dict(
             id=name,
@@ -320,7 +328,7 @@ for family in ["mega", "seahill"]:
         window = runtime("kit-wall-unevenbrick-window-wide-flat") + runtime(
             "kit-window-wide-flat1"
         )
-        opening = runtime("kit-wall-unevenbrick-door-flat")
+        opening = runtime("kit-wall-unevenbrick-door-flat") + runtime("kit-doorframe-flat-brick")
         floor = runtime("kit-floor-wooddark")
         roof = runtime("kit-roof-roundtiles-6x6")
         gable = runtime("kit-roof-front-brick6")
@@ -334,7 +342,11 @@ for family in ["mega", "seahill"]:
             )
 
         def sea(n):
-            track(ROOT / "assets_itch/Seahill_Towns_Complete/Models/GLB" / (n + ".glb"))
+            # The prepared GLB is the actual geometry input; original source
+            # packs may have been archived after the preparation pass.
+            track(folder / (n + ".glb"))
+            original = ROOT / "assets_itch/Seahill_Towns_Complete/Models/GLB" / (n + ".glb")
+            if original.exists(): track(original)
             return centre(Scene(folder / (n + ".glb")).parts(scale=2))
 
         wall = sea("wall_out_timber")
@@ -450,6 +462,25 @@ for family in ["mega", "seahill"]:
         if family == "mega"
         else "Seahill_Towns_Complete"
     )
+
+# Targeted re-export restores original source faces before applying the current
+# foundation rule. Preserve unrelated generated assets and metadata.
+if '--houses-only' in sys.argv:
+    for filename, generated in [('prefabs.json', prefabs), ('templates.json', templates)]:
+        path = DEST / filename
+        current = json.loads(path.read_text())
+        replacements = {entry['id']: entry for entry in generated}
+        merged = [replacements.pop(entry['id'], entry) for entry in current]
+        merged.extend(replacements.values())
+        path.write_text(json.dumps(merged, separators=(',', ':')) + '\n')
+    (DEST / 'foundation-refresh.json').write_text(json.dumps(dict(
+        tool='tools/import_settlements.py --houses-only',
+        geometry='flush wall-footprint foundations v2',
+        sources=[dict(path=p, sha256=h) for p,h in sorted(sources.items())]), indent=2) + '\n')
+    from import_masonry_materials import install as install_masonry
+    install_masonry()
+    print('Restored and exported', len(templates), 'houses from source.', flush=True)
+    raise SystemExit(0)
 
 # Modern sets contain grouped whole buildings, not one building per material.
 for pack in [
@@ -636,6 +667,7 @@ for pack in [
             "landmark",
         )
 
+prefabs = generate_doors(prefabs, OUT)
 (DEST / "prefabs.json").write_text(json.dumps(prefabs, separators=(",", ":")) + "\n")
 (DEST / "templates.json").write_text(json.dumps(templates, indent=2) + "\n")
 (DEST / "provenance.json").write_text(
@@ -663,3 +695,7 @@ print(
     len(reports),
     "excluded oversize groups",
 )
+
+# Keep generated houses on the same scanned masonry as the editable kit.
+from import_masonry_materials import install as install_masonry
+install_masonry()

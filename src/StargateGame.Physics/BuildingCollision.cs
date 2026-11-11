@@ -14,8 +14,8 @@ public sealed partial class PhysicsWorld
     } = WorldChanges.Empty;
     WorldChanges? stagedChanges;
     readonly HashSet<ChunkCoordinate> dirtyTerrain = [];
-    readonly Dictionary<ChunkCoordinate, (BodyID Body, Shape Shape)> buildingBodies = [];
-    readonly Dictionary<ChunkCoordinate, Shape> preparedBuildings = [];
+    readonly Dictionary<ChunkCoordinate, (BodyID Body, Shape Shape)[]> buildingBodies = [];
+    readonly Dictionary<ChunkCoordinate, (uint Layer, Shape Shape)[]> preparedBuildings = [];
     readonly HashSet<ChunkCoordinate> dirtyBuildings = [];
     public int RebuiltBatches
     {
@@ -27,8 +27,11 @@ public sealed partial class PhysicsWorld
         lock (NativeGate)
         {
             BuildingRules.ValidateState(state);
+            if (state.LocationId != World.Definition.LocationId || state.Revision < Changes.Revision)
+                throw new InvalidOperationException("Stale or foreign collision revision; active geometry retained.");
             CancelChanges();
             stagedChanges = state;
+            Console.WriteLine($"COLLISION staging location={state.LocationId} revision={state.Revision}; retaining active bodies");
             foreach (var r in state.Removed.Except(Changes.Removed).Concat(Changes.Removed.Except(state.Removed)))
                 dirtyTerrain.Add(r.Chunk);
             foreach (var c in dirtyTerrain)
@@ -47,6 +50,12 @@ public sealed partial class PhysicsWorld
                 dirtyBuildings.Add(Owner(Changes, Changes.Pieces.Single(p => p.Id == trim.Parent)));
             foreach (var trim in newCorners.Except(oldCorners))
                 dirtyBuildings.Add(Owner(state, state.Pieces.Single(p => p.Id == trim.Parent)));
+            // Base-course joins are shared by neighbors. Rebuild every owner in
+            // edited structures so removing one wall also exposes its neighbor.
+            var changedStructures = state.Pieces.Except(Changes.Pieces).Concat(Changes.Pieces.Except(state.Pieces)).Select(p => p.StructureId)
+                .Concat(state.Structures.Except(Changes.Structures).Concat(Changes.Structures.Except(state.Structures)).Select(s=>s.Id)).ToHashSet();
+            foreach (var p in Changes.Pieces.Where(p => changedStructures.Contains(p.StructureId))) dirtyBuildings.Add(Owner(Changes,p));
+            foreach (var p in state.Pieces.Where(p => changedStructures.Contains(p.StructureId))) dirtyBuildings.Add(Owner(state,p));
         }
     }
     static ChunkCoordinate Owner(WorldChanges state, BuildingPiece p) => BuildingGeometry.Chunks(BuildingGeometry.Bounds(BuildingGeometry.Mesh(state, p))).Order().First();
@@ -71,7 +80,7 @@ public sealed partial class PhysicsWorld
                     shapes.Remove(shape);
                     shape.Dispose();
                 }
-            foreach (var shape in preparedBuildings.Values)
+            foreach (var shape in preparedBuildings.Values.SelectMany(group=>group).Select(p=>p.Shape))
             {
                 shapes.Remove(shape);
                 shape.Dispose();
@@ -95,40 +104,51 @@ public sealed partial class PhysicsWorld
                 continue;
             var ready = input.GetAwaiter().GetResult();
             lock (NativeGate)
-                preparedBuildings[group.Key] = Cook(ready);
+            {
+                List<(uint Layer, Shape Shape)> cookedShapes = [];
+                try
+                {
+                    foreach (var part in ready) cookedShapes.Add((part.Layer,Cook(part.Input)));
+                    preparedBuildings[group.Key] = cookedShapes.ToArray();
+                }
+                catch
+                {
+                    foreach (var part in cookedShapes) { shapes.Remove(part.Shape); part.Shape.Dispose(); }
+                    throw;
+                }
+            }
             cooked++;
         }
         return groups.All(g => preparedBuildings.ContainsKey(g.Key));
     }
 
-    void CommitBuildings(HashSet<ChunkCoordinate> wanted)
+    void CommitBuildings(HashSet<ChunkCoordinate> wanted, Dictionary<ChunkCoordinate, List<BodyID>> replacements)
     {
-        PrepareBuildings(wanted, 256);
         foreach (var c in buildingBodies.Keys.Where(c => !wanted.Contains(c) || dirtyBuildings.Contains(c)).Order().ToArray())
         {
-            var old = buildingBodies[c];
-            system.BodyInterface.RemoveBody(old.Body);
-            system.BodyInterface.DestroyBody(old.Body);
-            ownedBodies.Remove(old.Body);
-            shapes.Remove(old.Shape);
-            old.Shape.Dispose();
+            foreach (var old in buildingBodies[c])
+            {
+                interactionBuildings.Remove(old.Body);
+                system.BodyInterface.RemoveBody(old.Body);
+                system.BodyInterface.DestroyBody(old.Body);
+                ownedBodies.Remove(old.Body);
+                shapes.Remove(old.Shape);
+                old.Shape.Dispose();
+                topology++;
+            }
             buildingBodies.Remove(c);
-            topology++;
         }
         foreach (var c in preparedBuildings.Keys.Order().ToArray())
         {
-            var shape = preparedBuildings[c];
+            var parts = preparedBuildings[c];
             preparedBuildings.Remove(c);
             if (wanted.Contains(c))
             {
-                buildingBodies.Add(c, (AddBody(shape, Vector3.Zero, Quaternion.Identity, false), shape));
+                foreach (var id in replacements[c]) interactionBuildings.Add(id);
+                buildingBodies.Add(c,parts.Select((part,i)=>(replacements[c][i],part.Shape)).ToArray());
                 RebuiltBatches++;
             }
-            else
-            {
-                shapes.Remove(shape);
-                shape.Dispose();
-            }
+            else foreach (var part in parts) { shapes.Remove(part.Shape); part.Shape.Dispose(); }
         }
         Changes = stagedChanges ?? Changes;
         stagedChanges = null;
@@ -167,7 +187,19 @@ public sealed partial class PhysicsWorld
             foreach (var t in ReadCollision(e.Model))
                 yield return new(Vector3.Transform(t.A, e.Transform), Vector3.Transform(t.B, e.Transform), Vector3.Transform(t.C, e.Transform));
         foreach (var p in Changes.Pieces.Where(p => p.Id != ignoreBuilding))
-            foreach (var t in BuildingGeometry.Mesh(Changes, p))
-                yield return t;
+        {
+            if (p.Kind == PieceKind.Prefab)
+            {
+                var definition = BuildingPrefabs.Get(p.Prefab);
+                var structure = Changes.Structures.Single(s=>s.Id==p.StructureId);
+                var transform = BuildingPrefabs.Transform(structure,p);
+                Matrix4x4.Invert(transform,out var inverse);
+                var local = Vector3.Transform(near,inverse);
+                var lo = new Vector3(definition.Min[0],definition.Min[1],definition.Min[2])-Vector3.One;
+                var hi = new Vector3(definition.Max[0],definition.Max[1],definition.Max[2])+Vector3.One;
+                if (Vector3.DistanceSquared(local,Vector3.Clamp(local,lo,hi))>radius*radius) continue;
+            }
+            foreach (var t in BuildingGeometry.CollisionMesh(Changes, p)) yield return t;
+        }
     }
 }

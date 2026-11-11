@@ -26,6 +26,8 @@ shutil.copytree(
 )
 shutil.copy2(ROOT / "native" / "rollback.inl", source / "src" / "rollback.inl")
 with (source / "src" / "joltc.cpp").open("a", encoding="utf-8") as output:
+    bridge_hash = hashlib.sha256((ROOT / "native" / "rollback.inl").read_text().replace('\r\n', '\n').encode()).hexdigest()
+    output.write(f'\n#define SG_BRIDGE_SOURCE_SHA "{bridge_hash}"\n')
     output.write('\n#include "rollback.inl"\n')
 build = ROOT / "artifacts" / "native-build" / rid
 options = [

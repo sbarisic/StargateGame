@@ -1,4 +1,6 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Collections.Concurrent;
 using StargateGame.Shared;
 
 namespace StargateGame.Building;
@@ -53,17 +55,37 @@ public static class BuildingGeometry
         var points = tris.SelectMany(t => new[] { t.A, t.B, t.C }).ToArray();
         return new(points.Aggregate(new Vector3(float.PositiveInfinity), Vector3.Min), points.Aggregate(new Vector3(float.NegativeInfinity), Vector3.Max));
     }
-    public static BuildTriangle[] Mesh(WorldChanges state, BuildingPiece piece)
+    static readonly ConditionalWeakTable<WorldChanges, ConcurrentDictionary<BuildingPiece, BuildTriangle[]>> stateMeshes = new();
+    // Render/picking geometry retains the individual stones. Collision uses a
+    // continuous corner shell, including for automatically derived trim.
+    public static BuildTriangle[] CollisionMesh(WorldChanges state, BuildingPiece piece)
     {
+        if (BuildingBaseCourses.ReplacesOwner(state,piece.Id))
+            return BuildingBaseCourses.OwnedMesh(state,piece.Id);
+        var structure = state.Structures.Single(s => s.Id == piece.StructureId);
+        var original = piece.Kind == PieceKind.Prefab && piece.Prefab == BuildingCorners.Model
+            ? CornerCollision.Mesh(structure,piece) : Mesh(structure,piece);
+        var trim = BuildingCorners.Pieces(state).Where(p => p.Parent == piece.Id)
+            .SelectMany(p => p.Prefab == BuildingCorners.Model
+                ? CornerCollision.Mesh(structure,p) : BuildingPrefabs.Mesh(structure,p));
+        return [.. original, .. trim, .. BuildingBaseCourses.OwnedMesh(state,piece.Id)];
+    }
+    public static BuildTriangle[] Mesh(WorldChanges state, BuildingPiece piece) =>
+        stateMeshes.GetValue(state, _ => new()).GetOrAdd(piece, p => DerivedMesh(state,p));
+    static BuildTriangle[] DerivedMesh(WorldChanges state, BuildingPiece piece)
+    {
+        if (BuildingBaseCourses.ReplacesOwner(state,piece.Id)) return BuildingBaseCourses.OwnedMesh(state,piece.Id);
         var original = Mesh(state.Structures.Single(s => s.Id == piece.StructureId), piece);
         var corners = BuildingCorners.OwnedMesh(state, piece.Id);
-        return corners.Length == 0 ? original : [.. original, .. corners];
+        var bases = BuildingBaseCourses.OwnedMesh(state, piece.Id);
+        return corners.Length == 0 && bases.Length == 0 ? original : [.. original, .. corners, .. bases];
     }
     public static BuildTriangle[] Mesh(StructureRecord s, BuildingPiece p)
     {
         if (p.Kind == PieceKind.Prefab)
             return BuildingPrefabs.Mesh(s, p);
         List<BuildTriangle> list = [];
+        List<BuildBounds> stairBoxes = [];
         var rotate = Matrix4x4.CreateRotationY(-p.Rotation * MathF.PI / 6) * Matrix4x4.CreateTranslation(p.Point.Position + new Vector3(0, p.Level * 3, 0)) * Transform(s);
         void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
         {
@@ -72,6 +94,7 @@ public static class BuildingGeometry
         }
         void Box(float x, float y, float z, float w, float h, float d)
         {
+            if (p.Kind == PieceKind.Stairs) { stairBoxes.Add(new(new(x,y,z),new(x+w,y+h,z+d))); return; }
             Vector3 a = new(x, y, z), b = new(x + w, y, z), c = new(x + w, y, z + d), e = new(x, y, z + d), up = new(0, h, 0);
             Quad(a, b, c, e);
             Quad(a + up, e + up, c + up, b + up);
@@ -109,11 +132,17 @@ public static class BuildingGeometry
         else if (p.Kind == PieceKind.Door)
         {
             Box(0, 0, -.045f, 1.08f, 2.28f, .09f);
-            var hinge = Matrix4x4.CreateRotationY(p.Open ? MathF.PI / 2 : 0) * Matrix4x4.CreateTranslation(.96f, 0, 0);
+            var pivot = new Vector3(0, 0, -.045f);
+            var hinge = Matrix4x4.CreateTranslation(-pivot) * Matrix4x4.CreateRotationY(p.Open ? MathF.PI / 2 : 0) * Matrix4x4.CreateTranslation(pivot + new Vector3(.96f, 0, 0));
             list = list.Select(t => new BuildTriangle(Vector3.Transform(t.A, hinge), Vector3.Transform(t.B, hinge), Vector3.Transform(t.C, hinge))).ToList();
         }
         else if (p.Kind == PieceKind.Stairs)
         {
+            if (p.FoundationBottom > 0)
+            {
+                Box(.1f, -.3f, -.6f, 1.2f, .15f, .3f);
+                Box(.1f, -.3f, -.3f, 1.2f, .3f, .3f);
+            }
             for (int i = 0; i < 10; i++)
                 Box(.1f, 0, i * .25f, 1.2f, (i + 1) * .15f, .25f);
             Box(.1f, 1.3f, 2.5f, 2.8f, .2f, .5f);
@@ -122,6 +151,7 @@ public static class BuildingGeometry
                 Box(1.7f, 1.5f + i * .15f, 2.25f - i * .25f, 1.2f, .15f, .25f);
             Box(1.7f, 2.8f, -.0f, 1.2f, .2f, .25f);
         }
+        if (stairBoxes.Count > 0) list = SolidGeometry.Union(stairBoxes).ToList();
         return list.Select(t => new BuildTriangle(Vector3.Transform(t.A, rotate), Vector3.Transform(t.B, rotate), Vector3.Transform(t.C, rotate))).ToArray();
     }
     public static float? Ray(Vector3 origin, Vector3 direction, IEnumerable<BuildTriangle> mesh, float limit = 8)

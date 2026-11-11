@@ -154,7 +154,7 @@ public sealed partial class GameServer
         else
         {
             var state = cmd.Action is "remove" or "door" ? CurrentChanges : proposed.State;
-            var p = cmd.Action == "door" ? CurrentChanges.Pieces.Single(p => p.Id == cmd.Target) : proposed.Piece!;
+            var p = cmd.Action is "door" or "remove" ? CurrentChanges.Pieces.Single(p => p.Id == cmd.Target) : proposed.Piece!;
             mesh = BuildingGeometry.Mesh(state, p);
         }
         if (mesh.Length == 0)
@@ -162,14 +162,25 @@ public sealed partial class GameServer
         var b = BuildingGeometry.Bounds(mesh);
         var eye = Movement.EyePosition(physics.Player(session.PlayerId));
         var target = Vector3.Clamp(eye, b.Min, b.Max);
+        if (cmd.Action is "door" or "remove")
+        {
+            if (cmd.HitPoint is not { } hitPoint || !float.IsFinite(hitPoint.X) || !float.IsFinite(hitPoint.Y) || !float.IsFinite(hitPoint.Z))
+                return cmd.Action == "door" ? "Aim at the door." : "Aim at the piece to demolish.";
+            target = hitPoint;
+            float reach = Vector3.Distance(eye,target);
+            if (reach > 8) return "Out of reach.";
+            if (reach < .001f || BuildingGeometry.Ray(eye,Vector3.Normalize(target-eye),mesh,reach+.1f) is not { } surface || Math.Abs(surface-reach)>.1f)
+                return cmd.Action == "door" ? "Aim at the door." : "Aim at the piece to demolish.";
+        }
         float distance = Vector3.Distance(eye, target);
         if (distance > 8)
             return "Target is farther than 8 m.";
         if (distance > .1f)
         {
             bool attachment = cmd.Action == "place" && (cmd.Kind == PieceKind.Door || cmd.Kind == PieceKind.Prefab);
-            float? hit = BuildingGeometry.Ray(eye, Vector3.Normalize(target - eye), physics.ObstacleTriangles(eye, ignoreBuilding: attachment ? cmd.Target : Guid.Empty), distance - .08f);
-            if (hit is not null)
+            bool blocked = physics.BuildingVisibilityBlocked(eye,Vector3.Normalize(target-eye),distance-.03f,session.PlayerId,
+                attachment || cmd.Action is "door" or "remove" ? cmd.Target : Guid.Empty);
+            if (blocked)
                 return "Target is obstructed.";
         }
         if (b.Min.X < -physics.World.Definition.HalfSize || b.Min.Z < -physics.World.Definition.HalfSize || b.Max.X > physics.World.Definition.HalfSize || b.Max.Z > physics.World.Definition.HalfSize || b.Max.Y > 2048)
@@ -177,22 +188,7 @@ public sealed partial class GameServer
         if (cmd.Action is "remove" or "clear")
             return "";
         if (cmd.Action == "door")
-        {
-            // Conservatively reserve the complete hinge sweep, not just the two endpoint poses.
-            var p = proposed.Piece!;
-            var s = proposed.State.Structures.Single(s => s.Id == p.StructureId);
-            var closed = BuildingGeometry.Bounds(BuildingGeometry.Mesh(s, p with
-            {
-                Open = false
-            }));
-            var open = BuildingGeometry.Bounds(BuildingGeometry.Mesh(s, p with
-            {
-                Open = true
-            }));
-            b = new(Vector3.Min(closed.Min, open.Min), Vector3.Max(closed.Max, open.Max));
-            if (b.Min.X < -physics.World.Definition.HalfSize || b.Min.Z < -physics.World.Definition.HalfSize || b.Max.X > physics.World.Definition.HalfSize || b.Max.Z > physics.World.Definition.HalfSize)
-                return "Door swing crosses the map boundary.";
-        }
+            return ValidateDoorSweep(proposed.Piece!);
         foreach (var p in physics.Players)
             if (b.Intersects(new(p.Position - new Vector3(.32f, 0, .32f), p.Position + new Vector3(.32f, 1.8f, .32f))))
                 return "A player occupies this space.";
@@ -210,13 +206,6 @@ public sealed partial class GameServer
                 if (!CurrentChanges.IsRemoved("tree", t.Id) && b.Intersects(new(t.Min, t.Max)))
                     return "Clear the tree first.";
         }
-        if (cmd.Action == "door")
-            foreach (var other in CurrentChanges.Pieces.Where(p => p.Id != cmd.Target && p.Id != proposed.Piece!.Parent && p.Kind != PieceKind.Doorway && !(p.Kind == PieceKind.Prefab && BuildingPrefabs.Get(p.Prefab).Role == "frame")))
-            {
-                var ob = BuildingGeometry.Bounds(BuildingGeometry.Mesh(CurrentChanges, other));
-                if (b.Intersects(ob))
-                    return "Door swing is obstructed.";
-            }
         return "";
     }
     void PollBuildLookups()

@@ -17,6 +17,23 @@ uniform int uViewmodelShadowEnabled;
 uniform sampler2D uViewmodelShadow;
 uniform mat4 uViewmodelShadowMatrix;
 
+// Interpolate visibility, not depth: linear depth sampling still produces a
+// hard comparison edge. Correct each comparison to the receiver's plane.
+float viewmodelBilinearVisibility(vec2 uv, float depth, vec2 gradient) {
+    ivec2 size = textureSize(uViewmodelShadow, 0);
+    vec2 pixel = uv * vec2(size) - .5;
+    ivec2 origin = ivec2(floor(pixel));
+    vec2 fraction = fract(pixel);
+    float result = 0.;
+    for (int y=0;y<2;y++) for (int x=0;x<2;x++) {
+        ivec2 cell = clamp(origin + ivec2(x,y), ivec2(0), size-ivec2(1));
+        vec2 center = (vec2(cell)+.5)/vec2(size);
+        float weight = (x==0?1.-fraction.x:fraction.x)*(y==0?1.-fraction.y:fraction.y);
+        result += weight * (depth + dot(gradient, center-uv) <= texelFetch(uViewmodelShadow, cell, 0).r ? 1. : 0.);
+    }
+    return result;
+}
+
 float viewmodelDynamicVisibility(vec3 position, vec3 normal, vec3 correctionNormal) {
     vec3 q = (uViewmodelShadowMatrix * vec4(position + normal * .002, 1)).xyz * .5 + .5;
     if (any(lessThan(q, vec3(0))) || any(greaterThan(q, vec3(1)))) return 1;
@@ -25,11 +42,12 @@ float viewmodelDynamicVisibility(vec3 position, vec3 normal, vec3 correctionNorm
     vec2 texel = 1.0 / vec2(textureSize(uViewmodelShadow, 0));
     float result = 0;
     for (int y=-1;y<=1;y++) for (int x=-1;x<=1;x++) {
-        vec2 delta = vec2(x,y) * texel;
+        vec2 delta = vec2(x,y) * texel * 1.5;
         float depth = q.z - .00002 + dot(gradient, delta);
-        result += depth <= texture(uViewmodelShadow, clamp(q.xy + delta, texel*.5, 1-texel*.5)).r ? 1 : 0;
+        float weight = (x==0?2.:1.)*(y==0?2.:1.);
+        result += weight * viewmodelBilinearVisibility(q.xy + delta, depth, gradient);
     }
-    return result / 9;
+    return result / 16.;
 }
 
 // GLSL 4.0 sampler-array indices must be dynamically uniform. Cascade selection

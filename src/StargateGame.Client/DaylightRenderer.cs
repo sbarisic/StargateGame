@@ -51,9 +51,9 @@ sealed partial class SceneRenderer
     public double RenderGpuMilliseconds => gpuTimer.Milliseconds;
     public double HorizonWaveGpuMilliseconds => gpuTimer.WaveMilliseconds;
     public double GateSprayGpuMilliseconds => gpuTimer.SprayMilliseconds;
-    public long TargetBytes => AoTargetBytes + AtmosphereBytes + VolumeBytes + WeatherTargetBytes + GateLightTargetBytes + HorizonTargetBytes + (long)(opaqueTarget?.Width ?? 0) * (opaqueTarget?.Height ?? 0) * 28
+    public long TargetBytes => DemolitionTargetBytes + AoTargetBytes + AtmosphereBytes + VolumeBytes + WeatherTargetBytes + GateLightTargetBytes + HorizonTargetBytes + (long)(opaqueTarget?.Width ?? 0) * (opaqueTarget?.Height ?? 0) * 28
         + (long)Settings.Shadows.CascadeCount * (Settings.Shadows.Resolution * Settings.Shadows.Resolution + (Settings.Shadows.Resolution / 2) * (Settings.Shadows.Resolution / 2)) * 4
-        + (long)(viewmodelShadow?.Width ?? 0) * (viewmodelShadow?.Height ?? 0) * 4 + ExposureTargetBytes;
+        + (long)(viewmodelShadow?.Width ?? 0) * (viewmodelShadow?.Height ?? 0) * 4 + ViewmodelTargetBytes + ExposureTargetBytes;
     public sealed record SceneFrame(PlayerState[] Remotes, BodyState[] Bodies, PlayerState Local, Guid LocationId = default, long PhysicsEpoch = 0, double SimulationTime = 0, double EnvironmentSeconds = 0, PropClip[]? Clips = null);
 
     ShaderProgram LoadProgram(string vertex, string fragment)
@@ -183,6 +183,19 @@ sealed partial class SceneRenderer
     } = 1;
     void Lighting(ShaderProgram program)
     {
+        program.SetUniform("uModelHeightScale", 0f);
+        program.SetUniform("uModelParallaxSteps", Settings.Quality switch
+        {
+            GraphicsQuality.Low => 16,
+            GraphicsQuality.High => 48,
+            _ => 32
+        });
+        program.SetUniform("uModelParallaxRange", Settings.Quality switch
+        {
+            GraphicsQuality.Low => 18f,
+            GraphicsQuality.High => 40f,
+            _ => 28f
+        });
         AtmosphereUniforms(program);
         program.SetUniform("uFogDeferred", deferOpaqueFog && program != skyShader ? 1 : 0);
         var light = Daylight.For(World.Definition.Preset);
@@ -418,6 +431,7 @@ sealed partial class SceneRenderer
                 DrawCachedPhysics(pass, camera);
             DrawBuildPreview(pass);
         }
+        DrawDemolition(frame, camera);
         DrawViewmodel(frame, camera, snapshot, time);
         RenderHorizonBloom(frame, view, time);
         using (ExposureTexture.Bind(2))
@@ -452,6 +466,8 @@ sealed partial class SceneRenderer
         program.SetUniform("uFoliageCutoff", 0f);
         program.SetUniform("uHasModelNormal", 0);
         program.SetUniform("uRockSnow", 0);
+        program.SetUniform("uHasMetallicRoughness", 0);
+        program.SetUniform("uModelHeightScale", 0f);
         program.SetUniform("uShadowSurfaceBias", .025f);
         var terrainMeasurement = depth ? null : gpuTimer.Measure(pass, "terrain");
         program.SetUniform("uTerrain", 1);
@@ -511,6 +527,12 @@ sealed partial class SceneRenderer
                     program.SetUniform("uDhdMatte", matte ? 1 : 0);
                 if (!depth)
                     program.SetUniform("uDhdLightCount", part.DhdOrb ? 0 : dhdLightCount);
+                program.SetUniform("uHasModelNormal", !depth && part.normal is not null ? 1 : 0);
+                program.SetUniform("uHasMetallicRoughness", !depth && part.MetallicRoughness is not null ? 1 : 0);
+                program.SetUniform("uMetallicRoughness", 6);
+                program.SetUniform("uModelHeightScale", depth ? 0 : part.HeightScale);
+                using var normal = depth ? null : part.normal?.Bind(5);
+                using var mr = depth ? null : part.MetallicRoughness?.Bind(6);
                 using var press = pass.PushModel(PressTransform(part) * entity.Transform);
                 Mesh(pass, part.mesh, depth ? white : part.texture, program);
             }
@@ -520,6 +542,9 @@ sealed partial class SceneRenderer
             program.SetUniform("uDhdLightCount", 0);
             program.SetUniform("uDhdMatte", 0);
         }
+        program.SetUniform("uHasModelNormal", 0);
+        program.SetUniform("uHasMetallicRoughness", 0);
+        program.SetUniform("uModelHeightScale", 0f);
         program.SetUniform("uRoughness", .86f);
         program.SetUniform("uRockSnow", World.Definition.Preset == "icy" ? 1 : 0);
         using var rockSnow = depth ? null : snowTexture.Bind(4);
@@ -530,12 +555,18 @@ sealed partial class SceneRenderer
             foreach (var part in models.GetValueOrDefault(rock.Model, []))
             {
                 program.SetUniform("uHasModelNormal", !depth && part.normal is not null ? 1 : 0);
+                program.SetUniform("uHasMetallicRoughness", !depth && part.MetallicRoughness is not null ? 1 : 0);
+                program.SetUniform("uMetallicRoughness", 6);
+                program.SetUniform("uModelHeightScale", depth ? 0 : part.HeightScale);
                 using var normal = depth ? null : part.normal?.Bind(5);
+                using var mr = depth ? null : part.MetallicRoughness?.Bind(6);
                 Mesh(pass, part.mesh, depth ? white : part.texture, program);
             }
         }
         program.SetUniform("uHasModelNormal", 0);
         program.SetUniform("uRockSnow", 0);
+        program.SetUniform("uHasMetallicRoughness", 0);
+        program.SetUniform("uModelHeightScale", 0f);
         if (!InspectTree || !TreeForest)
             DrawTrees(pass, program, frustum, depth);
         DrawBuildings(pass, program, frustum, depth);
@@ -574,6 +605,7 @@ sealed partial class SceneRenderer
                 program.SetUniform("uHasModelNormal", !depth && part.normal is not null ? 1 : 0);
                 program.SetUniform("uHasMetallicRoughness", !depth && part.MetallicRoughness is not null ? 1 : 0);
                 program.SetUniform("uMetallicRoughness", 6);
+                program.SetUniform("uModelHeightScale", depth ? 0 : part.HeightScale);
                 using var normal = depth ? null : part.normal?.Bind(5);
                 using var mr = depth ? null : part.MetallicRoughness?.Bind(6);
                 Mesh(pass, part.mesh, part.texture, program);
@@ -581,6 +613,7 @@ sealed partial class SceneRenderer
         }
         program.SetUniform("uHasModelNormal", 0);
         program.SetUniform("uHasMetallicRoughness", 0);
+        program.SetUniform("uModelHeightScale", 0f);
         program.SetUniform("uTravelPlane", Vector4.Zero);
         DrawCharacters(pass, program, frustum, snapshot, depth, excludeLocal);
     }

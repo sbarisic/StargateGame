@@ -18,7 +18,7 @@ public sealed partial class PhysicsWorld
     static readonly object inputGate = new();
     static readonly Dictionary<string, Task<CollisionInput>> terrainInputs = [];
     static readonly SemaphoreSlim inputWorkers = new(2);
-    static readonly ConditionalWeakTable<WorldChanges, ConcurrentDictionary<ChunkCoordinate, Task<CollisionInput>>> buildingInputs = new();
+    static readonly ConditionalWeakTable<WorldChanges, ConcurrentDictionary<ChunkCoordinate, Task<(uint Layer, CollisionInput Input)[]>>> buildingInputs = new();
     readonly Dictionary<ChunkCoordinate, (Shape Shape, string Key)> retainedTerrain = [];
     public int CollisionCacheHits
     {
@@ -85,12 +85,30 @@ public sealed partial class PhysicsWorld
         }
         return new(vertices, indices);
     }
-    static Task<CollisionInput> BuildingInput(WorldChanges state, ChunkCoordinate owner, IEnumerable<BuildingPiece> pieces)
+    static Task<(uint Layer, CollisionInput Input)[]> BuildingInput(WorldChanges state, ChunkCoordinate owner, IEnumerable<BuildingPiece> pieces)
     {
         var captured = pieces.ToArray();
-        return buildingInputs.GetValue(state, _ => new()).GetOrAdd(owner, _ => Task.Run(() => MakeInput(captured.SelectMany(p =>
-            BuildingGeometry.Mesh(state, p).Select(t => (t.A, t.B, t.C,
-                p.Prefab is "kit-floor-wooddark" or "kit-stair-interior-simple" or "kit-door-1-flat" or "settlement-seahill-door" || ((p.Prefab.StartsWith("settlement-mega-house-") || p.Prefab.StartsWith("settlement-seahill-house-")) && Math.Abs(t.A.Y - state.Structures.Single(s => s.Id == p.StructureId).Origin.Y) < .03f && Math.Abs(t.B.Y - t.A.Y) < .001f && Math.Abs(t.C.Y - t.A.Y) < .001f) ? GroundSurface.Wood : GroundSurface.Stone))))));
+        return buildingInputs.GetValue(state, _ => new()).GetOrAdd(owner, _ => Task.Run(() =>
+        {
+            List<(uint Layer, CollisionInput Input)> result = [];
+            foreach (uint layer in new[] { StaticLayer, StairPropLayer, StairPlayerLayer })
+            {
+                var triangles = captured.Where(p => StairGeometry.IsStair(p) ? layer != StaticLayer : layer == StaticLayer)
+                    .SelectMany(p =>
+                    {
+                        var mesh = layer == StairPlayerLayer
+                            ? StairGeometry.PlayerMesh(state.Structures.Single(s=>s.Id==p.StructureId),p)
+                            : BuildingGeometry.CollisionMesh(state,p);
+                        var surface = p.Prefab is "kit-floor-wooddark" or "kit-stair-interior-simple" or "kit-door-1-flat" or "settlement-seahill-door" ? GroundSurface.Wood : GroundSurface.Stone;
+                        return mesh.Select(t=>(t.A,t.B,t.C,
+                            (p.Prefab.StartsWith("settlement-mega-house-") || p.Prefab.StartsWith("settlement-seahill-house-")) &&
+                            Math.Abs(t.A.Y-state.Structures.Single(s=>s.Id==p.StructureId).Origin.Y)<.03f &&
+                            Math.Abs(t.B.Y-t.A.Y)<.001f && Math.Abs(t.C.Y-t.A.Y)<.001f ? GroundSurface.Wood : surface));
+                    }).ToArray();
+                if (triangles.Length > 0) result.Add((layer,MakeInput(triangles)));
+            }
+            return result.ToArray();
+        }));
     }
     Shape Cook(CollisionInput input)
     {
@@ -98,6 +116,7 @@ public sealed partial class PhysicsWorld
         using var settings = Native.Own(new MeshShapeSettings(input.Vertices, input.Indices) { PerTriangleUserData = true });
         settings.Sanitize();
         var shape = Own(settings.Create());
+        Console.WriteLine($"COLLISION cooked location={World.Definition.LocationId} revision={(stagedChanges ?? Changes).Revision} triangles={input.Indices.Length} ms={watch.Elapsed.TotalMilliseconds:F2}");
         LongestCollisionCookMilliseconds = Math.Max(LongestCollisionCookMilliseconds, watch.Elapsed.TotalMilliseconds);
         return shape;
     }

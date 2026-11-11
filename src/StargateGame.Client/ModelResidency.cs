@@ -18,6 +18,7 @@ sealed partial class SceneRenderer
         foreach (var entity in testingInspection) RequestModel(entity.Model, 1);
         Dictionary<string, int> references = [];
         void Reference(string name) => references[name] = references.GetValueOrDefault(name) + 1;
+        if (buildingBaseMesh is not null) Reference("kit-stone-foundation");
         foreach (var entity in World.Definition.Entities.Concat(testingInspection)) Reference(entity.Model);
         foreach (var prop in World.Definition.Props) Reference(prop.Model);
         foreach (var piece in buildingPrefabs) Reference(piece.Model);

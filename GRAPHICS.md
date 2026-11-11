@@ -2,6 +2,35 @@
 
 # Outdoor renderer
 
+## Rifle finish, viewmodel shadows and cloud layers (2026-11-11)
+
+Weapon and arms render into a 4x MSAA RGBA16Float/Depth32Float target at
+scene resolution across all quality presets. After the draw pass, color resolves
+into a single-sample RGBA16Float target without depth. Premultiplied-alpha
+composition preserves resolved edge coverage, also used by horizon glow masking.
+Hardware reporting fewer than four samples uses the single-sample color/depth
+path and logs the fallback once. Both targets resize with the scene and are
+included in target memory reporting (56 bytes/pixel for MSAA plus resolve,
+12 bytes/pixel for the fallback). World rendering and final FXAA are unchanged.
+MSAA implementation has not been built or tested; validation is left to the developer.
+
+The procedural rifle material uses matte coating roughness (0.62–0.94), low
+coating metallic response, and restrained sky reflections. Wear and brass retain
+separate highlights. Arms retain their surface texture variation with a 0.74
+roughness floor and reduced specular strength.
+
+The viewmodel uses a 2048-square depth map with bilinear visibility comparisons
+and a weighted nine-tap filter. Each depth comparison uses receiver-plane
+correction. The existing six-metre coverage is retained to avoid clipping poses;
+the larger depth map costs 12 MiB more than the previous 1024-square map.
+
+Cloud density uses wind-aligned regional base-height and thickness variation,
+with a softer lower profile. Local layers stay inside the global march bounds.
+Cloud lighting and ground shadows use the same layer definition.
+
+These changes have not been built, rendered, tested, or performance-validated;
+validation and playtesting are left to the developer as requested.
+
 ## Authoritative gate presentation (2026-11-07)
 
 Normal play follows replicated gate state. `GateEffectTimeline` supplies one shared

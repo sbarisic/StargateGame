@@ -20,7 +20,8 @@ void main(){
   float optical=0;for(int j=1;j<=4;j++)optical+=cloudDensityFiltered(p+uSunDirection*(float(j)*180),180.)*180*.005;
   cloudDepth=min(cloudDepth,start+(float(i)+jitter)*dt);
   float t=exp(-density*dt*.005);
-  float height=clamp((p.y-uCloudBase)/(uCloudTop-uCloudBase),0.,1.);
+  vec2 layer=cloudLayer(p);
+  float height=clamp((p.y-layer.x)/(layer.y-layer.x),0.,1.);
   vec3 light=ambient*mix(.16,.48,smoothstep(.05,.8,height))+sun*(phase*exp(-optical)+.12*exp(-optical*.25));
   color+=trans*(1-t)*light;trans*=t;
  }

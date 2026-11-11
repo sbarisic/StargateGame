@@ -121,7 +121,7 @@ public sealed partial class PhysicsWorld
         {
             if (!OwnPoint(BuildingGeometry.WorldPoint(Changes.Structures.Single(s => s.Id == piece.StructureId), piece.Point, piece.Level)))
                 continue;
-            foreach (var t in BuildingGeometry.Mesh(Changes, piece))
+            foreach (var t in BuildingGeometry.CollisionMesh(Changes, piece))
             {
                 yield return new(t.A, t.B, new(.7f, .7f, 1));
                 yield return new(t.B, t.C, new(.7f, .7f, 1));

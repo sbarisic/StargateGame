@@ -12,7 +12,7 @@ public readonly record struct DebugLine(Vector3 A, Vector3 B, Vector3 Color);
 /// <summary>A single-owner simulation. Snapshot data is portable; native checkpoints belong to this world only.</summary>
 public sealed partial class PhysicsWorld : IDisposable
 {
-    const uint StaticLayer = 0, PropLayer = 1, CharacterLayer = 2;
+    const uint StaticLayer = 0, PropLayer = 1, CharacterLayer = 2, StairPropLayer = 3, StairPlayerLayer = 4;
     readonly PhysicsSystem system;
     readonly JobSystemThreadPool jobs;
     readonly nint allocator;
@@ -80,16 +80,20 @@ public sealed partial class PhysicsWorld : IDisposable
             hasWorldGeometry = buildWorld;
             World = new(definition, terrain);
             Changes = changes ?? WorldChanges.Empty;
-            var pairs = new ObjectLayerPairFilterTable(3);
+            var pairs = new ObjectLayerPairFilterTable(5);
             pairs.EnableCollision(StaticLayer, PropLayer);
             pairs.EnableCollision(StaticLayer, CharacterLayer);
             pairs.EnableCollision(PropLayer, PropLayer);
             pairs.EnableCollision(PropLayer, CharacterLayer);
-            var broad = new BroadPhaseLayerInterfaceTable(3, 2);
+            pairs.EnableCollision(StairPropLayer, PropLayer);
+            pairs.EnableCollision(StairPlayerLayer, CharacterLayer);
+            var broad = new BroadPhaseLayerInterfaceTable(5, 2);
             broad.MapObjectToBroadPhaseLayer(StaticLayer, 0);
+            broad.MapObjectToBroadPhaseLayer(StairPropLayer, 0);
+            broad.MapObjectToBroadPhaseLayer(StairPlayerLayer, 0);
             broad.MapObjectToBroadPhaseLayer(PropLayer, 1);
             broad.MapObjectToBroadPhaseLayer(CharacterLayer, 1);
-            var filter = new ObjectVsBroadPhaseLayerFilterTable(broad, 2, pairs, 3);
+            var filter = new ObjectVsBroadPhaseLayerFilterTable(broad, 2, pairs, 5);
             system = new(new()
             {
                 MaxBodies = 4096,
@@ -190,14 +194,48 @@ public sealed partial class PhysicsWorld : IDisposable
         bool buildings = PrepareBuildings(ordered, limit);
         return missing.All(preparedTerrain.ContainsKey) && buildings;
     }
-    public void SetTerrain(IEnumerable<ChunkCoordinate> coordinates)
+    public void SetTerrain(IEnumerable<ChunkCoordinate> coordinates, bool preparedOnly = false)
     {
         var requested = coordinates.ToArray();
-        PrepareTerrain(requested);
-        PrepareBuildings(requested, 256, true);
+        if (!preparedOnly)
+        {
+            PrepareTerrain(requested);
+            PrepareBuildings(requested, 256, true);
+        }
+        var commitWatch = System.Diagnostics.Stopwatch.StartNew();
         lock (NativeGate)
         {
             var wanted = requested.ToHashSet();
+            var nextState = stagedChanges ?? Changes;
+            if (wanted.Any(c => (!terrainBodies.ContainsKey(c) || dirtyTerrain.Contains(c)) && !preparedTerrain.ContainsKey(c)) ||
+                nextState.Pieces.GroupBy(p => Owner(nextState, p)).Any(g => wanted.Contains(g.Key) &&
+                    (!buildingBodies.ContainsKey(g.Key) || dirtyBuildings.Contains(g.Key)) && !preparedBuildings.ContainsKey(g.Key)))
+                throw new InvalidOperationException("Collision commit attempted before replacements were ready; active geometry retained.");
+            // Allocate every replacement before touching active bodies. If capacity
+            // or native allocation fails, roll back only the new bodies.
+            var nextTerrain = new Dictionary<ChunkCoordinate, BodyID>();
+            var nextBuildings = new Dictionary<ChunkCoordinate, List<BodyID>>();
+            try
+            {
+                foreach (var c in wanted.Where(c=>!terrainBodies.ContainsKey(c)||dirtyTerrain.Contains(c)).Order())
+                    nextTerrain.Add(c,AddBody(preparedTerrain[c],Vector3.Zero,Quaternion.Identity,false));
+                foreach (var c in preparedBuildings.Keys.Where(wanted.Contains).Order())
+                {
+                    nextBuildings[c] = [];
+                    foreach (var part in preparedBuildings[c])
+                        nextBuildings[c].Add(AddBody(part.Shape,Vector3.Zero,Quaternion.Identity,false,layer:part.Layer));
+                }
+            }
+            catch
+            {
+                foreach (var body in nextTerrain.Values.Concat(nextBuildings.Values.SelectMany(ids=>ids)))
+                {
+                    system.BodyInterface.RemoveBody(body);
+                    system.BodyInterface.DestroyBody(body);
+                    ownedBodies.Remove(body);
+                }
+                throw;
+            }
             // All native checkpoints belong to the previous body topology.
             foreach (var checkpoint in checkpoints.ToArray())
                 checkpoint.Dispose();
@@ -216,7 +254,7 @@ public sealed partial class PhysicsWorld : IDisposable
                 {
                     var shape = preparedTerrain[c];
                     preparedTerrain.Remove(c);
-                    terrainBodies.Add(c, (AddBody(shape, Vector3.Zero, Quaternion.Identity, false), shape));
+                    terrainBodies.Add(c, (nextTerrain[c], shape));
                 }
             foreach (var c in preparedTerrain.Keys.Where(c => !wanted.Contains(c)).ToArray())
             {
@@ -225,11 +263,12 @@ public sealed partial class PhysicsWorld : IDisposable
                 shapes.Remove(shape);
                 shape.Dispose();
             }
-            CommitBuildings(wanted);
+            CommitBuildings(wanted, nextBuildings);
             foreach (var c in characters.Values)
                 Refresh(c);
             system.OptimizeBroadPhase();
         }
+        Console.WriteLine($"COLLISION commit revision={Changes.Revision} chunks={requested.Length} ms={commitWatch.Elapsed.TotalMilliseconds:F2}");
     }
     public bool HasTerrain(Vector3 p, float margin = 3)
     {
@@ -244,9 +283,9 @@ public sealed partial class PhysicsWorld : IDisposable
             }
         return true;
     }
-    BodyID AddBody(Shape shape, Vector3 position, Quaternion rotation, bool dynamic, float mass = 10)
+    BodyID AddBody(Shape shape, Vector3 position, Quaternion rotation, bool dynamic, float mass = 10, uint? layer = null)
     {
-        using var settings = Native.Own(new BodyCreationSettings(shape, position, rotation, dynamic ? MotionType.Dynamic : MotionType.Static, dynamic ? PropLayer : StaticLayer));
+        using var settings = Native.Own(new BodyCreationSettings(shape, position, rotation, dynamic ? MotionType.Dynamic : MotionType.Static, layer ?? (dynamic ? PropLayer : StaticLayer)));
         settings.Friction = .6f;
         settings.Restitution = .05f;
         if (dynamic)
@@ -390,7 +429,7 @@ public sealed partial class PhysicsWorld : IDisposable
             return propDefinitions[support].Surface;
         // Streamed terrain, rocks and trunks share a body; preserve material on each triangle.
         var ground = terrainBodies.Values.FirstOrDefault(t => t.Body == c.GroundBodyId);
-        if (ground.Shape is null && buildingBodies.Values.FirstOrDefault(t => t.Body == c.GroundBodyId).Shape is MeshShape building)
+        if (ground.Shape is null && buildingBodies.Values.SelectMany(parts=>parts).FirstOrDefault(t => t.Body == c.GroundBodyId).Shape is MeshShape building)
             return (GroundSurface)building.GetTriangleUserData(c.GroundSubShapeId);
         if (ground.Shape is not MeshShape mesh)
             return GroundSurface.Stone;
@@ -474,8 +513,10 @@ public sealed partial class PhysicsWorld : IDisposable
                     if (onGround && !jump && !players[id].Swimming)
                         velocity.Y = Math.Min(velocity.Y, support.Y - Movement.Gravity * Movement.Dt);
                 }
-                c.LinearVelocity = c.CancelVelocityTowardsSteepSlopes(velocity);
-                Native.SG_CharacterStep(c.Handle, system.Handle, allocator, Movement.Dt, CharacterLayer, jump || !onGround && velocity.Y > .1f);
+                // ExtendedUpdate preserves this desired velocity for stair detection
+                // before applying its own steep-slope cancellation.
+                c.LinearVelocity = velocity;
+                Native.SG_CharacterStep(c.Handle, system.Handle, allocator, Movement.Dt, CharacterLayer, jump || !onGround && velocity.Y > 0 || players[id].Swimming);
                 players[id] = players[id] with
                 {
                     Yaw = input.Yaw,

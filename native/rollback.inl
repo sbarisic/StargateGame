@@ -5,6 +5,10 @@
 struct SG_Checkpoint { JPH::StateRecorderImpl data; };
 extern "C" {
 JPH_CAPI uint32_t SG_ABIVersion() { return 2; }
+#ifndef SG_BRIDGE_SOURCE_SHA
+#define SG_BRIDGE_SOURCE_SHA "unrecorded"
+#endif
+JPH_CAPI const char* SG_BridgeSourceIdentity() { return SG_BRIDGE_SOURCE_SHA; }
 JPH_CAPI bool SG_CharacterShape(JPH_CharacterVirtual* character, const JPH_Shape* shape,
     JPH_PhysicsSystem* system, void* allocator, uint32_t layer, bool checkClearance) {
     auto* physics = system->physicsSystem;
@@ -34,10 +38,12 @@ JPH_CAPI void SG_AllocatorDestroy(void* allocator) { delete static_cast<JPH::Tem
 JPH_CAPI uint32_t SG_Step(JPH_PhysicsSystem* system, float dt, void* allocator, JPH_JobSystem* jobs) {
     return static_cast<uint32_t>(system->physicsSystem->Update(dt, 1, static_cast<JPH::TempAllocatorImpl*>(allocator), reinterpret_cast<JPH::JobSystem*>(jobs)));
 }
-JPH_CAPI void SG_CharacterStep(JPH_CharacterVirtual* character, JPH_PhysicsSystem* system, void* allocator, float dt, uint32_t layer, bool jumping) {
+JPH_CAPI void SG_CharacterStep(JPH_CharacterVirtual* character, JPH_PhysicsSystem* system, void* allocator, float dt, uint32_t layer, bool suppressStepping) {
     JPH::CharacterVirtual::ExtendedUpdateSettings settings;
-    settings.mWalkStairsStepUp = JPH::Vec3(0, 0.30f, 0);
-    settings.mStickToFloorStepDown = jumping ? JPH::Vec3::sZero() : JPH::Vec3(0, -0.35f, 0);
+    settings.mWalkStairsMinStepForward = 0.02f;
+    settings.mWalkStairsStepForwardTest = 0.15f;
+    settings.mWalkStairsStepUp = suppressStepping ? JPH::Vec3::sZero() : JPH::Vec3(0, 0.30f, 0);
+    settings.mStickToFloorStepDown = suppressStepping ? JPH::Vec3::sZero() : JPH::Vec3(0, -0.35f, 0);
     auto* physics = system->physicsSystem;
     AsCharacterVirtual(character)->ExtendedUpdate(dt, physics->GetGravity(), settings,
         physics->GetDefaultBroadPhaseLayerFilter(layer), physics->GetDefaultLayerFilter(layer), {}, {},

@@ -22,7 +22,7 @@ public sealed record WorldChanges(Guid UniverseId, Guid LocationId, long Revisio
     } = new(Guid.Empty, Guid.Empty, 0, [], [], []);
     public bool IsRemoved(string category, ulong id) => Removed.Any(r => r.Category == category && r.Id == id);
 }
-public sealed record BuildCommand(Guid RequestId, long Revision, string Action, PieceKind Kind = PieceKind.SquareFoundation, Guid Target = default, int Socket = 0, Vector3 Anchor = default, int Rotation = 0, string Category = "", ulong SceneryId = 0, ChunkCoordinate Chunk = default, string Prefab = "");
+public sealed record BuildCommand(Guid RequestId, long Revision, string Action, PieceKind Kind = PieceKind.SquareFoundation, Guid Target = default, int Socket = 0, Vector3 Anchor = default, int Rotation = 0, string Category = "", ulong SceneryId = 0, ChunkCoordinate Chunk = default, string Prefab = "", Vector3? HitPoint = null);
 public sealed record BuildingMetrics(int Pieces, long Revision, int PendingEdits, int RebuiltBatches, int SaveQueue, double SaveMilliseconds);
 public sealed record BuildResult(Guid RequestId, bool Success, string Reason, long Revision, Guid[]? Dependents = null);
 public sealed record WorldStatePart(Guid LocationId, long Revision, int Index, int Count, StructureRecord[] Structures, BuildingPiece[] Pieces, SceneryRemoval[] Removed, Guid UniverseId);

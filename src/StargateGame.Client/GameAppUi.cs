@@ -1,5 +1,6 @@
 using System.Numerics;
 using FishGfx;
+using StargateGame.Building;
 using FishGfx.Game;
 using FishGfx.Graphics;
 
@@ -220,7 +221,13 @@ sealed partial class GameApp
             Panel(pass, l.Notice);
             Text(pass, 34, l.Notice.Y + 8, Fit("BUILD / " + SelectedBuild, l.Notice.W - 28, 16), 16, UiTheme.Amber);
             Text(pass, 34, l.Notice.Y + 31, Fit(buildHint, l.Notice.W - 28, 14), 14, previewEdit?.Valid == true ? UiTheme.Cyan : UiTheme.Error);
-            Text(pass, 34, l.Notice.Y + 53, Fit(session.BuildStatus.Length > 0 ? session.BuildStatus : "B Picker / Wheel Select / R Rotate / ESC Stop", l.Notice.W - 28, 14), 14);
+            Text(pass, 34, l.Notice.Y + 53, Fit(session.Feedback(BuildAction).Length > 0 ? session.Feedback(BuildAction) : "B Picker / Wheel Select / R Rotate / ESC Stop", l.Notice.W - 28, 14), 14);
+            if (buildSelection >= BuildingPrefabs.Palette.Count && DemolitionProgress > 0)
+            {
+                Rect(pass, 34, l.Notice.Bottom - 5, l.Notice.W - 28, 3, UiTheme.Muted);
+                Rect(pass, 34, l.Notice.Bottom - 5, (float)((l.Notice.W - 28)*DemolitionProgress), 3, UiTheme.Amber);
+                Text(pass, l.Notice.Right - 70, l.Notice.Y + 8, $"{DemolitionProgress:P0}", 14, UiTheme.Amber);
+            }
         }
         else if (session.ShowItemNotice || session.TerrainStatus.Length > 0 && timer.Elapsed.TotalSeconds < hudStatusUntil)
         {

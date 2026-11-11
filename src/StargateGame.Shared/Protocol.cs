@@ -269,7 +269,7 @@ public sealed record Message
 
 public static class Protocol
 {
-    public const int Version = 23, MaxFrameBytes = 65536;
+    public const int Version = 25, MaxFrameBytes = 65536;
     public static readonly JsonSerializerOptions Json = new() { IncludeFields = true, MaxDepth = 16 };
     public static async Task WriteAsync(Stream stream, Message message, CancellationToken token = default)
     {

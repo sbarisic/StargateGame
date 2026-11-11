@@ -14,6 +14,8 @@ sealed partial class SceneRenderer
     readonly HashSet<string> settlementFar = [];
     WorldChanges buildingState = WorldChanges.Empty;
     bool buildingModelsPending;
+    Mesh3D? buildingBaseMesh;
+    long buildingBaseBytes;
     int buildingModelCount = -1;
     readonly Dictionary<ChunkCoordinate, (BuildingPiece[] Pieces, Mesh3D Mesh, AxisAlignedBoundingBox Bounds)> buildingMeshes = [];
     readonly HashSet<(string, ulong)> removedScenery = [];
@@ -26,19 +28,32 @@ sealed partial class SceneRenderer
         if (ReferenceEquals(changes, buildingState) && (!buildingModelsPending || buildingModelCount == models.Count))
             return;
         bool ready = true;
+        var baseTriangles = BuildingBaseCourses.Mesh(changes);
+        if (baseTriangles.Length > 0) ready &= RequestModel("kit-stone-foundation");
         foreach (var piece in changes.Pieces.Where(p => p.Kind == PieceKind.Prefab).Concat(BuildingCorners.Pieces(changes)))
             ready &= RequestModel(piece.Prefab);
+        if (!ready && changes.LocationId == buildingState.LocationId)
+        {
+            buildingModelsPending = true;
+            buildingModelCount = models.Count;
+            return; // Keep the complete old visual revision while uploads finish.
+        }
         if (changes.LocationId != buildingState.LocationId)
             ClearBuildings();
         buildingModelsPending = !ready;
         buildingModelCount = models.Count;
         buildingState = changes;
+        var replacementBase = baseTriangles.Length > 0 ? BuildingMesh(baseTriangles, 2) : null;
+        buildingBaseMesh?.Dispose();
+        buildingBaseMesh = replacementBase;
+        buildingBaseBytes = (long)baseTriangles.Length * 3 * 32;
         removedScenery.Clear();
         foreach (var r in changes.Removed)
             removedScenery.Add((r.Category, r.Id));
         buildingPrefabs.Clear();
         foreach (var p in changes.Pieces.Where(p => p.Kind == PieceKind.Prefab).Concat(BuildingCorners.Pieces(changes)))
         {
+            if (BuildingBaseCourses.ReplacesOwner(changes,p.Id)) continue;
             if (!models.ContainsKey(p.Prefab))
                 continue;
             if (BuildingPrefabs.Get(p.Prefab).Group == "Generated" && BuildingPrefabs.Get(p.Prefab).Role != "furnishing" && !BuildingPrefabs.IsDoor(p) && !settlementFar.Contains(p.Prefab))
@@ -62,16 +77,17 @@ sealed partial class SceneRenderer
         {
             if (buildingMeshes.TryGetValue(c, out var old) && old.Pieces.SequenceEqual(pieces))
                 continue;
-            old.Mesh?.Dispose();
             var triangles = pieces.SelectMany(p => BuildingGeometry.Mesh(changes, p)).ToArray();
-            buildingMeshes[c] = (pieces, BuildingMesh(triangles), AxisAlignedBoundingBox.FromPoints(triangles.SelectMany(t => new[] { t.A, t.B, t.C })));
+            var replacement = BuildingMesh(triangles);
+            old.Mesh?.Dispose();
+            buildingMeshes[c] = (pieces, replacement, AxisAlignedBoundingBox.FromPoints(triangles.SelectMany(t => new[] { t.A, t.B, t.C })));
         }
         RebuildPrefabBuckets();
         shadows.InvalidateAll();
         InvalidateGateShadows();
         fogRoomRevision = -1;
     }
-    Mesh3D BuildingMesh(BuildTriangle[] triangles)
+    Mesh3D BuildingMesh(BuildTriangle[] triangles, float textureMetres = 2)
     {
         var vertices = triangles.SelectMany(t => new[] { t.A, t.B, t.C }).ToArray();
         var normals = triangles.SelectMany(t => Enumerable.Repeat(Vector3.Normalize(Vector3.Cross(t.B - t.A, t.C - t.A)), 3)).ToArray();
@@ -79,13 +95,13 @@ sealed partial class SceneRenderer
         {
             var normal = normals[i];
             if (Math.Abs(normal.Y) > .5f)
-                return new Vector2(v.X, v.Z) / 2f;
+                return new Vector2(v.X, v.Z) / textureMetres;
             // Unit horizontal tangent avoids compressed textures on 30/60-degree walls.
             // Canonical sign gives coplanar overlaps exactly the same texture coordinates.
             var tangent = Vector3.Normalize(new Vector3(normal.Z, 0, -normal.X));
             if (tangent.X < -.001f || Math.Abs(tangent.X) <= .001f && tangent.Z < 0)
                 tangent = -tangent;
-            return new Vector2(Vector3.Dot(v, tangent), v.Y) / 2f;
+            return new Vector2(Vector3.Dot(v, tangent), v.Y) / textureMetres;
         }).ToArray();
         var mesh = graphics.CreateMesh3D();
         mesh.SetVertices(vertices);
@@ -117,6 +133,20 @@ sealed partial class SceneRenderer
         program.SetUniform("uTerrain", 0);
         program.SetUniform("uTint", Vector3.One);
         program.SetUniform("uHasModelNormal", 0);
+        if (buildingBaseMesh is not null && models.TryGetValue("kit-stone-foundation", out var masonry))
+        {
+            var stone = masonry[0];
+            program.SetUniform("uModelHeightScale", depth ? 0 : stone.HeightScale);
+            program.SetUniform("uHasModelNormal", !depth && stone.normal is not null ? 1 : 0);
+            program.SetUniform("uHasMetallicRoughness", !depth && stone.MetallicRoughness is not null ? 1 : 0);
+            program.SetUniform("uMetallicRoughness", 6);
+            using var stoneNormal = depth ? null : stone.normal?.Bind(5);
+            using var stoneRoughness = depth ? null : stone.MetallicRoughness?.Bind(6);
+            Mesh(pass, buildingBaseMesh, depth ? white : stone.texture, program);
+            program.SetUniform("uHasModelNormal", 0);
+            program.SetUniform("uHasMetallicRoughness", 0);
+        program.SetUniform("uModelHeightScale", 0f);
+        }
         using var twoSided = pass.PushState(pass.State with
         {
             CullMode = CullMode.None
@@ -155,6 +185,7 @@ sealed partial class SceneRenderer
                 program.SetUniform("uHasModelNormal", !depth && part.normal is not null ? 1 : 0);
                 program.SetUniform("uHasMetallicRoughness", !depth && part.MetallicRoughness is not null ? 1 : 0);
                 program.SetUniform("uMetallicRoughness", 6);
+                program.SetUniform("uModelHeightScale", depth ? 0 : part.HeightScale);
                 using var n = depth ? null : part.normal?.Bind(5);
                 using var mr = depth ? null : part.MetallicRoughness?.Bind(6);
                 program.SetUniform("uTreeMode", 0);
@@ -172,6 +203,7 @@ sealed partial class SceneRenderer
         }
         program.SetUniform("uHasModelNormal", 0);
         program.SetUniform("uHasMetallicRoughness", 0);
+        program.SetUniform("uModelHeightScale", 0f);
         program.SetUniform("uFoliageCutoff", 0f);
     }
     void DrawBuildPreview(RenderPass pass)
@@ -189,9 +221,13 @@ sealed partial class SceneRenderer
     }
     void ClearBuildings()
     {
+        ClearDemolition();
         foreach (var b in buildingMeshes.Values)
             b.Mesh.Dispose();
         buildingMeshes.Clear();
+        buildingBaseMesh?.Dispose();
+        buildingBaseMesh = null;
+        buildingBaseBytes = 0;
         buildingPrefabs.Clear();
         prefabBuckets.Clear();
         removedScenery.Clear();

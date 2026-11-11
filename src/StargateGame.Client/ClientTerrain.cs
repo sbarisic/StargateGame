@@ -53,6 +53,7 @@ sealed partial class ClientSession
     readonly HashSet<ChunkCoordinate> requested = [];
     long activationTick, nextVisualRequest, lastCancelledTransfer;
     bool readySent, dataReady;
+    long geometryStarted;
     public void CancelPlanetLoad()
     {
         if (Developer)
@@ -111,11 +112,12 @@ sealed partial class ClientSession
                 if (transfer is not null)
                     throw new InvalidDataException("Overlapping terrain preparations.");
                 transfer = new(message);
+                geometryStarted = Stopwatch.GetTimestamp();
                 readySent = false;
                 dataReady = false;
                 if (incomingWorld?.State is not { } changes)
                     throw new InvalidDataException("Missing prepared world changes.");
-                if (changes.LocationId != message.Planet!.LocationId || changes.UniverseId != message.Planet.UniverseId)
+                if (incomingWorldTransfer != message.TransferId || changes.Revision != message.ContentRevision || changes.LocationId != message.Planet!.LocationId || changes.UniverseId != message.Planet.UniverseId)
                     throw new InvalidDataException("World identity mismatch.");
                 StargateGame.Building.BuildingRules.ValidateState(changes);
                 preparedChanges = changes;
@@ -201,6 +203,9 @@ sealed partial class ClientSession
                 if (transfer.Preparation.RegenerateHome) { PlanetVisualPending = true; BuildPending = false; BuildStatus = ""; LastBuildResult = null; pendingCarry = CarryAction.None; pendingGrab = default; }
                 var prep = transfer.Preparation;
                 var baseline = message.State;
+                var commitWatch = Stopwatch.StartNew();
+                double commitNow = Now;
+                var beforeCommit = presentation.Sample(prediction.PreviousState, prediction.CurrentState, localId, clock.PredictionTime(commitNow) - 1, commitNow);
                 if (prep.SwitchPlanet)
                 {
                     ClearDial();
@@ -224,14 +229,20 @@ sealed partial class ClientSession
                 latest = baseline.Players;
                 LastSnapshot = baseline;
                 ServerTick = baseline.Tick;
-                clock.Anchor(baseline.Tick, Now, true);
-                presentation.Clear();
-                remotePresentation.Clear();
+                clock.Anchor(baseline.Tick, Now, prep.SwitchPlanet);
+                if (prep.SwitchPlanet)
+                {
+                    presentation.Clear();
+                    remotePresentation.Clear();
+                }
+                else
+                    presentation.Correct(beforeCommit, PredictionPresentation.Interpolate(prediction.PreviousState, prediction.CurrentState, localId, clock.PredictionTime(commitNow) - 1), commitNow);
                 remotePresentation.Add(baseline);
                 lastTarget = relocating ? baseline.Tick : Math.Max(lastTarget, baseline.Tick);
-                pendingJump = false;
+                if (prep.SwitchPlanet) pendingJump = false;
                 if (relocating)
                     sequence = baseline.Players.Single(p => p.Id == localId).LastInput;
+                Console.WriteLine($"GEOMETRY committed transfer={prep.TransferId} location={World.Definition.LocationId} revision={Changes.Revision} reconciliationMs={commitWatch.Elapsed.TotalMilliseconds:F2}");
                 activationTick = 0;
                 transfer = null;
                 targetStore = null;
@@ -268,10 +279,23 @@ sealed partial class ClientSession
     {
         if (transfer is null || !dataReady || readySent)
             return;
-        if (!(preparedWorld ?? prediction.Simulation).PrepareTerrainBatch(transfer.Preparation.CollisionChunks!))
+        try
+        {
+            if (!(preparedWorld ?? prediction.Simulation).PrepareTerrainBatch(transfer.Preparation.CollisionChunks!)) return;
+        }
+        catch (Exception ex) when (!transfer.Preparation.SwitchPlanet && ex is IOException or InvalidOperationException or ArgumentException)
+        {
+            long failed = transfer.Preparation.TransferId;
+            Console.Error.WriteLine($"GEOMETRY preparation failed transfer={failed}; active collision retained: {ex}");
+            prediction.Simulation.CancelChanges();
+            lastCancelledTransfer = Math.Max(lastCancelledTransfer,failed);
+            transfer = null; targetStore = null; activationTick = 0; readySent = dataReady = false;
+            TerrainStatus = "Geometry update failed; previous collision retained.";
+            connection.Peer.Send(new() { Kind = "terrain-failed", TransferId = failed, LocationId = World.Definition.LocationId });
             return;
+        }
         if (preparedWorld is not null)
-            preparedWorld.SetTerrain(transfer.Preparation.CollisionChunks!);
+            preparedWorld.SetTerrain(transfer.Preparation.CollisionChunks!, preparedOnly: true);
         if (Transit is { } transit)
         {
             if (!TransitReady)
@@ -289,6 +313,7 @@ sealed partial class ClientSession
                 Kind = "terrain-ready",
                 TransferId = transfer.Preparation.TransferId
             });
+        Console.WriteLine($"GEOMETRY ready transfer={transfer.Preparation.TransferId} location={transfer.Preparation.Planet!.LocationId} revision={preparedChanges!.Revision} preparationMs={Stopwatch.GetElapsedTime(geometryStarted).TotalMilliseconds:F1}");
         readySent = true;
         TerrainStatus = "Terrain ready; synchronizing simulation...";
     }

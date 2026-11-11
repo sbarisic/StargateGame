@@ -103,7 +103,7 @@ sealed partial class GameApp
             }
             if (buildPaletteOpen)
             {
-                palettePage = Math.Clamp(palettePage + (e.Offset.Y > 0 ? -1 : 1), 0, (BuildItemCount - 1) / Layout.PageSize);
+                palettePage = Math.Clamp(palettePage + (e.Offset.Y > 0 ? -1 : 1), 0, (BuildPaletteItemCount - 1) / Layout.PageSize);
                 return;
             }
             if (debugPhysics && !buildMode && !paused)
@@ -200,6 +200,7 @@ sealed partial class GameApp
                     benchmarkDustGpu.Add(scene.World.Definition.Preset == "desert" ? scene.FogGpuMilliseconds + scene.WeatherGpuMilliseconds : 0);
                 }
                 previous = now;
+                targetingFrame++;
                 input.BeginFrame();
                 window.PollEvents();
                 CompleteConnection();
@@ -271,6 +272,7 @@ sealed partial class GameApp
                         jumpQueued = false;
                         if (!bookInputConsumed && !uiInputConsumed && !uiMouseGuard && !session.TransitLocked)
                             BuildingInput(input);
+                        else { CancelDemolition(); scene?.Demolition(null, [], false); }
                         if (Smoke)
                         {
                             SmokeActions(now);
@@ -390,7 +392,8 @@ sealed partial class GameApp
         paletteMouseGuard = false;
         previewCommand = null;
         previewEdit = null;
-        demolitionStarted = 0;
+        CancelDemolition();
+        demolitionState=null;
         window.CaptureCursor = false;
         status = reason;
         paused = false;
@@ -403,6 +406,8 @@ sealed partial class GameApp
     }
     void SetPause(bool value)
     {
+        CancelDemolition();
+        scene?.Demolition(null, [], false);
         if (!value) exposureMenu = false;
         if (value && buildPaletteOpen)
             SetBuildPalette(false);
@@ -497,6 +502,8 @@ sealed partial class GameApp
                 if (buildMode)
                 {
                     buildMode = false;
+                    CancelDemolition();
+                    scene?.Demolition(null, [], false);
                     scene?.Preview(null, false);
                     return;
                 }

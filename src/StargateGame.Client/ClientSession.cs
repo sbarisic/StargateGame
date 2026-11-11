@@ -114,7 +114,7 @@ sealed partial class ClientSession : IDisposable
                     if (World.Definition.Fixture != "gate-pair" || message.LocationId != World.Definition.LocationId || message.State is not { } baseline)
                         throw new InvalidDataException("Invalid fixture arrival.");
                     newest = null;
-                    prediction.CommitTerrain(Physics.TerrainCoordinates.ToArray(), baseline);
+                    prediction.CommitTerrain(Physics.TerrainCoordinates.ToArray(), baseline, replayInputs: false);
                     latest = baseline.Players;
                     LastSnapshot = baseline;
                     ServerTick = baseline.Tick;
@@ -256,7 +256,7 @@ sealed partial class ClientSession : IDisposable
         }
         pendingJump |= jump;
         long target = Math.Min((long)Math.Floor(clock.PredictionTime(Now)), ServerTick + 24);
-        if (activationTick > 0)
+        if (activationTick > 0 && transfer?.Preparation.SwitchPlanet == true)
             target = Math.Min(target, activationTick - 1);
         if (target <= lastTarget || target <= prediction.Simulation.Tick)
             return;

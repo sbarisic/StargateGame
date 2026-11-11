@@ -208,9 +208,17 @@ static class SettlementChecks
         Verify.Check(firstFurniture.Length > 0 && firstFurniture.SequenceEqual(secondFurniture), "both clients receive identical furniture identities and transforms under latency/jitter");
         var structure = GeneratedBuildings.Identity(first.World.Definition.LocationId, $"structure:{plot.Id}");
         var door = first.Changes.Pieces.First(p => p.StructureId == structure && BuildingPrefabs.IsDoor(p));
+        Vector3 DoorHit()
+        {
+            var mesh = BuildingGeometry.Mesh(first.Changes, first.Changes.Pieces.Single(p=>p.Id==door.Id));
+            var bounds = BuildingGeometry.Bounds(mesh);
+            var eye = Movement.EyePosition(first.Local);
+            var direction = Vector3.Normalize((bounds.Min+bounds.Max)/2-eye);
+            return eye + direction * (BuildingGeometry.Ray(eye,direction,mesh,8) ?? throw new InvalidOperationException("Door is not in reach."));
+        }
         for (int attempt = 0; attempt < 12; attempt++)
         {
-            first.Build(new(Guid.NewGuid(), first.Changes.Revision, "door", Target: door.Id));
+            first.Build(new(Guid.NewGuid(), first.Changes.Revision, "door", Target: door.Id, HitPoint: DoorHit()));
             for (int i = 0; i < 150 && first.BuildPending; i++)
                 await Pump(100);
             if (first.LastBuildResult?.Success == true || first.LastBuildResult?.Reason != "World update in progress; try again.")

@@ -31,6 +31,15 @@ internal static class Native
             {
                 if (SG_ABIVersion() != 2)
                     throw new InvalidOperationException("Incorrect StargateGame Jolt runtime. Rebuild client, server and the native bridge together for tactical movement.");
+                using (var source = typeof(Native).Assembly.GetManifestResourceStream("SimulationSource.rollback.inl")!)
+                using (var reader = new StreamReader(source))
+                {
+                    string expected = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(reader.ReadToEnd().Replace("\r\n", "\n"))));
+                    string actual = Marshal.PtrToStringUTF8(SG_BridgeSourceIdentity()) ?? "unknown";
+                    Console.WriteLine($"Native bridge source: loaded={actual} expected={expected}");
+                    if (!actual.Equals(expected, StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidOperationException("Stale native physics library. Run python tools/build_native.py, then rebuild matching client and server binaries.");
+                }
                 if (!Foundation.Init())
                     throw new InvalidOperationException("Jolt initialization failed.");
                 initialized = true;
@@ -39,7 +48,7 @@ internal static class Native
             }
             catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException)
             {
-                throw new InvalidOperationException("The packaged StargateGame Jolt x64 runtime is missing or incompatible. Rebuild/publish the application with its native library.", ex);
+                throw new InvalidOperationException("The packaged StargateGame Jolt x64 runtime is missing or stale. Run python tools/build_native.py, then rebuild client and server.", ex);
             }
         }
     }
@@ -49,6 +58,7 @@ internal static class Native
     [return: MarshalAs(UnmanagedType.I1)]
     internal static extern bool Buoyancy(nint bodyInterface, BodyID id, in Vector3 surface, in Vector3 normal, float buoyancy, float linearDrag, float angularDrag, in Vector3 flow, in Vector3 gravity, float dt);
     [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)] static extern uint SG_ABIVersion();
+    [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)] static extern nint SG_BridgeSourceIdentity();
     [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.I1)]
     internal static extern bool SG_CharacterShape(nint character, nint shape, nint system, nint allocator, uint layer, [MarshalAs(UnmanagedType.I1)] bool checkClearance);
@@ -61,6 +71,6 @@ internal static class Native
     [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)] internal static extern nint SG_AllocatorCreate();
     [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)] internal static extern void SG_AllocatorDestroy(nint allocator);
     [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)] internal static extern uint SG_Step(nint system, float dt, nint allocator, nint jobs);
-    [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)] internal static extern void SG_CharacterStep(nint character, nint system, nint allocator, float dt, uint layer, [MarshalAs(UnmanagedType.I1)] bool jumping);
+    [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)] internal static extern void SG_CharacterStep(nint character, nint system, nint allocator, float dt, uint layer, [MarshalAs(UnmanagedType.I1)] bool suppressStepping);
     [DllImport("joltc", CallingConvention = CallingConvention.Cdecl)] internal static extern void SG_Refresh(nint character, nint system, nint allocator, uint layer);
 }

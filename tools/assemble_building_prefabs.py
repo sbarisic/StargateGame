@@ -1,13 +1,18 @@
 """Compose ready-to-place kit pieces from imported runtime assets.
 Run normally after import_building_kit.py; use Blender -b --python this_file
-to also render the three combined thumbnails. Original kit files stay intact.
+to also render missing selectable-catalog thumbnails. Original kit files stay intact.
 """
 
 import json, math, struct, hashlib
+import sys
 from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'tools'))
+from build_wall_caps import generate_caps
+from build_door_collision import generate_doors
+from build_stair_reference import generate_reference
 MODELS = ROOT / "assets/models"
 BUILD = ROOT / "assets/building"
 recipes = {
@@ -41,6 +46,8 @@ recipes = {
     ),
 }
 hidden = {
+    "kit-stair-interior-simple", "kit-stairs-exterior-platform",
+    "fort-swing-gate", "fort-sliding-gate", "fort-bollard", "fort-gate-control",
     "kit-wall-unevenbrick-window-wide-flat",
     "kit-window-wide-flat1",
     "kit-wall-unevenbrick-door-flat",
@@ -106,6 +113,7 @@ for key, (title, base, components, children) in recipes.items():
 for p in catalog:
     if p["id"] in hidden:
         p["selectable"] = False
+catalog = generate_doors(generate_reference(generate_caps(catalog, MODELS), MODELS), MODELS)
 (BUILD / "prefabs.json").write_text(json.dumps(catalog, separators=(",", ":")) + "\n")
 (BUILD / "assemblies.json").write_text(
     json.dumps(
@@ -125,17 +133,34 @@ print(
 )
 
 try:
+    from import_masonry_materials import install as install_masonry
+except ModuleNotFoundError as error:
+    if error.name != "PIL":
+        raise
+    # Blender does not bundle Pillow; use the asset pipeline's system Python.
+    import subprocess, shutil
+    subprocess.run([shutil.which("python"), str(ROOT / "tools/import_masonry_materials.py")], check=True)
+else:
+    install_masonry()
+
+try:
     import bpy
 except ImportError:
     raise SystemExit(0)
 from mathutils import Vector
 
-for key, (_, _, _, children) in recipes.items():
+for prefab in catalog:
+    if not prefab.get("selectable", True):
+        continue
+    key = prefab["id"]
+    if "--refresh-icons" not in sys.argv and (ROOT / "assets/gui/building" / (key + ".png")).exists():
+        continue
+    children = prefab.get("children") or []
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
     all_points = []
     manifests = [(key, (0, 0, 0), 0)] + [
-        (c["prefab"], c["offset"], c["rotation"]) for c in children
+        (c["prefab"], c["offset"], c.get("rotation", 0)) for c in children
     ]
     for model, offset, angle in manifests:
         for part in json.loads((MODELS / (model + ".json")).read_text())["parts"]:
@@ -166,6 +191,28 @@ for key, (_, _, _, children) in recipes.items():
                 str(MODELS / part["texture"]), check_existing=True
             )
             material.node_tree.links.new(tex.outputs["Color"], bs.inputs["Base Color"])
+            nodes, links = material.node_tree.nodes, material.node_tree.links
+            if part.get("metallicRoughness"):
+                mr = nodes.new("ShaderNodeTexImage")
+                mr.image = bpy.data.images.load(str(MODELS / part["metallicRoughness"]), check_existing=True)
+                mr.image.colorspace_settings.name = "Non-Color"
+                channels = nodes.new("ShaderNodeSeparateColor")
+                links.new(mr.outputs["Color"], channels.inputs["Color"])
+                links.new(channels.outputs["Green"], bs.inputs["Roughness"])
+                links.new(channels.outputs["Blue"], bs.inputs["Metallic"])
+            if part.get("normal"):
+                normal = nodes.new("ShaderNodeTexImage")
+                normal.image = bpy.data.images.load(str(MODELS / part["normal"]), check_existing=True)
+                normal.image.colorspace_settings.name = "Non-Color"
+                flip = nodes.new("ShaderNodeVectorMath"); flip.operation = "MULTIPLY"
+                flip.inputs[1].default_value = (1, -1, 1)
+                normal_offset = nodes.new("ShaderNodeVectorMath"); normal_offset.operation = "ADD"
+                normal_offset.inputs[1].default_value = (0, 1, 0)
+                links.new(normal.outputs["Color"], flip.inputs[0])
+                links.new(flip.outputs["Vector"], normal_offset.inputs[0])
+                mapped = nodes.new("ShaderNodeNormalMap")
+                links.new(normal_offset.outputs["Vector"], mapped.inputs["Color"])
+                links.new(mapped.outputs["Normal"], bs.inputs["Normal"])
             mesh.materials.append(material)
     lo = Vector(tuple(min(p[i] for p in all_points) for i in range(3)))
     hi = Vector(tuple(max(p[i] for p in all_points) for i in range(3)))

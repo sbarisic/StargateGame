@@ -279,6 +279,10 @@ public sealed partial class GameServer : IAsyncDisposable
         UpdateTerrain();
         if (freezeTick)
         {
+            // Persistence/travel may defer this exact tick. Do not lose inputs
+            // already dequeued before the boundary was deferred.
+            foreach (var peer in sessions)
+                if (inputs.TryGetValue(peer.PlayerId,out var held)) peer.Inputs.TryAdd(NextTick,held);
             foreach (var peer in sessions.Where(s => !s.Peer.Closed))
                 PumpTerrain(peer);
             return;
@@ -388,7 +392,11 @@ public sealed partial class GameServer : IAsyncDisposable
             return Reject(session, "Too many pending movement inputs.");
         session.LastSequence = input.Sequence;
         session.LastTarget = input.TargetTick;
-        if (message.Epoch != physics.Epoch && runtime is not null || input.TargetTick < NextTick)
+        bool previousGeometry = message.Epoch == session.PreviousGeometryEpoch &&
+            session.GeometryLocation == physics.World.Definition.LocationId &&
+            physics.Epoch == session.PreviousGeometryEpoch + 1 && NextTick <= session.GeometryInputDeadline;
+        if (message.Epoch == physics.Epoch) session.PreviousGeometryEpoch = -1;
+        if (message.Epoch != physics.Epoch && !previousGeometry && runtime is not null || input.TargetTick < NextTick)
             physics.Acknowledge(session.PlayerId, input.Sequence);
         else
             session.Inputs.Add(input.TargetTick, input);
@@ -475,6 +483,8 @@ public sealed partial class GameServer : IAsyncDisposable
     }
     sealed class Session(Peer peer, bool loopback)
     {
+        public long PreviousGeometryEpoch = -1, GeometryInputDeadline;
+        public Guid GeometryLocation;
         public Peer Peer
         {
             get;

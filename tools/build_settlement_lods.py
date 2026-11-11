@@ -1,6 +1,6 @@
 """Blender background pass over imported assemblies; preserves material UV seams."""
 
-import bpy, bmesh, json, struct, math
+import bpy, bmesh, json, struct, math, sys
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
@@ -8,6 +8,7 @@ models = root / "assets/models"
 records = []
 for template in json.loads((root / "assets/settlements/templates.json").read_text()):
     name = template["id"]
+    if "--houses-only" in sys.argv and not name.startswith(("settlement-mega-house-", "settlement-seahill-house-")): continue
     manifest = json.loads((models / (name + ".json")).read_text())
     entries = []
     before = after = 0
@@ -67,6 +68,10 @@ for template in json.loads((root / "assets/settlements/templates.json").read_tex
     )
     records.append(dict(model=name, nearTriangles=before, farTriangles=after))
     print(name, before, "->", after, flush=True)
+if "--houses-only" in sys.argv:
+    previous = json.loads((root / "assets/settlements/lods.json").read_text())
+    updated = {r['model']: r for r in records}
+    records = [updated.pop(r['model'], r) for r in previous['models']] + list(updated.values())
 (root / "assets/settlements/lods.json").write_text(
     json.dumps(
         dict(

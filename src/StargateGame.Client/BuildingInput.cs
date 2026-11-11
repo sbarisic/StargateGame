@@ -20,102 +20,100 @@ sealed partial class GameApp
     ulong heldScenery;
     Vector3 Look => new(MathF.Sin(yaw) * MathF.Cos(pitch), MathF.Sin(pitch), -MathF.Cos(yaw) * MathF.Cos(pitch));
     string SelectedBuild => BuildName(buildSelection);
+    bool demolitionNeedsRelease;
+    WorldChanges? demolitionState;
+    Guid demolitionPreviewTarget, demolitionOwner;
+    Guid[] demolitionHighlightIds=[];
+    string demolitionName = "";
+    string BuildAction => buildSelection < BuildingPrefabs.Palette.Count ? "place" : buildSelection == BuildingPrefabs.Palette.Count ? "remove" : "clear";
+    double DemolitionProgress => demolitionStarted == 0 ? 0 : Math.Clamp(timer.Elapsed.TotalSeconds-demolitionStarted,0,1);
+    void CancelDemolition(bool requireRelease = true)
+    {
+        demolitionStarted=0; heldTarget=Guid.Empty; heldScenery=0;
+        if(requireRelease)demolitionNeedsRelease=true;
+    }
     void BuildingInput(InputManager input)
     {
-        if (session is null)
+        bool down=input.IsMouseButtonDown(MouseButton.Left);
+        if(!down) { CancelDemolition(false); demolitionNeedsRelease=false; }
+        if(session is null || paused || buildPaletteOpen || !buildMode)
+        { CancelDemolition(); scene?.Demolition(null,[],false); return; }
+        if(paletteMouseGuard)
+        {
+            if(down) { CancelDemolition(); return; }
+            paletteMouseGuard=false;
+        }
+        if(input.WasKeyPressed(Key.R)) {buildRotation=(buildRotation+1)%12;nextBuildPreview=0;}
+        if(input.WasKeyPressed(Key.PageUp)) {buildElevation+=.25f;nextBuildPreview=0;}
+        if(input.WasKeyPressed(Key.PageDown)) {buildElevation-=.25f;nextBuildPreview=0;}
+        if(buildSelection==BuildingPrefabs.Palette.Count || timer.Elapsed.TotalSeconds>=nextBuildPreview || input.WasMouseButtonPressed(MouseButton.Left))
+        { UpdateBuildPreview(); nextBuildPreview=timer.Elapsed.TotalSeconds+.1; }
+        if(previewCommand is null || previewEdit?.Valid!=true)
+        { if(down)CancelDemolition(); return; }
+        if(buildSelection<BuildingPrefabs.Palette.Count)
+        {
+            CancelDemolition();
+            if(input.WasMouseButtonPressed(MouseButton.Left)) session.Build(previewCommand with{RequestId=Guid.NewGuid()});
             return;
-        if (paused)
-            return;
-        if (paletteMouseGuard)
-        {
-            if (input.IsMouseButtonDown(MouseButton.Left))
-                return;
-            paletteMouseGuard = false;
         }
-        if (input.WasKeyPressed(Key.R))
+        if(!down||demolitionNeedsRelease||session.BuildPending)return;
+        if(demolitionStarted!=0 && (heldTarget!=(BuildAction=="remove"?demolitionOwner:previewCommand.Target)||heldScenery!=previewCommand.SceneryId))
+        {CancelDemolition();return;}
+        if(demolitionStarted==0)
+        {demolitionStarted=timer.Elapsed.TotalSeconds;heldTarget=BuildAction=="remove"?demolitionOwner:previewCommand.Target;heldScenery=previewCommand.SceneryId;}
+        if(DemolitionProgress>=1)
         {
-            buildRotation = (buildRotation + 1) % 12;
-            nextBuildPreview = 0;
+            session.Build(previewCommand with{RequestId=Guid.NewGuid()});
+            CancelDemolition(); // Exactly one request per press, including rejections.
         }
-        if (input.WasKeyPressed(Key.PageUp))
-        {
-            buildElevation += .25f;
-            nextBuildPreview = 0;
-        }
-        if (input.WasKeyPressed(Key.PageDown))
-        {
-            buildElevation -= .25f;
-            nextBuildPreview = 0;
-        }
-        if (!buildMode)
-            return;
-        if (timer.Elapsed.TotalSeconds >= nextBuildPreview || input.WasMouseButtonPressed(MouseButton.Left))
-        {
-            UpdateBuildPreview();
-            nextBuildPreview = timer.Elapsed.TotalSeconds + .1;
-        }
-        if (!buildMode || previewCommand is null)
-            return;
-        if (buildSelection < BuildingPrefabs.Palette.Count)
-        {
-            if (input.WasMouseButtonPressed(MouseButton.Left) && previewEdit?.Valid == true)
-                session.Build(previewCommand with
-                {
-                    RequestId = Guid.NewGuid()
-                });
-        }
-        else if (input.IsMouseButtonDown(MouseButton.Left))
-        {
-            if (demolitionStarted == 0 || heldTarget != previewCommand.Target || heldScenery != previewCommand.SceneryId)
-            {
-                demolitionStarted = timer.Elapsed.TotalSeconds;
-                heldTarget = previewCommand.Target;
-                heldScenery = previewCommand.SceneryId;
-            }
-            if (timer.Elapsed.TotalSeconds - demolitionStarted >= 1 && !session.BuildPending)
-            {
-                session.Build(previewCommand with
-                {
-                    RequestId = Guid.NewGuid()
-                });
-                demolitionStarted = 0;
-            }
-        }
-        else
-            demolitionStarted = 0;
     }
+    long targetingFrame, pickedFrame=-1;
+    WorldChanges? pickedState;
+    Vector3 pickedEye, pickedAim;
+    (BuildingPiece? Piece,Vector3 Point) pickedResult;
     (BuildingPiece? Piece, Vector3 Point) PickPiece()
     {
-        var eye = Movement.EyePosition(session!.Local);
-        float best = 8;
-        BuildingPiece? found = null;
-        foreach (var p in session.Changes.Pieces)
+        var eye = camera.Position;
+        var aim = camera.WorldForwardNormal;
+        if(pickedFrame==targetingFrame && ReferenceEquals(pickedState,session!.Changes) && pickedEye==eye && pickedAim==aim)return pickedResult;
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+        var query = session!.Physics.BuildingQuery;
+        var hit = query.Ray(eye, aim);
+        if (hit.Piece is not null && session.Physics.InteractionBlocked(eye, aim,
+            Vector3.Distance(eye, hit.Point) - .015f, ignorePlayer: session.Local.Id, ignoreBuildings: true))
+            hit = (null, hit.Point);
+        queryCount++; queryCandidates += query.Candidates; queryTriangles += query.Triangles;
+        queryMilliseconds += System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+        if (timer.Elapsed.TotalSeconds >= nextQueryReport)
         {
-            var mesh = BuildingGeometry.Mesh(session.Changes, p);
-            if (BuildingGeometry.Ray(eye, Look, mesh, best) is { } distance)
-            {
-                best = distance;
-                found = p;
-            }
+            Console.WriteLine($"BUILD query count={queryCount} avgMs={queryMilliseconds/Math.Max(queryCount,1):F3} candidates={queryCandidates/Math.Max(queryCount,1)} triangles={queryTriangles/Math.Max(queryCount,1)}");
+            nextQueryReport = timer.Elapsed.TotalSeconds + 15;
+            queryCount = queryCandidates = queryTriangles = 0; queryMilliseconds = 0;
         }
-        return (found, eye + Look * best);
+        pickedFrame=targetingFrame;pickedState=session.Changes;pickedEye=eye;pickedAim=aim;pickedResult=hit;
+        return hit;
     }
+    double nextQueryReport = 15, queryMilliseconds;
+    int queryCount, queryCandidates, queryTriangles;
+
     void UpdateBuildPreview()
     {
         previewCommand = null;
+        var previousEdit = previewEdit;
         previewEdit = null;
         scene?.Preview(null, false);
         if (session is null || !buildMode)
             return;
         var state = session.Changes;
         var hit = PickPiece();
-        var eye = Movement.EyePosition(session.Local);
+        var eye = camera.Position;
         bool Dry(float x, float z)
         {
             if (session.Terrain is null || !session.Terrain.TryGetChunk(ChunkCoordinate.At(x, z), out var c))
                 return false;
             return float.IsNaN(c.WaterHeight(Math.Clamp((int)MathF.Round(x - c.Coordinate.X * 64), 0, 64), Math.Clamp((int)MathF.Round(z - c.Coordinate.Z * 64), 0, 64)));
         }
+        if (buildSelection != BuildingPrefabs.Palette.Count) { scene?.Demolition(null, [], false); demolitionState=null; }
         if (buildSelection == BuildingPrefabs.Palette.Count + 1)
         {
             float best = 8;
@@ -130,7 +128,7 @@ sealed partial class GameApp
                             if (state.IsRemoved(category, id) || Vector3.DistanceSquared(eye, Vector3.Clamp(eye, min, max)) > 64)
                                 continue;
                             var mesh = session.Physics.SceneryMesh(category, id, c).ToArray();
-                            if (BuildingGeometry.Ray(eye, Look, mesh, best) is { } d)
+                            if (BuildingGeometry.Ray(eye, camera.WorldForwardNormal, mesh, best) is { } d)
                             {
                                 best = d;
                                 selected = mesh;
@@ -138,7 +136,9 @@ sealed partial class GameApp
                             }
                         }
                     }
-            scene?.Preview(selected, true);
+            if(previewCommand is not null) previewEdit=BuildingRules.Edit(state,previewCommand,session.World.SampleHeight,Dry);
+            demolitionName=previewCommand?.Category ?? "";
+            scene?.Preview(selected, previewEdit?.Valid==true);
             buildHint = selected is null ? "Aim at a tree trunk or rock within 8 m." : "Hold left mouse for one second to clear.";
             return;
         }
@@ -146,14 +146,24 @@ sealed partial class GameApp
         {
             if (hit.Piece is null)
             {
+                scene?.Demolition(null, [], false);
+                demolitionState=null;
                 buildHint = "Aim at a building piece.";
                 return;
             }
-            previewCommand = new(Guid.NewGuid(), state.Revision, "remove", Target: hit.Piece.Id);
-            previewEdit = BuildingRules.Edit(state, previewCommand, session.World.SampleHeight, Dry);
-            var ids = previewEdit.Valid ? [hit.Piece.Id] : previewEdit.Dependents;
-            scene?.Preview(state.Pieces.Where(p => ids.Contains(p.Id)).SelectMany(p => BuildingGeometry.Mesh(state, p)).ToArray(), previewEdit.Valid);
-            buildHint = previewEdit.Valid ? "Hold left mouse for one second to demolish." : previewEdit.Error;
+            previewCommand = new(Guid.NewGuid(), state.Revision, "remove", Target: hit.Piece.Id, HitPoint: hit.Point);
+            if(!ReferenceEquals(state,demolitionState)||demolitionPreviewTarget!=hit.Piece.Id||previousEdit is null)
+            {
+                previewEdit=BuildingRules.Edit(state,previewCommand,session.World.SampleHeight,Dry);
+                var owner=BuildingPrefabs.IsAssemblyChild(state,hit.Piece) ? state.Pieces.Single(p=>p.Id==hit.Piece.Parent) : hit.Piece;
+                demolitionOwner=owner.Id;
+                demolitionHighlightIds=state.Pieces.Where(p=>p.Id==owner.Id||p.Parent==owner.Id&&BuildingPrefabs.IsAssemblyChild(state,p)).Select(p=>p.Id).ToArray();
+                demolitionName=owner.Kind==PieceKind.Prefab?BuildingPrefabs.Get(owner.Prefab).Title:owner.Kind.ToString();
+                demolitionState=state;demolitionPreviewTarget=hit.Piece.Id;
+            }
+            else previewEdit=previousEdit;
+            scene?.Demolition(state,demolitionHighlightIds,previewEdit.Valid);
+            buildHint=previewEdit.Valid ? $"Hold left mouse for one second: {demolitionName}" : previewEdit.Error;
             return;
         }
         UpdatePrefabPreview(hit, eye, Dry);

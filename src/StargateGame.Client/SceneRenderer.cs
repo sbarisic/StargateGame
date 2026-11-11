@@ -13,7 +13,7 @@ sealed partial class SceneRenderer : IDisposable
 {
     readonly GraphicsContext graphics;
     readonly List<IDisposable> resources = [];
-    sealed record ModelPart(Mesh3D mesh, Texture texture, Texture? normal, float AlphaCutoff, Texture? Emission, Vector3 EmissionColor, float EmissionIntensity, Vector3? LightPosition, int DhdKeyId, bool DhdOrb, int Chevron, Texture? MetallicRoughness = null, bool Leaf = false);
+    sealed record ModelPart(Mesh3D mesh, Texture texture, Texture? normal, float AlphaCutoff, Texture? Emission, Vector3 EmissionColor, float EmissionIntensity, Vector3? LightPosition, int DhdKeyId, bool DhdOrb, int Chevron, Texture? MetallicRoughness = null, bool Leaf = false, float HeightScale = 0);
     readonly Dictionary<string, List<ModelPart>> models = [];
     const int TreeBatchSize = 8;
     readonly Dictionary<string, Texture> textures = [];
@@ -189,6 +189,7 @@ sealed partial class SceneRenderer : IDisposable
         startupStop.Dispose();
         ClearGateSpray();
         viewmodelTarget?.Dispose();
+        viewmodelMultisampleTarget?.Dispose();
         ClearDestinationResources();
         ClearDebugMeshes();
         ClearFoliage();

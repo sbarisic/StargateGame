@@ -89,15 +89,16 @@ void rifleFinish(vec2 uv, vec3 position, inout vec3 albedo, inout vec3 normal,
     // faint, smoother oil patches. Avoid a uniform brown wash over the weapon.
     albedo = mix(albedo, vec3(.012, .010, .008), grime * .65);
     albedo *= 1.0 - oil * .10;
-    roughness = clamp((magazine ? .48 : .37) + (brush - .5) * .07 +
-        (grain - .5) * .08 + (handling - .5) * .14 - scratches * .07 -
-        edgeWear * .08 + grime * .22 - oil * .07, .23, .73);
-    metal = mix(.18, .85, wear) * (1.0 - grime * .65);
+    // Matte coating dominates; exposed wear keeps restrained highlights.
+    roughness = clamp((magazine ? .84 : .78) + (brush - .5) * .04 +
+        (grain - .5) * .05 + (handling - .5) * .06 - scratches * .04 -
+        edgeWear * .07 + grime * .12 - oil * .025, .62, .94);
+    metal = mix(.02, .65, wear) * (1.0 - grime * .65);
 
     float brass = magazine ? smoothstep(.08, .22, source.r - source.b) *
         smoothstep(.025, .12, source.g - source.b) : 0.0;
     albedo = mix(albedo, vec3(.30, .19, .055), brass);
-    roughness = mix(roughness, .30, brass);
+    roughness = mix(roughness, .46, brass);
     metal = mix(metal, .95, brass);
 
     // Surface-gradient bumping follows the skinned frame, including mirrored UVs.
@@ -146,5 +147,5 @@ vec3 rifleEnvironment(vec3 base, vec3 normal, vec3 view, float rough, float meta
     float nv = max(dot(normal, view), 0.0);
     vec3 f0 = mix(vec3(.04), base, metal);
     vec3 fresnel = f0 + (max(vec3(1.0 - rough), f0) - f0) * pow(1.0 - nv, 5.0);
-    return radiance * fresnel * (1.0 - rough * .45);
+    return radiance * fresnel * (1.0 - rough * .70);
 }

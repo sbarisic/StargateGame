@@ -213,6 +213,7 @@ public sealed partial class GameServer
             LocationId = target.Definition.LocationId,
             TransferId = id,
             Planet = target.Definition,
+            ContentRevision = (ReferenceEquals(target, runtime) ? edit?.Edit.State ?? target.Changes : target.Changes).Revision,
             CollisionChunks = chunks,
             Manifest = manifest,
             SwitchPlanet = switching,
@@ -246,6 +247,18 @@ public sealed partial class GameServer
         }
         return true;
     }
+    void CancelGeometryPreparation(string reason)
+    {
+        Console.Error.WriteLine($"GEOMETRY cancelled transfer={transition?.Id}: {reason}");
+        if (edit is not null) { CancelEdit(reason); return; }
+        if (transition is not { } pending) return;
+        lastCancelledTransfer = Math.Max(lastCancelledTransfer,pending.Id);
+        Broadcast(new() { Kind = "terrain-cancel", TransferId = pending.Id, Reason = reason });
+        physics.CancelChanges();
+        pending.World?.Dispose();
+        if (pending.Data.Switch) pending.Data.Runtime.Dispose();
+        transition = null;
+    }
     bool HandleTerrainMessage(Session s, Message m, out bool result)
     {
         result = true;
@@ -261,6 +274,12 @@ public sealed partial class GameServer
                 Kind = "terrain-status",
                 Reason = "Use a galaxy address in F4 to move only your own session."
             });
+            return true;
+        }
+        if (m.Kind == "terrain-failed")
+        {
+            if (transition is { Data.Switch: false } failed && m.TransferId == failed.Id && failed.ActivateTick == 0)
+                CancelGeometryPreparation("Client collision preparation failed; previous geometry retained.");
             return true;
         }
         if (m.Kind == "terrain-fetch")
@@ -465,8 +484,16 @@ public sealed partial class GameServer
         }
         if (transition is { } change)
         {
-            if (!change.ServerReady)
-                change.ServerReady = (change.World ?? physics).PrepareTerrainBatch(change.Data.Chunks);
+            try
+            {
+                if (!change.ServerReady)
+                    change.ServerReady = (change.World ?? physics).PrepareTerrainBatch(change.Data.Chunks);
+            }
+            catch (Exception ex) when (!change.Data.Switch && ex is IOException or InvalidOperationException or ArgumentException)
+            {
+                CancelGeometryPreparation("Collision preparation failed: " + ex.Message);
+                return;
+            }
             if (!change.Data.Switch && !physics.Players.Select(p => p.Position).Concat(physics.Bodies().Select(b => b.Position))
                 .SelectMany(p => ChunkCoordinate.At(p.X, p.Z).Around(1)).All(change.Data.Chunks.Contains))
             {
@@ -475,14 +502,7 @@ public sealed partial class GameServer
                     CancelEdit("Collision coverage changed; try again.");
                     return;
                 }
-                lastCancelledTransfer = change.Id;
-                Broadcast(new()
-                {
-                    Kind = "terrain-cancel",
-                    TransferId = change.Id,
-                    Reason = "Refreshing collision coverage..."
-                });
-                transition = null;
+                CancelGeometryPreparation("Refreshing collision coverage...");
                 return;
             }
             var active = sessions.Where(s => s.PlayerId != 0 && s.RejectAt == 0).ToArray();
@@ -490,6 +510,7 @@ public sealed partial class GameServer
             if (change.ActivateTick == 0 && change.ServerReady && active.All(s => change.Ready.Contains(s.PlayerId)))
             {
                 if (!SaveHomeReady(change)) return;
+                Console.WriteLine($"GEOMETRY ready transfer={change.Id} location={runtime.Definition.LocationId} revision={edit?.Edit.State.Revision ?? runtime.Changes.Revision} preparationMs={(DateTime.UtcNow-change.Started).TotalMilliseconds:F1}");
                 change.ActivateTick = NextTick + 12;
                 Broadcast(new()
                 {
@@ -538,7 +559,7 @@ public sealed partial class GameServer
                 var target = change.Data.Runtime;
                 var next = change.World!;
                 change.World = null;
-                next.SetTerrain(change.Data.Chunks);
+                next.SetTerrain(change.Data.Chunks, preparedOnly: true);
                 var players = old.Players.Select((p, i) => p with { Position = next.World.Spawn(i), Velocity = Vector3.Zero, Grounded = true, SupportId = 0, GroundVelocity = Vector3.Zero, GroundNormal = Vector3.UnitY }).ToArray();
                 foreach (var p in players.OrderBy(p => p.Id))
                     next.AddPlayer(p);
@@ -573,7 +594,13 @@ public sealed partial class GameServer
             }
             else
             {
-                physics.SetTerrain(change.Data.Chunks);
+                physics.SetTerrain(change.Data.Chunks, preparedOnly: true);
+                foreach (var peer in sessions)
+                {
+                    peer.PreviousGeometryEpoch = physics.Epoch;
+                    peer.GeometryInputDeadline = NextTick + 180;
+                    peer.GeometryLocation = physics.World.Definition.LocationId;
+                }
                 physics.Epoch++;
             }
         }

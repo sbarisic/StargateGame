@@ -6,7 +6,7 @@ uniform float uTerrainMetres[8],uTerrainGain[8],uTerrainNormalStrength[8],uTerra
 uniform float uTerrainGrass[8];
 uniform float uTerrainRelief[8],uTerrainParallaxRange;
 uniform int uTerrainParallaxSteps;
-struct TerrainSurface {vec3 color;vec3 normal;float ao;float rough;float height;float grass;};
+struct TerrainSurface {vec3 color;vec3 normal;float ao;float rough;float height;float grass;float shadow;};
 float terrainTraceHeight(int id,vec2 uv,vec2 dx,vec2 dy,float cover){
  return textureGrad(uTerrainMasks,vec3(uv,id),dx,dy).b;
 }
@@ -37,6 +37,24 @@ vec2 terrainReliefUv(int id,vec2 uv,vec3 view,vec2 dx,vec2 dy,float strength,flo
  }
  return uv-ray*((low+high)*.5);
 }
+// Bounded height-field sunlight visibility; ambient remains unshadowed.
+// Algorithm reference: LiveTrower, Godot Shaders (CC0), linked in BUILDING.md.
+float terrainHeightShadow(int id,vec2 uv,vec3 light,vec2 dx,vec2 dy,float strength){
+ if(strength<.00001||uTerrainParallaxSteps==0)return 1.;
+ if(light.z<=0.)return 0.;
+ float start=1.-terrainTraceHeight(id,uv,dx,dy,0.);
+ int steps=int(mix(float(uTerrainParallaxSteps),8.,clamp(light.z,0.,1.)));
+ vec2 ray=light.xy/max(light.z,.08)*strength;
+ float visibility=1.;
+ for(int i=1;i<=48;i++){
+  if(i>steps)break;
+  float rise=start*float(i)/float(steps);
+  float surface=1.-terrainTraceHeight(id,uv+ray*rise,dx,dy,0.);
+  visibility=min(visibility,1.-smoothstep(.01,.04,start-rise-surface));
+  if(visibility<=0.)break;
+ }
+ return visibility;
+}
 TerrainSurface terrainLayer(int id,vec3 p,vec3 g,float distance){
  float metres=uTerrainMetres[id];vec3 q=p/metres;vec2 uv=q.xz;
  mat2 wind=mat2(uTerrainWind.x,-uTerrainWind.y,uTerrainWind.y,uTerrainWind.x);
@@ -46,6 +64,9 @@ TerrainSurface terrainLayer(int id,vec3 p,vec3 g,float distance){
  float relief=uTerrainRelief[id]/metres*(1.-smoothstep(uTerrainParallaxRange*.35,uTerrainParallaxRange,distance));
  relief*=smoothstep(.02,.14,dot(g,view));
  uv=terrainReliefUv(id,uv,view.xzy,dx.xz,dy.xz,relief,cover);
+ vec3 sunY=uSunDirection.xzy;
+ if(dunes)sunY.xy=wind*sunY.xy;
+ float selfShadow=terrainHeightShadow(id,uv,sunY,dx.xz,dy.xz,relief*smoothstep(.035,.16,abs(view.y)));
  vec3 projection=pow(abs(g),vec3(6));projection/=max(dot(projection,vec3(1)),.0001);
  projection=mix(vec3(0,1,0),projection,1-smoothstep(.65,.85,g.y));
  vec4 col=textureGrad(uTerrainColor,vec3(uv,id),dx.xz,dy.xz),m=textureGrad(uTerrainMasks,vec3(uv,id),dx.xz,dy.xz);
@@ -57,13 +78,16 @@ TerrainSurface terrainLayer(int id,vec3 p,vec3 g,float distance){
  if(g.y<.85){
   vec2 ux=terrainReliefUv(id,q.zy,view.zyx,dx.zy,dy.zy,relief,0.);
   vec2 uz=terrainReliefUv(id,q.xy,view.xyz,dx.xy,dy.xy,relief,0.);
+  selfShadow=selfShadow*projection.y+
+   terrainHeightShadow(id,ux,vec3(uSunDirection.zy,uSunDirection.x*sign(g.x)),dx.zy,dy.zy,relief*smoothstep(.035,.16,abs(view.x)))*projection.x+
+   terrainHeightShadow(id,uz,vec3(uSunDirection.xy,uSunDirection.z*sign(g.z)),dx.xy,dy.xy,relief*smoothstep(.035,.16,abs(view.z)))*projection.z;
   col=col*projection.y+textureGrad(uTerrainColor,vec3(ux,id),dx.zy,dy.zy)*projection.x+textureGrad(uTerrainColor,vec3(uz,id),dx.xy,dy.xy)*projection.z;
   m=m*projection.y+textureGrad(uTerrainMasks,vec3(ux,id),dx.zy,dy.zy)*projection.x+textureGrad(uTerrainMasks,vec3(uz,id),dx.xy,dy.xy)*projection.z;
   vec3 x=vec3(0),z=vec3(0);if(distance<140.0){x=textureGrad(uTerrainNormal,vec3(ux,id),dx.zy,dy.zy).xyz*2-1;z=textureGrad(uTerrainNormal,vec3(uz,id),dx.xy,dy.xy).xyz*2-1;}
   perturb=perturb*projection.y+vec3(0,-x.y,x.x)*projection.x+vec3(z.x,-z.y,0)*projection.z;
  }
  perturb-=g*dot(perturb,g);
- TerrainSurface s;s.color=min(vec3(.9),decodeColor(col.rgb)*uTerrainGain[id]);s.normal=normalize(g+perturb*uTerrainNormalStrength[id]*(1-smoothstep(35.0,140.0,distance)));s.ao=m.r;s.rough=clamp(m.g,.15,1);s.height=m.b*uTerrainHeightStrength[id];s.grass=uTerrainGrass[id];return s;
+ TerrainSurface s;s.color=min(vec3(.9),decodeColor(col.rgb)*uTerrainGain[id]);s.normal=normalize(g+perturb*uTerrainNormalStrength[id]*(1-smoothstep(35.0,140.0,distance)));s.ao=m.r;s.rough=clamp(m.g,.15,1);s.height=m.b*uTerrainHeightStrength[id];s.grass=uTerrainGrass[id];s.shadow=selfShadow;return s;
 }
 TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance,vec2 habitat){
  vec4 env=surfaceData(p.xz);float canopy=max(env.r,habitat.x),wet=env.b> -4000?max(env.g,material.b*.45):material.b*.45;
@@ -92,6 +116,7 @@ TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance,vec2 h
  vec3 scores=weights+vec3(x.height,y.height,z.height);float peak=max(scores.x,max(scores.y,scores.z));
  vec3 blend=max(vec3(0),scores-peak+.5)*weights;float sum=dot(blend,vec3(1));weights=sum>1e-6?blend/sum:weights;
  TerrainSurface r;r.color=x.color*weights.x+y.color*weights.y+z.color*weights.z;
+ r.shadow=dot(vec3(x.shadow,y.shadow,z.shadow),weights);
  r.grass=dot(vec3(x.grass,y.grass,z.grass),weights);
  r.normal=normalize(x.normal*weights.x+y.normal*weights.y+z.normal*weights.z);
  r.ao=mix(1.0,x.ao*weights.x+y.ao*weights.y+z.ao*weights.z,.65);
@@ -104,6 +129,7 @@ TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance,vec2 h
   TerrainSurface path=terrainLayer(pathLayer,p,g,distance);
   vec3 tint=mix(vec3(.8,.66,.48),vec3(.83,.8,.74),paved);
   r.color=mix(r.color,path.color*tint,road);
+  r.shadow=mix(r.shadow,path.shadow,road);
   r.grass*=1.-smoothstep(0.,.04,road);
   r.normal=normalize(mix(r.normal,path.normal,road));r.rough=mix(r.rough,max(.85,path.rough),road);r.ao=mix(r.ao,path.ao,road);
  }
@@ -111,7 +137,7 @@ TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance,vec2 h
   float beach=clamp(-habitat.x,0.,1.);TerrainSurface sand=terrainLayer(1,p,g,distance);
   float damp=(1.-smoothstep(.15,2.,p.y))*.35;
   r.color=mix(r.color,sand.color*(1.-damp),beach);r.normal=normalize(mix(r.normal,sand.normal,beach));r.rough=mix(r.rough,mix(.9,.5,damp),beach);
-  r.grass=mix(r.grass,sand.grass,beach);
+  r.grass=mix(r.grass,sand.grass,beach);r.shadow=mix(r.shadow,sand.shadow,beach);
  }
  if(uTerrainBiome==1){float layers=.94+.06*sin(p.y*2.3+sin(p.y*.41));r.color*=mix(1.,layers,cliff);}
  if(uTerrainBiome==0 && material.a>.01){float snow=material.a*smoothstep(.45,.85,g.y);r.color=mix(r.color,vec3(.65,.7,.75),snow);r.rough=mix(r.rough,.9,snow);r.grass*=1.-snow;}

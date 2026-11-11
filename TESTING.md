@@ -4,7 +4,41 @@ Use `scripts/Test.ps1` for builds, scenarios, recipes, and focused checks. The m
 
 ## Manual testing
 
+The latest corner/foundation/stair update is untested. Asset generation was run,
+but no native/managed builds, tests or playtests were run. Rebuild matching client
+and server with updated assets. The current native bridge must match its source;
+this follow-up adds managed collision layers without adding native exports.
+
+Use the existing Sandbox for manual acceptance:
+
+- Fill floor corners from either supporting wall, including rotated structures.
+  Try duplicate and partially overlapping floors and genuine wall-body crossings.
+  Rejections should name the blocking piece.
+- Add/remove walls, windows, doors and corner pieces on foundations. Check flush
+  outer edges, unchanged bare edges, thresholds, shadows, and saved/reloaded houses.
+- Walk, run, crouch and jump on both staircase flights; enter from the sides and
+  walk underneath the return flight. Compare steady traversal with the incline
+  beside the stairs at (-28, 0, 8), which has the same flight slope.
+- Drop crates onto stairs: they must rest on individual treads, not the player
+  ramp. Check picking/visibility against the actual stair geometry.
+- Keep moving during edits and streamed collision replacement. Check preparation,
+  commit and replay logs; all stair collision layers must switch together.
+- Continue checking doors from both sides, including genuine sweep obstruction.
+
+The 2026-11-11 picker/end-cap/stepping changes are untested. Stepping now passes
+desired velocity to Jolt before its internal slope cancellation, retaining 30 cm
+step-up, 35 cm floor following, and the existing camera filter. Jumping, ascending
+airborne motion and swimming disable both stepping and floor following.
+Before testing these native changes, run `python tools/build_native.py` and then
+rebuild matching client/server binaries with asset cooking. Normal .NET builds
+alone use the packaged native library. Neither native nor managed builds were run
+as part of this change, at the developer's request.
+
+Every client launch writes an immediately flushed log to `%LOCALAPPDATA%/StargateGame/logs/client-<UTC timestamp>-<PID>.log`. It includes console output, startup failures, full exception stacks, build/working directories, and launch arguments. When a debugger is attached, thrown exceptions are also logged before application catch handlers run; these entries can include handled exceptions and do not by themselves indicate a crash. Logs stay in this directory when Local Testing switches profiles.
+
 Visual Studio can launch the client directly in Debug or Release. Building the client also builds its Server and Harness project dependencies and writes `testing-runtime.paths` beside the client. Local Testing uses those exact outputs, without copying asset packs or looking for an older Release build. Asset-cooking builds also record the development overlay so additional clients see the same current assets. Keep both dependencies enabled in the solution configuration. Published packages use their bundled runtime instead.
+
+Direct client startup loads the development asset overlay recorded in `testing-runtime.paths`, just like harness-launched clients. An explicit `--dev-assets` path takes precedence; `--loose-assets` disables automatic overlay selection.
 
 The main menu has **Local Testing** and **Connect to Server**. Select a local scenario to start immediately. Optional biome, preset, landscape, and settlement controls appear below the scenarios. The menu remembers the last manual selection; CLI runs resolve catalog defaults independently.
 
@@ -169,3 +203,17 @@ Representative development-machine measurements (2026-11-11), not speed targets:
 These measure whole recipes; inspect timestamped events for startup/reset substeps. The representative validation also passed two-client Sandbox doors/containers, carried-prop travel, current model capture, live UI and 100/150/200% DPI captures, mist shelter/roof probes, seven-lock receiver audio isolation, and cancellation/crash cleanup. Python asset tests passed; optional Blender was reported skipped without BLENDER_EXE.
 
 Broad packet loss, travel commit-stage crashes, and multiplayer soak matrices are deferred. Rings/ZPM gameplay is not implemented.
+
+
+### Door and demolition manual acceptance (protocol 25)
+
+Implementation does not run these checks. Rebuild matching client/server before
+checking both sides of doors, genuine player/crate blockers and the logged
+blocker identity. Confirm frames and fixed world geometry never block the swing,
+while walls still block interaction through them. Compare looking toward/away from doors using the aggregate
+`BUILD query` diagnostics. Browse all palette pages and confirm the six hidden
+entries stay absent while saved instances remain present. Hold/cancel demolition,
+move aim between an assembly's children, open the picker or pause during a hold,
+and keep the button down after completion/rejection. Verify one request per hold,
+visible mesh tint/outline without flicker, dependency/generated-building errors,
+window resizing and saved/reloaded results.

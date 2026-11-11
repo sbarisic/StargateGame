@@ -149,15 +149,21 @@ public sealed class PredictedWorld : IDisposable
         Save();
         ReplayTo(target);
     }
-    public void CommitTerrain(ChunkCoordinate[] chunks, PhysicsSnapshot baseline)
+    public void CommitTerrain(ChunkCoordinate[] chunks, PhysicsSnapshot baseline, bool replayInputs = true)
     {
+        long target = replayInputs ? Math.Max(Simulation.Tick, baseline.Tick) : baseline.Tick;
+        if (!replayInputs) pending.Clear();
+        long ack = baseline.Players.Single(p => p.Id == localId).LastInput;
         ClearHistory();
-        pending.Clear();
+        foreach (long tick in pending.Where(p => p.Key <= baseline.Tick || p.Value.Sequence <= ack).Select(p => p.Key).ToArray())
+            pending.Remove(tick);
         collisionChunks = chunks;
-        Simulation.SetTerrain(chunks);
+        Simulation.SetTerrain(chunks, preparedOnly: true);
         Simulation.Apply(baseline);
         PreviousState = baseline;
         Save();
+        ReplayTo(target);
+        Console.WriteLine($"COLLISION prediction commit baseline={baseline.Tick} replayed={target-baseline.Tick} pending={pending.Count}");
         Resets++;
     }
     void Save()

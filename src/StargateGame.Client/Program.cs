@@ -2,6 +2,7 @@ using StargateGame.Client;
 
 try
 {
+    ClientLog.Initialize();
     StartupTrace.Initialize(args);
     if (args.Contains("--verify-assets"))
     {
