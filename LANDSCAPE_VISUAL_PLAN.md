@@ -3,7 +3,7 @@
 ## Scope
 
 Implement the requested visual improvements in the existing renderer. Follow
-instructions.md: focused builds, a few checks and representative captures;
+AGENTS.md: focused builds, a few checks and representative captures;
 extended movement and gameplay validation stays with the developer. Preserve
 unrelated work and existing saves. No questions are required for this pass.
 

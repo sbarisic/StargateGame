@@ -1,7 +1,7 @@
 # Water and tactical movement
 
 Implemented 10 November 2026. Validation resumed after the other agent finished,
-following `instructions.md`: relevant Release builds, focused checks, and a small
+following `AGENTS.md`: relevant Release builds, focused checks, and a small
 water comparison. Broad gameplay coverage remains for developer playtesting.
 
 ## Movement
