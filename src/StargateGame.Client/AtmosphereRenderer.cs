@@ -38,6 +38,8 @@ sealed partial class SceneRenderer
         set;
     } = true;
     EnvironmentFrame environmentFrame;
+    float celestialSeed;
+    Matrix4x4 starViewProjection;
     double? pausedEnvironment;
     RenderTarget? atmosphereTrans, atmosphereSingle, atmosphereScatter, atmosphereIrr, atmosphereSky, atmosphereLight, celestial;
     ShaderProgram? atmosphereTransShader, atmosphereDirectShader, atmosphereSingleShader, atmosphereDensityShader, atmosphereIndirectShader, atmosphereMultipleShader, atmosphereAddShader, atmosphereSkyShader, atmosphereLightShader, celestialShader;
@@ -99,6 +101,7 @@ sealed partial class SceneRenderer
     }
     void PrepareAtmosphere(RenderFrame frame, Camera camera, SceneFrame snapshot)
     {
+        starViewProjection=camera.View*camera.Projection;
         var definition = World.Definition.Environment ?? PlanetEnvironmentDefinition.Create(World.Definition.LocationId, World.Definition.Seed, World.Definition.Preset == "legacy" ? "temperate" : World.Definition.Preset);
         double utc = snapshot.EnvironmentSeconds > 0 ? snapshot.EnvironmentSeconds : 946684800 + snapshot.SimulationTime;
         if (PauseSky)
@@ -110,6 +113,7 @@ sealed partial class SceneRenderer
             pausedEnvironment = null;
         double phase = TimeOfDay is { } hour ? hour / 24.0 : definition.Phase(utc);
         environmentFrame = new(definition.Sun(phase), phase, utc);
+        celestialSeed = (definition.CelestialSeed & 65535) * .01f;
         var view = new RenderView(camera);
         if (atmosphereTrans is null || atmosphereLocation != snapshot.LocationId)
         {

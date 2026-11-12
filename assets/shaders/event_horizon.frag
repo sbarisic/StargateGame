@@ -3,7 +3,6 @@ in vec3 vWorld,vGatePosition;
 in vec2 vMembrane;
 in vec3 vSurfaceNormal,vSurfaceTangent,vSurfaceBitangent;
 layout(location=0) out vec4 fragColor;
-#include "ao_outputs.glsl"
 
 uniform vec3 uViewPosition,uGateCentre,uBlue;
 uniform float uRadius,uTime,uWaveScale,uDistortion,uSpeed,uNormalStrength,uHighlightWidth,uCentreEmphasis;
@@ -58,7 +57,7 @@ vec3 reflectionEnvironment(vec3 r,float width,float detailFade){
  float lights=band1+band2*.65+band3*.4;
  return vec3(.004,.009,.022)+vec3(.045,.075,.13)*softbox*mix(.3,1.0,detailFade)+vec3(1.05,1.35,1.8)*lights*detailFade;
 }
-void main(){excludeAmbient();
+void main(){
  if(uBackSheet!=0&&dot(uViewPosition-uGateCentre,uGateNormal)>=0.0)discard;
  float radial=clamp(length(vMembrane)/uRadius,0.0,1.0);
  float activity=surgeActivity();

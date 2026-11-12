@@ -98,7 +98,7 @@ sealed partial class SceneRenderer
         program.SetUniform("uTint", Vector3.One);
         program.SetUniform("uTreeTime", (float)weatherFrame.Time);
         program.SetUniform("uTreeWind", weatherFrame.Wind);
-        program.SetUniform("uTreeWindStrength", depth ? 0 : TreeSettings.WindStrength);
+        program.SetUniform("uTreeWindStrength", depth && !pointShadowPass ? 0 : TreeSettings.WindStrength);
         program.SetUniform("uLeafTransmission", TreeSettings.LeafTransmission);
         program.SetUniform("uLeafOlive", World.Definition.Preset == "temperate" ? 1f : 0f);
         foreach (var group in treeDrawGroups.Values)

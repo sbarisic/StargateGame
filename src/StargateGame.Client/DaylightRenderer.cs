@@ -16,7 +16,7 @@ sealed partial class SceneRenderer
     Vector3 lastSunShadowDirection;
     ShaderProgram aerialShader = null!;
     bool deferOpaqueFog;
-    ShaderProgram depthShader = null!, skyShader = null!, waterShader = null!, toneShader = null!, aaShader = null!;
+    ShaderProgram depthShader = null!, waterShader = null!, toneShader = null!, aaShader = null!;
     Texture[] normals = [];
     Mesh3D screen = null!;
     RenderTarget? opaqueTarget, waterTarget, toneTarget;
@@ -51,7 +51,7 @@ sealed partial class SceneRenderer
     public double RenderGpuMilliseconds => gpuTimer.Milliseconds;
     public double HorizonWaveGpuMilliseconds => gpuTimer.WaveMilliseconds;
     public double GateSprayGpuMilliseconds => gpuTimer.SprayMilliseconds;
-    public long TargetBytes => DemolitionTargetBytes + AoTargetBytes + AtmosphereBytes + VolumeBytes + WeatherTargetBytes + GateLightTargetBytes + HorizonTargetBytes + (long)(opaqueTarget?.Width ?? 0) * (opaqueTarget?.Height ?? 0) * 28
+    public long TargetBytes => DemolitionTargetBytes + AoTargetBytes + DeferredLightingTargetBytes + AtmosphereBytes + VolumeBytes + WeatherTargetBytes + PointLightTargetBytes + GateLightTargetBytes + HorizonTargetBytes + (long)(opaqueTarget?.Width ?? 0) * (opaqueTarget?.Height ?? 0) * 56
         + (long)Settings.Shadows.CascadeCount * (Settings.Shadows.Resolution * Settings.Shadows.Resolution + (Settings.Shadows.Resolution / 2) * (Settings.Shadows.Resolution / 2)) * 4
         + (long)(viewmodelShadow?.Width ?? 0) * (viewmodelShadow?.Height ?? 0) * 4 + ViewmodelTargetBytes + ExposureTargetBytes;
     public sealed record SceneFrame(PlayerState[] Remotes, BodyState[] Bodies, PlayerState Local, Guid LocationId = default, long PhysicsEpoch = 0, double SimulationTime = 0, double EnvironmentSeconds = 0, PropClip[]? Clips = null);
@@ -76,9 +76,17 @@ sealed partial class SceneRenderer
             StartupTrace.Mark("shader-cache-hit", compileClock.Elapsed.TotalMilliseconds, vertex + " / " + fragment);
             return cached;
         }
-        var vs = Own(graphics.CreateShaderStage(ShaderStageType.Vertex, vertexSource));
-        var fs = Own(graphics.CreateShaderStage(ShaderStageType.Fragment, fragmentSource));
-        var program = Own(graphics.CreateShaderProgram(vs, fs));
+        ShaderProgram program;
+        try
+        {
+            var vs = Own(graphics.CreateShaderStage(ShaderStageType.Vertex, vertexSource));
+            var fs = Own(graphics.CreateShaderStage(ShaderStageType.Fragment, fragmentSource));
+            program = Own(graphics.CreateShaderProgram(vs, fs));
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new InvalidOperationException($"Failed to prepare shader program '{vertex}' / '{fragment}'.", ex);
+        }
         SaveShaderCache(cachePath, program);
         StartupTrace.Mark("shader-compile-link", compileClock.Elapsed.TotalMilliseconds, vertex + " / " + fragment);
         return program;
@@ -92,8 +100,6 @@ sealed partial class SceneRenderer
         aerialShader = LoadProgram("fullscreen.vert", "aerial_composite.frag");
         aerialShader.SetUniform("uOpaqueColor", 0);
         aerialShader.SetUniform("uOpaqueDepth", 1);
-        yield return false;
-        skyShader = LoadProgram("fullscreen.vert", "sky.frag");
         yield return false;
         realisticWaterShader = LoadProgram("water.vert", "water.frag");
         yield return false;
@@ -149,9 +155,11 @@ sealed partial class SceneRenderer
     void DisposeTargets()
     {
         DisposeAmbientOcclusion();
+        DisposeViewmodelTargets();
         ClearVolumes();
         DisposeHorizonTargets();
         DisposeGateLights();
+        DisposePointLights();
         toneTarget?.Dispose();
         waterTarget?.Dispose();
         opaqueTarget?.Dispose();
@@ -166,7 +174,7 @@ sealed partial class SceneRenderer
         DisposeTargets();
         try
         {
-            opaqueTarget = graphics.CreateRenderTarget(new(width, height, [TextureFormat.RGBA16Float, TextureFormat.RGBA16Float, TextureFormat.RGBA8Unorm], TextureFormat.Depth32Float));
+            opaqueTarget = CreateGbuffer(width, height, 1);
             waterTarget = graphics.CreateRenderTarget(new(width, height, [TextureFormat.RGBA16Float], TextureFormat.Depth32Float));
             toneTarget = graphics.CreateRenderTarget(new(width, height, [TextureFormat.RGBA8Unorm], null));
         }
@@ -183,7 +191,10 @@ sealed partial class SceneRenderer
     } = 1;
     void Lighting(ShaderProgram program)
     {
+        program.SetUniform("uSurfaceViewProjection", deferredSurfaceViewProjection);
         program.SetUniform("uModelHeightScale", 0f);
+        program.SetUniform("uModelEmission", 7);
+        program.SetUniform("uModelEmissionGain", Vector3.Zero);
         program.SetUniform("uModelParallaxSteps", Settings.Quality switch
         {
             GraphicsQuality.Low => 16,
@@ -197,7 +208,7 @@ sealed partial class SceneRenderer
             _ => 28f
         });
         AtmosphereUniforms(program);
-        program.SetUniform("uFogDeferred", deferOpaqueFog && program != skyShader ? 1 : 0);
+        program.SetUniform("uFogDeferred", deferOpaqueFog ? 1 : 0);
         var light = Daylight.For(World.Definition.Preset);
         if (World.Definition.Preset == "desert")
         {
@@ -313,6 +324,7 @@ sealed partial class SceneRenderer
         CheckHorizonWaves(frame, view);
         AdvanceHorizonWaves(frame, view, time);
         PrepareGateLights(frame, camera, snapshot, time);
+        PreparePointLights(frame, camera, snapshot, time);
         PrepareDhds(frustum);
         // The scattering volume samples this frame's shelter map too.
         PrepareSnow(frame, camera);
@@ -322,41 +334,37 @@ sealed partial class SceneRenderer
         waterShader = RealisticWater ? realisticWaterShader : legacyWaterShader;
         GateLightingUniforms(shader);
         GateLightingUniforms(waterShader);
+        PointLightingUniforms(waterShader);
         CheckWeatherShelter(frame, view);
         CheckLandscape(frame, view);
+        deferredSurfaceViewProjection = camera.View * camera.Projection;
+        deferredDhdReceivers.Clear();
+        foreach (var entity in World.Definition.Entities.Concat(testingInspection).Where(e => e.Model == "dhd"))
+            if (!deferredDhdReceivers.ContainsKey(entity.Id)) deferredDhdReceivers.Add(entity.Id, 10 + deferredDhdReceivers.Count);
+        if (deferredDhdReceivers.Count > 2038) throw new InvalidOperationException("Deferred DHD receiver IDs exceed half-float precision.");
         deferOpaqueFog = true;
         using (var pass = frame.BeginPass(opaqueTarget!, new RenderPassDescriptor
         {
             View = view,
             State = OpaqueState,
             Time = time,
+            ClearColor = new Color(0, 0, 0, 0),
             ColorLoadAction = RenderLoadAction.Clear,
             DepthLoadAction = RenderLoadAction.Clear
         }))
         {
-            using (gpuTimer.Measure(pass))
-            using (pass.PushState(ScreenState))
-            {
-                Lighting(skyShader);
-                skyShader.SetUniform("uInverseViewProjection", inverse);
-                Mesh(pass, screen, white, skyShader);
-            }
             Lighting(shader);
             using (gateShadowAtlas?.DepthStencilAttachment.Bind(15))
             using (shadows.CurrentFrame.Bind(shader, 9))
             {
                 DrawStatic(pass, shader, frustum, false);
-                DrawCables(pass, shader, frustum, false);
+                using (gpuTimer.Measure(pass, "gbuffer"))
+                    DrawCables(pass, shader, frustum, false);
                 using (gpuTimer.Measure(pass, "character"))
                     DrawActors(pass, shader, frustum, snapshot, false);
             }
             using (gpuTimer.Measure(pass, "canopy"))
                 DrawPrototypeVolume(pass, camera, inverse);
-            using var remainingOpaque = gpuTimer.Measure(pass);
-            DrawHorizons(pass, false, time);
-            DrawGateEmission(pass, false);
-            DrawDhdEmission(pass, false);
-
         }
         // Separate depth snapshot avoids sampling an attached render target.
         opaqueTarget!.DepthStencilAttachment.CopyTo(waterTarget!.DepthStencilAttachment);
@@ -373,12 +381,21 @@ sealed partial class SceneRenderer
             DrawGroundCover(pass, frustum, camera, inverse);
             DrawFoliage(pass);
         }
-        ResolveAmbientOcclusion(frame, camera, view, inverse);
+        RenderDeferredWorld(frame, camera);
+        opaqueTarget!.DepthStencilAttachment.CopyTo(resolvedOpaque!.DepthStencilAttachment);
+        // Specialized gate surfaces render against the surface depth, never into material buffers.
+        if (!SurfaceInspection)
+        using (var pass = frame.BeginPass(resolvedOpaque, new RenderPassDescriptor { View = view, State = OpaqueState, Time = time,
+            ColorLoadAction = RenderLoadAction.Load, DepthLoadAction = RenderLoadAction.Load }))
+        {
+            using var timing = gpuTimer.Measure(pass, "composition");
+            DrawHorizons(pass, false, time);
+        }
         // Separate attachments: no sampled image is attached to the current draw framebuffer.
         deferOpaqueFog = false;
         bool hasWater = WaterSurfaceData.TrySample(terrainStore, camera.Position.X, camera.Position.Z, out var cameraWater);
         float immersion = hasWater ? Math.Clamp((cameraWater.Height - camera.Position.Y) / .12f, 0, 1) : 0;
-        using (opaqueTarget!.DepthStencilAttachment.Bind(1))
+        using (resolvedOpaque!.DepthStencilAttachment.Bind(1))
         using (var pass = frame.BeginPass(waterTarget!, new RenderPassDescriptor { View = view, State = ScreenState, ColorLoadAction = RenderLoadAction.DontCare }))
         using (gpuTimer.Measure(pass, "fog"))
         {
@@ -389,7 +406,7 @@ sealed partial class SceneRenderer
             aerialShader.SetUniform("uWaterHeight", cameraWater.Height);
             Mesh(pass, screen, resolvedOpaque!.ColorAttachments[0], aerialShader);
         }
-        opaqueTarget.DepthStencilAttachment.CopyTo(waterTarget!.DepthStencilAttachment);
+        resolvedOpaque!.DepthStencilAttachment.CopyTo(waterTarget!.DepthStencilAttachment);
         // Water owns the visible surface depth, so subsequent snowflakes cannot
         // show through it. Transmission still reads the separate opaque depth.
         long waterCpuStart = Stopwatch.GetTimestamp(), waterAllocatedStart = GC.GetAllocatedBytesForCurrentThread();
@@ -402,8 +419,9 @@ sealed partial class SceneRenderer
             DepthLoadAction = RenderLoadAction.Load
         }))
         using (gpuTimer.Measure(pass, "water"))
-        using (opaqueTarget.DepthStencilAttachment.Bind(1))
+        using (resolvedOpaque!.DepthStencilAttachment.Bind(1))
         using (gateShadowAtlas?.DepthStencilAttachment.Bind(15))
+        using (propShadowAtlas?.DepthStencilAttachment.Bind(23))
         using (shadows.CurrentFrame.Bind(waterShader, 2))
         using ((waterNormals ?? buildingNormal).Bind(8))
         {
@@ -423,6 +441,7 @@ sealed partial class SceneRenderer
         }
         WaterCpuMilliseconds = Stopwatch.GetElapsedTime(waterCpuStart).TotalMilliseconds;
         WaterAllocatedBytes = GC.GetAllocatedBytesForCurrentThread() - waterAllocatedStart;
+        DrawPropGlass(frame, camera, snapshot, time);
         DrawSnow(frame, view, camera, inverse, time);
         DrawDesertDust(frame, view, camera, inverse, time);
         RenderGateSpray(frame, view, time);
@@ -458,7 +477,7 @@ sealed partial class SceneRenderer
             {
                 aoPresentShader ??= LoadProgram("fullscreen.vert", "ao_present.frag");
                 aoPresentShader.SetUniform("uTexture", 0);
-                Mesh(pass, screen, resolvedOpaque.ColorAttachments[0], aoPresentShader);
+                Mesh(pass, screen, (SurfaceInspection ? resolvedOpaque : waterTarget!).ColorAttachments[0], aoPresentShader);
             }
             else Mesh(pass, screen, toneTarget!.ColorAttachments[0], aaShader);
         }
@@ -505,7 +524,7 @@ sealed partial class SceneRenderer
         }
         program.SetUniform("uTerrainCoverageLevel",0);
         terrainMeasurement?.Dispose();
-        using var sceneryMeasurement = depth ? null : gpuTimer.Measure(pass);
+        using var sceneryMeasurement = depth ? null : gpuTimer.Measure(pass, "gbuffer");
         program.SetUniform("uShadowSurfaceBias", .015f);
         // Weathered gate and DHD surfaces: broad, subdued highlights instead of polished metal.
         program.SetUniform("uTerrain", 0);
@@ -513,6 +532,7 @@ sealed partial class SceneRenderer
         foreach (var entity in World.Definition.Entities.Concat(testingInspection))
         {
             using var endpoint = SelectGate(entity);
+            program.SetUniform("uModelEmissionGain", Vector3.Zero);
             if (!models.ContainsKey(entity.Model))
             {
                 DrawModelProxy(pass, program, entity.Model, entity.Transform);
@@ -522,7 +542,7 @@ sealed partial class SceneRenderer
             var bounds = AxisAlignedBoundingBox.FromPoints(Enumerable.Range(0, 8).Select(i => Vector3.Transform(new Vector3((i & 1) == 0 ? b.Min.X : b.Max.X, (i & 2) == 0 ? b.Min.Y : b.Max.Y, (i & 4) == 0 ? b.Min.Z : b.Max.Z), entity.Transform)));
             if (!frustum.Intersects(bounds))
                 continue;
-            int dhdLightCount = depth ? 0 : DhdLightingUniforms(program, entity);
+            if (!depth) program.SetUniform("uDeferredReceiver", deferredDhdReceivers.GetValueOrDefault(entity.Id, 1));
             using var model = pass.PushModel(entity.Transform);
             foreach (var part in models[entity.Model])
             {
@@ -530,8 +550,20 @@ sealed partial class SceneRenderer
                 program.SetUniform("uRoughness", matte ? .98f : .84f);
                 if (!depth)
                     program.SetUniform("uDhdMatte", matte ? 1 : 0);
-                if (!depth)
-                    program.SetUniform("uDhdLightCount", part.DhdOrb ? 0 : dhdLightCount);
+                Vector3 emission = Vector3.Zero;
+                if (!depth && part.Emission is not null)
+                {
+                    if (entity.Model == "dhd")
+                    {
+                        bool accepted = part.DhdOrb ? DhdGlyphs.IsOrbLit(entity.Id) : DhdGlyphs.IsLit(entity.Id, part.DhdKeyId);
+                        float hint = part.DhdOrb || !DhdHintActive ? 0 : DhdHint.ForKey(part.DhdKeyId);
+                        emission = accepted ? part.EmissionColor * part.EmissionIntensity * (part.DhdOrb ? OrbStrength : 1) : new Vector3(.045f) * hint;
+                    }
+                    else if (entity.Model == "stargate" && HorizonSettings.Enabled && ChevronOn(part))
+                        emission = part.EmissionColor * part.EmissionIntensity * GateEmissionScale;
+                }
+                program.SetUniform("uModelEmissionGain", emission);
+                using var emissive = !depth && part.Emission is not null ? part.Emission.Bind(7) : null;
                 program.SetUniform("uHasModelNormal", !depth && part.normal is not null ? 1 : 0);
                 program.SetUniform("uHasMetallicRoughness", !depth && part.MetallicRoughness is not null ? 1 : 0);
                 program.SetUniform("uMetallicRoughness", 6);
@@ -546,6 +578,7 @@ sealed partial class SceneRenderer
         {
             program.SetUniform("uDhdLightCount", 0);
             program.SetUniform("uDhdMatte", 0);
+            program.SetUniform("uModelEmissionGain", Vector3.Zero);
         }
         program.SetUniform("uHasModelNormal", 0);
         program.SetUniform("uHasMetallicRoughness", 0);
@@ -585,10 +618,12 @@ sealed partial class SceneRenderer
         program.SetUniform("uShadowSurfaceBias", .015f);
         program.SetUniform("uTerrain", 0);
         program.SetUniform("uRoughness", .85f);
+        program.SetUniform("uDeferredReceiver", 1);
+        program.SetUniform("uDhdMatte", 0);
         foreach (var prop in snapshot.Bodies)
         {
             var definition = World.Definition.Props.FirstOrDefault(p => p.Id == prop.Id);
-            if (definition is null)
+            if (definition is null || depth && !definition.CastsShadows)
                 continue;
             var clip = snapshot.Clips?.FirstOrDefault(c => c.Body == prop.Id);
             program.SetUniform("uTravelPlane", clip is null ? Vector4.Zero : new Vector4(clip.Gate.Normal, -Vector3.Dot(clip.Gate.Normal, clip.Gate.Centre)));
@@ -607,6 +642,9 @@ sealed partial class SceneRenderer
             using var model = pass.PushModel(transform);
             foreach (var part in models[definition.Model])
             {
+                if (part.Transparent) continue;
+                program.SetUniform("uModelEmissionGain", depth ? Vector3.Zero : part.EmissionColor * part.EmissionIntensity);
+                using var emission = depth ? null : part.Emission?.Bind(7);
                 program.SetUniform("uHasModelNormal", !depth && part.normal is not null ? 1 : 0);
                 program.SetUniform("uHasMetallicRoughness", !depth && part.MetallicRoughness is not null ? 1 : 0);
                 program.SetUniform("uMetallicRoughness", 6);
@@ -620,6 +658,7 @@ sealed partial class SceneRenderer
         program.SetUniform("uHasMetallicRoughness", 0);
         program.SetUniform("uModelHeightScale", 0f);
         program.SetUniform("uTravelPlane", Vector4.Zero);
+        program.SetUniform("uModelEmissionGain", Vector3.Zero);
         DrawCharacters(pass, program, frustum, snapshot, depth, excludeLocal);
     }
 }
@@ -632,7 +671,7 @@ sealed class GpuFrameTimer : IDisposable
         public long Frame;
         public int Remaining;
         public bool Complete, Valid = true;
-        public double Ao, Total, Character, Wave, Spray, Grass, Weather, Atmosphere, Cloud, Fog, Water, MistMap, Terrain, Canopy, Exposure, ToneMap;
+        public double PointLight, PointShadow, Gbuffer, Deferred, Weapon, Composition, Ao, Total, Character, Wave, Spray, Grass, Weather, Atmosphere, Cloud, Fog, Water, MistMap, Terrain, Canopy, Exposure, ToneMap;
     }
     readonly GraphicsQuery[] queries;
     readonly Queue<int> free = [];
@@ -648,6 +687,12 @@ sealed class GpuFrameTimer : IDisposable
     public double ExposureMilliseconds { get; private set; }
     public double ToneMapMilliseconds { get; private set; }
     public double AoMilliseconds { get; private set; }
+    public double GbufferMilliseconds { get; private set; }
+    public double PointLightMilliseconds { get; private set; }
+    public double PointShadowMilliseconds { get; private set; }
+    public double DeferredMilliseconds { get; private set; }
+    public double WeaponMilliseconds { get; private set; }
+    public double CompositionMilliseconds { get; private set; }
     public double CharacterMilliseconds
     {
         get;
@@ -705,7 +750,7 @@ sealed class GpuFrameTimer : IDisposable
     }
     public GpuFrameTimer(GraphicsContext graphics)
     {
-        queries = Enumerable.Range(0, 96).Select(_ => graphics.CreateQuery(GraphicsQueryType.TimeElapsed)).ToArray();
+        queries = Enumerable.Range(0, 512).Select(_ => graphics.CreateQuery(GraphicsQueryType.TimeElapsed)).ToArray();
         for (int i = 0; i < queries.Length; i++)
             free.Enqueue(i);
     }
@@ -716,7 +761,11 @@ sealed class GpuFrameTimer : IDisposable
             pending.Dequeue();
             double ms = queries[p.Index].GetResult() / 1_000_000.0;
             p.Sample.Total += ms;
-            if (p.Group == "ao") p.Sample.Ao += ms;
+            if (p.Group is "gbuffer" or "terrain" or "character" or "grass" or "canopy") p.Sample.Gbuffer += ms;
+            if (p.Group == "deferred") p.Sample.Deferred += ms;
+            if (p.Group is "weapon" or "weapon-ao") p.Sample.Weapon += ms;
+            if (p.Group is "fog" or "water" or "tonemap" or "weather" or "gate-spray" or "composition") p.Sample.Composition += ms;
+            if (p.Group is "ao" or "weapon-ao") p.Sample.Ao += ms;
             if (p.Group == "gate-spray")
                 p.Sample.Spray += ms;
             if (p.Group == "horizon-wave")
@@ -739,6 +788,8 @@ sealed class GpuFrameTimer : IDisposable
                 p.Sample.MistMap += ms;
             if (p.Group == "terrain")
                 p.Sample.Terrain += ms;
+            if (p.Group == "point-shadow") p.Sample.PointShadow += ms;
+            if (p.Group == "point-light") p.Sample.PointLight += ms;
             if (p.Group == "canopy") p.Sample.Canopy += ms;
             if (p.Group == "exposure") p.Sample.Exposure += ms;
             if (p.Group == "tonemap") p.Sample.ToneMap += ms;
@@ -752,6 +803,9 @@ sealed class GpuFrameTimer : IDisposable
             {
                 Milliseconds = f.Total;
                 AoMilliseconds = f.Ao;
+                PointLightMilliseconds = f.PointLight; PointShadowMilliseconds = f.PointShadow;
+                GbufferMilliseconds = f.Gbuffer; DeferredMilliseconds = f.Deferred;
+                WeaponMilliseconds = f.Weapon; CompositionMilliseconds = f.Composition;
                 CharacterMilliseconds = f.Character;
                 WaveMilliseconds = f.Wave;
                 SprayMilliseconds = f.Spray;

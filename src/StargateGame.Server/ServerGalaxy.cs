@@ -303,6 +303,12 @@ public sealed partial class GameServer
                 int key = command.Key;
                 if (key == 0)
                 {
+                    if (symbols.Count is > 0 and < 7)
+                    {
+                        Idle(context, "Dial cancelled");
+                        Reply(true, "Dial cancelled");
+                        return true;
+                    }
                     activating = true;
                     if (symbols.Count != 7 || symbols[6] != 1)
                         throw new InvalidOperationException("Enter six destination symbols and the origin key before pressing the orb.");

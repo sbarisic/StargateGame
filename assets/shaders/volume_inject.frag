@@ -28,7 +28,7 @@ void main(){
   if(localMist>0.0)mist+=localMist*outsideMist(samplePoint);
  }
  density+=mist*.2;
- vec3 ambient=ambientSkyColor();float visibility=SampleSunVisibility(p,vec3(0,1,0),max(uSunDirection.y,0))*cloudVisibility(p);
+ vec3 ambient=scatteringIndirect(ambientSkyColor(),uSunDirection.y);float visibility=SampleSunVisibility(p,vec3(0,1,0),max(uSunDirection.y,0))*cloudVisibility(p);
  float mu=dot(ray,uSunDirection),phase=(1-.49)/(pow(1+.49-1.4*mu,1.5));
  vec3 light=ambient*.7+sunLightColor()*max(0.0,uSunDirection.y)*visibility*phase*.25;
  for(int i=0;i<uGateLightCount;i++){

@@ -6,3 +6,5 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 & $Blender --background $SourceBlend --python "$root/tools/export_assets.py" -- --output "$root/assets/models"
 if ($LASTEXITCODE -ne 0) { throw 'Asset export failed.' }
+& $Blender --background $SourceBlend --python "$root/tools/export_gate_materials.py" -- --output "$root/assets/models"
+if ($LASTEXITCODE -ne 0) { throw 'Gate material export failed.' }

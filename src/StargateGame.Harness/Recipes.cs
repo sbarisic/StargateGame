@@ -9,7 +9,7 @@ namespace StargateGame.Harness;
 
 static class Recipes
 {
-    public static readonly string[] Names = ["visual-check", "ui-live", "movement-visual", "gate-roundtrip", "travel-roundtrip", "lifecycle", "horizon-lifecycle", "audio", "environment", "gate-effects", "sandbox-check", "audio-endpoints", "dialing-failure", "audio-failure"];
+    public static readonly string[] Names = ["lantern-lighting", "deferred-ao-compare", "visual-check", "ui-live", "movement-visual", "gate-roundtrip", "travel-roundtrip", "lifecycle", "horizon-lifecycle", "audio", "environment", "gate-effects", "sandbox-check", "audio-endpoints", "dialing-failure", "audio-failure"];
     public static async Task Run(SessionManifest manifest, string name, CancellationToken token)
     {
         async Task<TestResult> Send(TestAction action, object? data = null, int client = 1, int timeout = 180)
@@ -44,6 +44,49 @@ static class Recipes
         if (!Names.Contains(name)) throw new ArgumentException("Unknown recipe: " + name);
         switch (name)
         {
+            case "lantern-lighting":
+            {
+                if (manifest.Options.Scenario != "sandbox") throw new ArgumentException("lantern-lighting requires Sandbox.");
+                await Send(TestAction.Teleport, new { station = "props" });
+                var lanternState = await State();
+                var player = lanternState.GetProperty("player").Deserialize<PlayerState>(TestJson.Options);
+                var eye = player.Position + Vector3.UnitY * Movement.ViewHeight(player);
+                foreach (var offset in new[] { new Vector3(-3, -1, -2), new Vector3(-3, -1, 1), new Vector3(1, -1, -3) })
+                    await Send(TestAction.Build, new { command = new BuildCommand(Guid.NewGuid(), 0, "spawn-prop", Anchor: eye, Prefab: "wooden-lantern", HitPoint: player.Position + offset) });
+                await Send(TestAction.Camera, new { eye = player.Position + new Vector3(2, 1.6f, -5), target = player.Position + new Vector3(-1, .45f, 0) });
+                await Send(TestAction.Settings, new { quality = "high", weather = "off", gateLighting = false, visualTime = 20, orbit = false, traverse = false, exposure = "manual", exposureEv = 0 });
+                foreach (int hour in new[] { 0, 12 })
+                    foreach (string ao in new[] { "high", "off" })
+                    {
+                        await Send(TestAction.Settings, new { hour, ao, aoView = "lit" });
+                        await Send(TestAction.Wait, new { condition = "captureReady" });
+                        await Send(TestAction.Capture, new { name = $"lanterns-{hour}h-ao-{ao}.png", includeUi = false });
+                    }
+                foreach (string quality in new[] { "low", "performance", "high" })
+                {
+                    await Send(TestAction.Settings, new { quality, hour = 0, ao = "high" });
+                    await Send(TestAction.Wait, new { condition = "captureReady" });
+                    await Send(TestAction.Capture, new { name = $"lanterns-night-{quality}.png", includeUi = false });
+                }
+                break;
+            }
+            case "deferred-ao-compare":
+                if (manifest.Options.Scenario != "sandbox") throw new ArgumentException("deferred-ao-compare requires Sandbox.");
+                await Send(TestAction.Settings, new { quality = "high", weather = "off", hour = 12, visualTime = 20, orbit = false, traverse = false, exposure = "manual", exposureEv = 0 });
+                foreach (string bookmark in new[] { "gate-pair", "interior", "dhd" })
+                {
+                    await Send(TestAction.Camera, new { bookmark });
+                    foreach (string quality in new[] { "high", "off" })
+                    {
+                        await Send(TestAction.Settings, new { ao = quality, aoView = "lit" });
+                        await Send(TestAction.Wait, new { condition = "captureReady" });
+                        await Send(TestAction.Capture, new { name = $"deferred-{bookmark}-{quality}.png" });
+                    }
+                    await Send(TestAction.Settings, new { ao = "high", aoView = "ao" });
+                    await Send(TestAction.Capture, new { name = $"deferred-{bookmark}-ao.png" });
+                }
+                await Send(TestAction.Settings, new { ao = "auto", aoView = "lit" });
+                break;
             case "ui-live": await Send(TestAction.UiReview, timeout: 240); break;
             case "movement-visual": await Send(TestAction.MovementReview, timeout: 60); await Send(TestAction.Capture, new { name = "movement-end.png" }); break;
             case "sandbox-check":

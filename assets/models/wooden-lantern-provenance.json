@@ -1,0 +1,27 @@
+{
+  "source": "assets_itch/props/wooden_lantern/assets/models/woodenLantern01.glb",
+  "sha256": "0aadd9742f9624bdd57fbf978f012a43ee1fae0477ff6709510674a0f0472960",
+  "assetToBodyOffset": [
+    0.0,
+    0.26555,
+    -0.00012
+  ],
+  "lightPosition": [
+    0.0,
+    -0.03055000000000002,
+    -0.006679999999999999
+  ],
+  "bounds": [
+    [
+      -0.11052404344081879,
+      -0.26459014415740967,
+      -0.11728521436452866
+    ],
+    [
+      0.1105133444070816,
+      0.26458656787872314,
+      0.1172933503985405
+    ]
+  ],
+  "conversion": "Node TRS baked; authored metres; body-centred; UV V and normal green flipped"
+}

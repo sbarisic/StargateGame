@@ -353,3 +353,71 @@ including rotating props and opening doors; preview, picking, and shadows use
 the same mesh. Check side/top/angled attachments and short cables at each diameter.
 This is a renderer change; no protocol or saved-cable changes are required.
 Builds and playtests remain deferred.
+
+Resting cables use radius-aware contact probes and normal-only corrections,
+with contact damping and alternating length-constraint sweeps. After 0.75 seconds
+of sub-2 mm movement per step (within a 4 mm settling envelope), they sleep and
+stop uploading unchanged meshes. Attachment movement, nearby prop/player motion,
+collision replacement, and resuming a hidden or distant cable wake the solver.
+The existing 4,096-ray frame budget includes the added support probes.
+Manual checks: let hanging and ground-supported cables settle at each diameter;
+move an attached prop, move/remove a supporting crate, open an attached door,
+edit the supporting terrain, and leave/return to the area. Check that idle
+cables stay still and disturbed cables resume draping. No builds or playtests
+were run for this change; no protocol, save, or native bridge changes are needed.
+
+### Deferred rendering inspection
+
+The harness `settings` action accepts `ao` (`auto`, `off`, `low`, `performance`,
+`high`) and `aoView`: `lit`, `ao`, `albedo`, `normals`, `geometric-normals`,
+`geometric-depth`, `depth`, `material-class`, `indirect`, `sun-diffuse`,
+`transmission`, `specular`, `emission`, `hdr`, `roughness`, `metalness`,
+`specular-strength`, `surface-auxiliary`, `sun-visibility`.
+The additional scalar views expose every packed G-buffer channel; surface auxiliary
+stores transmission for foliage and snow coverage for solid materials. Old material/combined/raw/filtered/
+ambient names are removed. AO is the effective visibility used by deferred
+lighting, including receiver weighting. White means unoccluded; Off is white.
+These deferred views have no diagnostic command-line switches.
+
+Example settings action:
+`{ "action": "settings", "data": { "ao": "high", "aoView": "ao" } }`.
+Set capture `includeUi:false` to capture before HUD overlays.
+Use the existing capture action, which waits for material shaders, model/terrain
+uploads, canopy uploads, grass preparation and capture readiness. `normals` shows
+shading normals; `geometric-normals` shows the AO guide. Depth displays camera
+distance divided by 100 m. `hdr` shows linear HDR before tone mapping; screenshot
+formats with limited range will clip values above one.
+
+Run the `deferred-ao-compare` recipe in Sandbox through `scripts/Test.ps1 run`.
+It fixes quality High, clear weather, hour 12, visual time 20, camera orbit/traverse
+off and manual exposure at 0 EV. It captures lit AO High/Off pairs and the AO view
+at the same gate-pair, interior and DHD bookmarks. Camera, animation and exposure
+remain fixed between each pair. The recipe leaves exposure/time fixed for further
+inspection and restores AO Auto/lit. Set `exposure` to `auto` and `visualTime` to
+null to resume live behaviour.
+
+Harness status exposes `performance.gbufferMs`, `aoMs`, `deferredMs`, `weaponMs`,
+and `compositionMs`; target memory is in `resources.targetsBytes`, `gbufferBytes`,
+`lightingBytes`, `aoBytes` (world AO), and `weaponBytes` (including weapon AO/MSAA).
+GPU timings use nonblocking completed-frame queries.
+
+Manual acceptance: grass roots, terrain cavities and contacts, house corners,
+DHD base; bright/shaded AO pairs; parallax at grazing angles/water/fog boundaries;
+vegetation LOD/wind/cutouts; moving props; gates, DHD, clouds, fog, water, particles,
+previews and demolition; weapon edges/shadows/AO/glow; resizing/presets/travel and
+frame-time/memory comparisons. Screen-space occlusion remains limited to visible
+samples; subpixel and offscreen cavities cannot be reconstructed.
+
+Refresh shader assets through the development overlay before using the matching
+client build. No protocol, save-schema or native-physics change is needed.
+Builds, tests, profiling and playtesting were left to the developer.
+
+## Lantern lighting
+
+The `lantern-lighting` Sandbox recipe spawns three Wooden Lantern props, fixes
+camera/time/exposure, and captures night/noon AO pairs plus night quality presets.
+Use a fresh Sandbox session. It uses normal server-validated spawning and waits
+for capture readiness. See [LANTERNS.md](LANTERNS.md) for regeneration and manual
+acceptance. Status reports `pointLights.count`, `shadowFaceUpdates`, `targetBytes`,
+`shadowMs` and `lightingMs`; the `shadows` setting controls global shadow casting.
+This recipe has not been run as part of the lantern implementation.

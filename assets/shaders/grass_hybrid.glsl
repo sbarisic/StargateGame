@@ -21,18 +21,10 @@ bool grassKept(vec2 p){
  float rangeFade=1.-smoothstep(uRange*.85,uRange,distance(p,uViewPosition.xz));
  return allowed>.5&&surface.y>.02&&grassHash(p+vec2(119.7,14.3))<surface.y*rangeFade*uGrowth*uDensity;
 }
-vec3 grassLight(vec3 world,vec3 normal,vec3 albedo,float stem,vec2 ambientVisibility,out vec3 ambient){
- vec3 groundNormal=grassGroundNormal(world.xz);
- vec3 n=normalize(vec3(normal.x,abs(normal.y)+.3,normal.z));
- float visibility=cloudVisibility(world)*SampleSunVisibility(world,groundNormal,max(dot(groundNormal,uSunDirection),0.));
+vec3 grassAlbedo(vec3 world,vec3 albedo,float stem){
  albedo=mix(vec3(dot(albedo,vec3(.2126,.7152,.0722))),albedo,.65)*vec3(1.03,1.,.85);
- // Match root pigmentation to the retained terrain material field.
- // Only root pigmentation is needed: do not evaluate three full PBR layers,
- // normals and height blending for every visible blade/volume hit.
  int layer=uGrassGroundLayer;
  float footprint=length(world-uViewPosition)*.001*float(textureSize(uTerrainColor,0).x)/uTerrainMetres[layer];
  vec3 ground=decodeColor(textureLod(uTerrainColor,vec3(world.xz/uTerrainMetres[layer],layer),log2(max(1.,footprint))).rgb)*uTerrainGain[layer];
- albedo=mix(albedo,ground,mix(.25,.08,smoothstep(0.,.65,stem)))*mix(.42,.95,stem);
- ambient=albedo*mix(ambientGroundColor()*mix(.65,1.,ambientVisibility.y),ambientSkyColor()*mix(.65,1.,ambientVisibility.x),.78);
- return ambient+albedo*sunLightColor()*(max(dot(n,uSunDirection),0.)+.20*max(dot(-normal,uSunDirection),0.))*visibility+gateLighting(world,normal,normalize(uViewPosition-world),albedo,.92);
+ return mix(albedo,ground,mix(.25,.08,smoothstep(0.,.65,stem)))*mix(.42,.95,stem);
 }

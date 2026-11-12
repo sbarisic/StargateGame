@@ -171,11 +171,13 @@ public static class GraphicsFixture
         if (!IsFixture(d) || !PlanetSettings.Presets.Contains(d.Preset))
             throw new InvalidDataException("Unknown fixture.");
         var expected = Create(d.Fixture!, d.Preset);
-        // The fixture layout is immutable; its live prop registry changes after
-        // capture/destruction and is independently validated with physics state.
+        // Layout is immutable. Props and developer time/weather are live state,
+        // including in the definition accompanying a door/building transfer.
+        d.Environment?.Validate();
         if (System.Text.Json.JsonSerializer.Serialize(d with
         {
-            Props = expected.Props
+            Props = expected.Props,
+            Environment = expected.Environment
         }, Protocol.Json) != System.Text.Json.JsonSerializer.Serialize(expected, Protocol.Json))
             throw new InvalidDataException("Fixture definition does not match this build.");
     }

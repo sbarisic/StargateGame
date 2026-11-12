@@ -25,6 +25,7 @@ sealed partial class GameApp
     Vector3? testCameraEye, testCameraTarget;
     readonly List<double> testSamples = [];
     string? testCapture;
+    bool testCaptureIncludeUi = true;
     bool testWeatherFixture, testHorizonProps, testHorizonPlayers, testHorizonOcclusion, testShadowFixture, testOrbit, testTraverse;
     string testPropMode = "motion";
     float? testVisualTime;
@@ -34,7 +35,7 @@ sealed partial class GameApp
     double testPreviewTime;
     bool TestAutomated => args.Contains("--test-automated");
     bool TestPlayable => session is not null && scene is not null && firstPlayablePresented && !session.PlanetVisualPending && !session.TransitionPending && !session.TransitLocked && !session.AwaitingArrivalFrame && !session.Local.TransitFrozen;
-    bool TestCaptureReady => TestPlayable && testFrames > testChangedFrame + 1 && scene!.InspectionAssetsReady && scene.PendingMeshes == 0 && scene.WorldCanopiesPending == 0 && scene.ArrivalRegionReady(camera.Position) && (!scene.WeatherDiagnostics || scene.WeatherChecksComplete) && (!scene.LandscapeDiagnostics || scene.LandscapeChecksComplete);
+    bool TestCaptureReady => TestPlayable && testFrames > testChangedFrame + 1 && scene!.InspectionAssetsReady && scene.DeferredCaptureReady && scene.PendingMeshes == 0 && scene.WorldCanopiesPending == 0 && scene.ArrivalRegionReady(camera.Position) && (!scene.WeatherDiagnostics || scene.WeatherChecksComplete) && (!scene.LandscapeDiagnostics || scene.LandscapeChecksComplete);
     void InitializeTestControl()
     {
         string pipe = Arguments.Get(args, "--test-pipe", "");
@@ -56,11 +57,12 @@ sealed partial class GameApp
         bodies = session?.Physics.Bodies(), carries = session?.Physics.Carries,
         returnAddress = session?.ReturnAddress, inventory = session?.Inventory, container = session?.OpenWeaponContainer, changes = session?.Changes, pieces = session?.Changes.Pieces, revision = session?.Changes.Revision,
         operation = testOperation, camera = new { eye = camera.Position, target = camera.Position + camera.WorldForwardNormal, view = testView },
-        performance = new { cpuMs = scene?.RenderCpuMilliseconds, gpuMs = scene?.CommonReady == true ? scene.RenderGpuMilliseconds : 0, modelGpuBytes = scene?.ModelGpuBytes },
+        pointLights = new { count = scene?.PointLightCount, shadowFaceUpdates = scene?.PointShadowUpdates, targetBytes = scene?.PointLightTargetBytes, shadowMs = scene?.CommonReady == true ? scene.PointShadowGpuMilliseconds : 0, lightingMs = scene?.CommonReady == true ? scene.PointLightGpuMilliseconds : 0 },
+        performance = new { cpuMs = scene?.RenderCpuMilliseconds, gpuMs = scene?.CommonReady == true ? scene.RenderGpuMilliseconds : 0, modelGpuBytes = scene?.ModelGpuBytes, gbufferMs = scene?.CommonReady == true ? scene.GbufferGpuMilliseconds : 0, aoMs = scene?.CommonReady == true ? scene.AoGpuMilliseconds : 0, deferredMs = scene?.CommonReady == true ? scene.DeferredGpuMilliseconds : 0, weaponMs = scene?.CommonReady == true ? scene.WeaponGpuMilliseconds : 0, compositionMs = scene?.CommonReady == true ? scene.CompositionGpuMilliseconds : 0 },
         build = new { physicsHash = Physics.PhysicsWorld.PhysicsHash, contentHash = Physics.PhysicsWorld.ContentHash },
-        resources = new { environmentBytes = (scene?.GrassWorldBytes ?? 0) + (scene?.WeatherBytes ?? 0), sharedGrassBytes = scene?.GrassVolumeBytes ?? 0, volumeBytes = scene?.VolumeBytes ?? 0, horizonBytes = scene?.HorizonTargetBytes ?? 0 },
+        resources = new { targetsBytes = scene?.CommonReady == true ? scene.TargetBytes : 0, gbufferBytes = scene?.GbufferTargetBytes, weaponBytes = scene?.WeaponDeferredTargetBytes, aoBytes = scene?.AoTargetBytes, lightingBytes = scene?.DeferredLightingTargetBytes, environmentBytes = (scene?.GrassWorldBytes ?? 0) + (scene?.WeatherBytes ?? 0), sharedGrassBytes = scene?.GrassVolumeBytes ?? 0, volumeBytes = scene?.VolumeBytes ?? 0, horizonBytes = scene?.HorizonTargetBytes ?? 0 },
         audioCues = audio?.TestCueCounts,
-        rendering = scene is null ? null : new { hour = scene.TimeOfDay, quality = graphicsSettings.Quality, weather = scene.WeatherSettings, roof = scene.WeatherFixtureRoof, weatherCheck = scene.WeatherDiagnostics, camera = testView, gatePreview = testPreview }, options = testOptions
+        rendering = scene is null ? null : new { hour = scene.TimeOfDay, quality = graphicsSettings.Quality, ao = scene.AoSettings, exposure = scene.ToneMapping, visualTime = testVisualTime, deferredReady = scene.DeferredCaptureReady, weather = scene.WeatherSettings, roof = scene.WeatherFixtureRoof, weatherCheck = scene.WeatherDiagnostics, camera = testView, gatePreview = testPreview }, options = testOptions
     };
     TestResult ExecuteTest(TestRequest r)
     {
@@ -156,7 +158,10 @@ sealed partial class GameApp
                 if (session.Inventory is null || session.WeaponPending || session.TransitLocked) throw new InvalidOperationException("Inventory is not ready for an action.");
                 session.Weapon(r.Text("action"), r.Data.TryGetProperty("item", out _) ? r.Value<Guid>("item") : Guid.Empty,
                     r.Data.TryGetProperty("container", out _) ? r.Value<Guid>("container") : Guid.Empty); break;
-            case TestAction.Capture: testCapture = TestOutput(r.Text("name", "capture-" + r.Id.ToString("N") + ".png")); break;
+            case TestAction.Capture:
+                testCapture = TestOutput(r.Text("name", "capture-" + r.Id.ToString("N") + ".png"));
+                testCaptureIncludeUi = r.Flag("includeUi", true);
+                break;
             case TestAction.Sample:
                 double duration = r.Number("seconds", 3);
                 if (!double.IsFinite(duration) || duration is < .1 or > 60) throw new ArgumentException("Sample duration must be 0.1â€“60 seconds.");
@@ -210,6 +215,10 @@ sealed partial class GameApp
         if (scene is null) return;
         foreach (var setting in r.Data.EnumerateObject())
             if (!ScenarioCatalog.RenderSettings.Contains(setting.Name)) throw new ArgumentException("Unknown rendering setting: " + setting.Name);
+        if (r.Data.TryGetProperty("exposure", out _)) ToneMappingSettings.ParseMode(r.Text("exposure"));
+        if (r.Data.TryGetProperty("exposureEv", out _) && (!double.IsFinite(r.Number("exposureEv")) || r.Number("exposureEv") is < -2 or > 2)) throw new ArgumentException("Exposure EV must be finite and between -2 and 2.");
+        if (r.Data.TryGetProperty("ao", out _)) AmbientOcclusionSettings.Parse(r.Text("ao"));
+        if (r.Data.TryGetProperty("aoView", out _)) AmbientOcclusionSettings.InspectionId(r.Text("aoView"));
         if (r.Data.TryGetProperty("quality", out _) && !new[] { "performance", "low", "high" }.Contains(r.Text("quality"))) throw new ArgumentException("Invalid quality.");
         if (r.Data.TryGetProperty("weather", out _)) WeatherSettings.Parse(r.Text("weather"));
         if (r.Data.TryGetProperty("grassDensity", out _) && r.Int("grassDensity") is < 0 or > 64) throw new ArgumentException("Grass density must be 0�64.");
@@ -220,6 +229,11 @@ sealed partial class GameApp
         if (r.Data.TryGetProperty("hour", out _)) scene.TimeOfDay = (float)r.Number("hour");
         if (r.Data.TryGetProperty("quality", out _)) { graphicsSettings = GraphicsSettings.Parse(r.Text("quality")); scene.SetGraphics(graphicsSettings); }
         if (r.Data.TryGetProperty("weather", out _)) scene.WeatherSettings = scene.WeatherSettings with { Mode = WeatherSettings.Parse(r.Text("weather")) };
+        if (r.Data.TryGetProperty("ao", out _)) scene.AoSettings = scene.AoSettings with { Quality = AmbientOcclusionSettings.Parse(r.Text("ao")) };
+        if (r.Data.TryGetProperty("aoView", out _)) scene.AoSettings = scene.AoSettings with { Inspection = r.Text("aoView") };
+        if (r.Data.TryGetProperty("exposure", out _)) scene.ToneMapping = scene.ToneMapping with { Mode = ToneMappingSettings.ParseMode(r.Text("exposure")) };
+        if (r.Data.TryGetProperty("exposureEv", out _)) scene.ToneMapping = scene.ToneMapping with { Compensation = (float)r.Number("exposureEv") };
+        if (r.Data.TryGetProperty("shadows", out _)) scene.ShadowsEnabled = r.Flag("shadows");
         if (r.Data.TryGetProperty("clouds", out _)) scene.CloudsEnabled = r.Flag("clouds");
         if (r.Data.TryGetProperty("volumetrics", out _)) scene.VolumetricsEnabled = r.Flag("volumetrics");
         if (r.Data.TryGetProperty("reflections", out _)) scene.WaterReflections = r.Flag("reflections");
@@ -271,9 +285,9 @@ sealed partial class GameApp
         "interior" => "region:25,3,29,25,1,23", "technology" => "region:37,3,18,37,1,10",
         "water" => "water-shallow", "region" => testRegionalView is { Length: > 0 } view ? view : throw new InvalidOperationException("This scenario has no regional bookmark."), _ => name
     };
-    void CaptureTest(RenderPass pass)
+    void CaptureTest(RenderPass pass, bool beforeUi = false)
     {
-        if (testCapture is not { } path || !TestCaptureReady) return;
+        if (beforeUi == testCaptureIncludeUi || testCapture is not { } path || !TestCaptureReady) return;
         Capture(pass, path, true); TestJson.Write(Path.ChangeExtension(path, ".json"), TestStatus());
         FinishTest(data: new { path, metadata = Path.ChangeExtension(path, ".json") });
     }

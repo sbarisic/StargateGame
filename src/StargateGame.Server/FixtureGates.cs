@@ -85,7 +85,15 @@ public sealed partial class GameServer
                 if (state.Owner != 0 && state.Owner != s.PlayerId)
                     throw new InvalidOperationException("Another explorer owns this dial session.");
                 var symbols = state.Symbols.ToList();
-                if (command.Action == "reset")
+                // Six destination glyphs are already complete in Sandbox;
+                // an earlier orb press abandons the partial address.
+                bool cancelPartial = command.Action == "press" && command.Key == 0 && symbols.Count is > 0 and < 6;
+                if (cancelPartial)
+                {
+                    symbols.Clear();
+                    reason = "Dial cancelled";
+                }
+                else if (command.Action == "reset")
                     symbols.Clear();
                 else if (command.Action == "undo")
                 {
@@ -145,7 +153,7 @@ public sealed partial class GameServer
                         PhaseTick = serverTick,
                         PressKey = command.Action == "press" ? command.Key : -1,
                         PressTick = serverTick,
-                        Status = "Any six glyphs dial the other test gate"
+                        Status = cancelPartial ? reason : "Any six glyphs dial the other test gate"
                     });
             }
             accepted = true;

@@ -252,3 +252,13 @@ These candidates were rejected and are not assigned to runtime trees.
 Active broadleaf bark uses the developer-supplied BarkPoplar001 set under
 assets_itch/textures/bark. Its original license was not supplied in that folder.
 Runtime conversion and source hashes: assets/models/tree-bark-materials.json.
+
+## Wooden Lantern 01
+
+Wooden Lantern 01 by James Ray Cock / Poly Haven, CC0 1.0.
+https://polyhaven.com/a/wooden_lantern_01
+The supplied Patch repack restores glass alpha, includes LODs and moves the pivot
+to the bottom centre. Our importer bakes node transforms at authored scale,
+converts normal maps to the runtime convention, and adds a steady flame insert.
+Source credits: assets_itch/props/wooden_lantern/CREDITS.md. Generated model
+credits, licence and source hash accompany assets/models/wooden-lantern.json.

@@ -60,6 +60,7 @@ sealed partial class SceneRenderer
     {
         ClearGateSpray();
         DisposeGateLights();
+        DisposePointLights();
         DisposeHorizonWaves();
         horizonStates.Clear();
         visibleHorizons = [];
@@ -225,7 +226,7 @@ sealed partial class SceneRenderer
     }
     void RenderHorizonBloom(RenderFrame frame, RenderView view, float time)
     {
-        if ((visibleHorizons.Length == 0 && !gateEmissionVisible && visibleLitDhds.Length == 0) || HorizonSettings.BloomStrength <= 0)
+        if ((visibleHorizons.Length == 0 && !gateEmissionVisible && visibleLitDhds.Length == 0 && !HasLanternEmission) || HorizonSettings.BloomStrength <= 0)
         {
             DisposeHorizonTargets();
             return;
@@ -258,6 +259,7 @@ sealed partial class SceneRenderer
                 DrawHorizons(pass, true, time);
                 DrawGateEmission(pass, true);
                 DrawDhdEmission(pass, true);
+                DrawLanternEmission(pass);
             }
             using (gpuTimer.Measure(pass, "gate-spray"))
                 DrawGateSpray(pass, view, true);

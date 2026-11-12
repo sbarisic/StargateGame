@@ -10,7 +10,7 @@ void main(){
   if(any(isnan(s.color))||any(isinf(s.color)))failure|=1;
   if(any(isnan(s.normal))||abs(length(s.normal)-1)>=.001)failure|=2;
   if(isnan(s.rough)||s.rough<.14999||s.rough>1.00001)failure|=4;
-  if(isnan(s.ao)||s.ao<-.00001||s.ao>1.00001)failure|=8;
+  if(isnan(s.depth)||isinf(s.depth)||s.depth<-.00001)failure|=8;
   fragColor=vec4(failure==0?1:0,texture(uTerrainMasks,vec3(.37,.61,0)).a,float(failure)/255.0,1);
  }else fragColor=vec4(clamp(dustDensity(uPoint)*50,0,1),outsideMist(uPoint),looseSand(uPoint.xz,surfaceData(uPoint.xz)),1);
 }

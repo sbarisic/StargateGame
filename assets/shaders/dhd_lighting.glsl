@@ -3,8 +3,8 @@
 uniform int uDhdLightCount;
 uniform vec4 uDhdLightPositionRange[38],uDhdLightNormalRadius[38];
 uniform vec3 uDhdLightColor[38];
-vec3 dhdLighting(vec3 p,vec3 geometricNormal,vec3 normal,vec3 view,vec3 albedo,float rough,float specularStrength){
- vec3 sum=vec3(0);
+vec3 dhdLightingParts(vec3 p,vec3 geometricNormal,vec3 normal,vec3 view,vec3 albedo,float rough,float specularStrength,out vec3 specular){
+ vec3 sum=vec3(0);specular=vec3(0);
  float top=smoothstep(.2,.5,geometricNormal.y);
  if(uDhdLightCount==0||top<=0.0)return sum;
  for(int i=0;i<uDhdLightCount;i++){
@@ -25,7 +25,8 @@ vec3 dhdLighting(vec3 p,vec3 geometricNormal,vec3 normal,vec3 view,vec3 albedo,f
   vec3 halfVector=view+toward;
   halfVector/=max(length(halfVector),.00001);
   float spec=pow(max(dot(normal,halfVector),0.0),power)*.04*(power+2.0)/8.0;
-  sum+=(albedo+vec3(spec*specularStrength))*uDhdLightColor[i]*diffuse*attenuation*top*facing*plane;
+  vec3 irradiance=uDhdLightColor[i]*diffuse*attenuation*top*facing*plane;
+  sum+=albedo*irradiance;specular+=spec*specularStrength*irradiance;
  }
  return sum;
 }

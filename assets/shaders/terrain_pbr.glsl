@@ -6,13 +6,15 @@ uniform float uTerrainMetres[11],uTerrainGain[11],uTerrainNormalStrength[11],uTe
 uniform float uTerrainGrass[11];
 uniform float uTerrainRelief[11],uTerrainParallaxRange;
 uniform int uTerrainParallaxSteps;
-struct TerrainSurface {vec3 color;vec3 normal;float ao;float rough;float height;float grass;float shadow;};
+struct TerrainSurface {vec3 color;vec3 normal;float depth;float rough;float height;float grass;float shadow;};
+float terrainHitDepth=0.;
 float terrainTraceHeight(int id,vec2 uv,vec2 dx,vec2 dy,float cover){
  return textureGrad(uTerrainMasks,vec3(uv,id),dx,dy).b;
 }
 // Bounded parallax occlusion: white height is the top of a recessed slab.
 // Explicit unwarped derivatives keep mip selection stable inside divergent marches.
 vec2 terrainReliefUv(int id,vec2 uv,vec3 view,vec2 dx,vec2 dy,float strength,float cover){
+ terrainHitDepth=0.;
  if(strength<.00001||uTerrainParallaxSteps==0)return uv;
  float facing=abs(view.z);strength*=smoothstep(.035,.16,facing);
  if(strength<.00001)return uv;
@@ -35,6 +37,7 @@ vec2 terrainReliefUv(int id,vec2 uv,vec3 view,vec2 dx,vec2 dy,float strength,flo
   float surface=1.-terrainTraceHeight(id,uv-ray*mid,dx,dy,cover);
   if(mid<surface)low=mid;else high=mid;
  }
+ terrainHitDepth=(low+high)*.5*strength;
  return uv-ray*((low+high)*.5);
 }
 // Bounded height-field sunlight visibility; ambient remains unshadowed.
@@ -63,7 +66,10 @@ TerrainSurface terrainLayer(int id,vec3 p,vec3 g,float distance){
  vec3 dx=dFdx(q),dy=dFdy(q),view=normalize(uViewPosition-p);
  float relief=uTerrainRelief[id]/metres*(1.-smoothstep(uTerrainParallaxRange*.35,uTerrainParallaxRange,distance));
  relief*=smoothstep(.02,.14,dot(g,view));
- uv=terrainReliefUv(id,uv,view.xzy,dx.xz,dy.xz,relief,cover);
+ vec3 projectionView=view.xzy;vec2 projectionDx=dx.xz,projectionDy=dy.xz;
+ if(dunes){projectionView.xy=wind*projectionView.xy;projectionDx=wind*projectionDx;projectionDy=wind*projectionDy;}
+ uv=terrainReliefUv(id,uv,projectionView,projectionDx,projectionDy,relief,cover);
+ float surfaceDepth=terrainHitDepth*metres/max(abs(view.y),.15);
  vec3 sunY=uSunDirection.xzy;
  if(dunes)sunY.xy=wind*sunY.xy;
  float selfShadow=terrainHeightShadow(id,uv,sunY,dx.xz,dy.xz,relief*smoothstep(.035,.16,abs(view.y)));
@@ -77,7 +83,10 @@ TerrainSurface terrainLayer(int id,vec3 p,vec3 g,float distance){
  // Only slopes pay for three projections. Map perturbations into world space.
  if(g.y<.85){
   vec2 ux=terrainReliefUv(id,q.zy,view.zyx,dx.zy,dy.zy,relief,0.);
+  float depthX=terrainHitDepth*metres/max(abs(view.x),.15);
   vec2 uz=terrainReliefUv(id,q.xy,view.xyz,dx.xy,dy.xy,relief,0.);
+  float depthZ=terrainHitDepth*metres/max(abs(view.z),.15);
+  surfaceDepth=surfaceDepth*projection.y+depthX*projection.x+depthZ*projection.z;
   selfShadow=selfShadow*projection.y+
    terrainHeightShadow(id,ux,vec3(uSunDirection.zy,uSunDirection.x*sign(g.x)),dx.zy,dy.zy,relief*smoothstep(.035,.16,abs(view.x)))*projection.x+
    terrainHeightShadow(id,uz,vec3(uSunDirection.xy,uSunDirection.z*sign(g.z)),dx.xy,dy.xy,relief*smoothstep(.035,.16,abs(view.z)))*projection.z;
@@ -87,7 +96,7 @@ TerrainSurface terrainLayer(int id,vec3 p,vec3 g,float distance){
   perturb=perturb*projection.y+vec3(0,-x.y,x.x)*projection.x+vec3(z.x,-z.y,0)*projection.z;
  }
  perturb-=g*dot(perturb,g);
- TerrainSurface s;s.color=min(vec3(.9),decodeColor(col.rgb)*uTerrainGain[id]);s.normal=normalize(g+perturb*uTerrainNormalStrength[id]*(1-smoothstep(35.0,140.0,distance)));s.ao=m.r;s.rough=clamp(m.g,.15,1);s.height=m.b*uTerrainHeightStrength[id];s.grass=uTerrainGrass[id];s.shadow=selfShadow;return s;
+ TerrainSurface s;s.color=min(vec3(.9),decodeColor(col.rgb)*uTerrainGain[id]);s.normal=normalize(g+perturb*uTerrainNormalStrength[id]*(1-smoothstep(35.0,140.0,distance)));s.depth=surfaceDepth;s.rough=clamp(m.g,.15,1);s.height=m.b*uTerrainHeightStrength[id];s.grass=uTerrainGrass[id];s.shadow=selfShadow;return s;
 }
 TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance,vec2 habitat){
  vec4 env=surfaceData(p.xz);float canopy=max(env.r,habitat.x),wet=env.b> -4000?max(env.g,material.b*.45):material.b*.45;
@@ -119,7 +128,7 @@ TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance,vec2 h
  r.shadow=dot(vec3(x.shadow,y.shadow,z.shadow),weights);
  r.grass=dot(vec3(x.grass,y.grass,z.grass),weights);
  r.normal=normalize(x.normal*weights.x+y.normal*weights.y+z.normal*weights.z);
- r.ao=mix(1.0,x.ao*weights.x+y.ao*weights.y+z.ao*weights.z,.65);
+ r.depth=dot(vec3(x.depth,y.depth,z.depth),weights);
  r.rough=x.rough*weights.x+y.rough*weights.y+z.rough*weights.z;r.height=0;
  r.color*=mix(.91,1.07,large);r.color*=1-wet*.14;r.rough=mix(r.rough,max(.22,r.rough*.65),wet);
  float paved=uRoadPaved;float road=material.r;
@@ -131,23 +140,16 @@ TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance,vec2 h
   r.color=mix(r.color,path.color*tint,road);
   r.shadow=mix(r.shadow,path.shadow,road);
   r.grass*=1.-smoothstep(0.,.04,road);
-  r.normal=normalize(mix(r.normal,path.normal,road));r.rough=mix(r.rough,max(.85,path.rough),road);r.ao=mix(r.ao,path.ao,road);
+  r.normal=normalize(mix(r.normal,path.normal,road));r.rough=mix(r.rough,max(.85,path.rough),road);r.depth=mix(r.depth,path.depth,road);
  }
  if(uTerrainBiome==0 && habitat.x<0.){
   float beach=clamp(-habitat.x,0.,1.);TerrainSurface sand=terrainLayer(1,p,g,distance);
   float damp=(1.-smoothstep(.15,2.,p.y))*.35;
   r.color=mix(r.color,sand.color*(1.-damp),beach);r.normal=normalize(mix(r.normal,sand.normal,beach));r.rough=mix(r.rough,mix(.9,.5,damp),beach);
-  r.grass=mix(r.grass,sand.grass,beach);r.shadow=mix(r.shadow,sand.shadow,beach);
+  r.depth=mix(r.depth,sand.depth,beach);r.grass=mix(r.grass,sand.grass,beach);r.shadow=mix(r.shadow,sand.shadow,beach);
  }
  if(uTerrainBiome==1){float layers=.94+.06*sin(p.y*2.3+sin(p.y*.41));r.color*=mix(1.,layers,cliff);}
  if(uTerrainBiome==0 && material.a>.01){float snow=material.a*smoothstep(.45,.85,g.y);r.color=mix(r.color,vec3(.65,.7,.75),snow);r.rough=mix(r.rough,.9,snow);r.grass*=1.-snow;}
  return r;
 }
 TerrainSurface terrainMaterial(vec3 p,vec3 g,vec4 material,float distance){return terrainMaterial(p,g,material,distance,vec2(0,1));}
-vec3 terrainBrdf(vec3 base,vec3 n,vec3 view,vec3 sun,float rough){
- vec3 halfVector=view+sun,h=halfVector*inversesqrt(max(dot(halfVector,halfVector),1e-8));float nv=max(dot(n,view),.001),nl=max(dot(n,sun),0),nh=max(dot(n,h),0),vh=max(dot(view,h),0);
- float a=max(.06,rough*rough),a2=a*a,d=a2/(3.14159265*pow(nh*nh*(a2-1)+1,2));
- float k=pow(rough+1,2)/8;float geometry=nv/(nv*(1-k)+k)*nl/max(nl*(1-k)+k,.001);
- vec3 fresnel=vec3(.04)+vec3(.96)*pow(1-vh,5);
- return ((1-fresnel)*base/3.14159265+d*geometry*fresnel/max(4*nv*nl,.001))*nl*3.14159265;
-}

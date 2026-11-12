@@ -4,12 +4,10 @@ uniform sampler2D uTexture,uBladeNormal;
 in vec3 vWorld,vNormal,vBladeSide;in float vStem;in vec2 vBladeUv,vBladeTexture;
 flat in vec3 vRoot,vGroundNormal;flat in vec4 vGroundMaterial;
 flat in float vShade,vLodStart,vLodEnd,vCoverage,vSeed;
-layout(location=0) out vec4 fragColor;
-#include "ao_outputs.glsl"
+
+#include "gbuffer_outputs.glsl"
 
 #include "daylight.glsl"
-#include "shadows.glsl"
-#include "gate_lighting.glsl"
 #include "meadow.glsl"
 #include "terrain_pbr.glsl"
 void main(){
@@ -32,14 +30,5 @@ void main(){
  float blend=mix(uGrassTerrainBlend.x,uGrassTerrainBlend.y,smoothstep(0.,.65,vStem));
  vec3 base=mix(grass,ground.color,blend)*mix(.42,.95,vStem);
  base*=mix(.90,1.,1.-abs(vBladeUv.x))*(.96+.04*sin(vStem*19.+vSeed*13.));
- float visibility=cloudVisibility(vWorld)*SampleSunVisibility(vWorld,normalize(vGroundNormal),max(uSunDirection.y,0.));
- // Thin blades receive transmitted light on either face. Use an upward
- // foliage normal for diffuse collection so backlit blades are not black wires.
- vec3 lightNormal=normalize(vec3(n.x,abs(n.y)+.3,n.z));
- float diffuse=max(dot(lightNormal,uSunDirection),0.);
- vec3 ambient=base*mix(ambientGroundColor(),ambientSkyColor(),.78)*mix(.82,1.,vStem);
- vec3 light=ambient+base*(sunLightColor()*(diffuse+.20*max(dot(-n,uSunDirection),0.))*visibility);
- light+=gateLighting(vWorld,n,normalize(uViewPosition-vWorld),base,.92);
- writeAmbient(ambient,gl_FrontFacing?g:-g,3.);
- fragColor=vec4(applyFog(light,vWorld,uViewPosition),1);
+ writeSurface(base,.92,n,0.,1.,gl_FrontFacing?g:-g,.20,3.,vec3(0),1.,gl_FragCoord.z,gl_FragCoord.z);
 }

@@ -1,0 +1,149 @@
+{
+  "source_sha256": "a5e8440f50683037bf435481f31fc47ef706ef030cb6bfdafba7afbd8d1917f0",
+  "method": "screened Poisson recessed engraving; normals baked from the same metre-scaled height field with authored fine detail",
+  "roughness": [
+    0.88,
+    0.98
+  ],
+  "metalness": [
+    0.7,
+    0.9
+  ],
+  "depth_metres": 0.012,
+  "height_profile_exponent": 0.65,
+  "authored_normal_strength": 0.35,
+  "source_normals": {
+    "T_Stargate_Chevron_N.png": "e365b0f429e839a79ff09648bfdb1d5d810920ffb343d7f18fe126a2a33d38dc",
+    "T_Stargate_Glyph_N.png": "2ddbf84db17ddfe2406e80fb6c68c09a3d0076cdb72ef9c3ffe0d58ced8bfab1",
+    "T_Stargate_GlyphTrack_N.png": "81793f4c47cc47f7117e9da1ab6ceff5b1e14d348d4c47b7865140605966b176",
+    "T_Stargate_Segment_N.png": "b9ead1c9e1720d6d02807fe22ec5469fa899ed0e9b47e9e98b83be9572feac1a"
+  },
+  "materials": [
+    {
+      "name": "SM_Stargate_ChevronCrystal_01",
+      "normal": "stargate_00-normal.png",
+      "metallicRoughness": "stargate_00-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronCrystal_02",
+      "normal": "stargate_01-normal.png",
+      "metallicRoughness": "stargate_01-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronCrystal_03",
+      "normal": "stargate_01-normal.png",
+      "metallicRoughness": "stargate_01-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronCrystal_04",
+      "normal": "stargate_01-normal.png",
+      "metallicRoughness": "stargate_01-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronCrystal_05",
+      "normal": "stargate_04-normal.png",
+      "metallicRoughness": "stargate_04-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronCrystal_06",
+      "normal": "stargate_04-normal.png",
+      "metallicRoughness": "stargate_04-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronCrystal_07",
+      "normal": "stargate_01-normal.png",
+      "metallicRoughness": "stargate_01-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronCrystal_08",
+      "normal": "stargate_01-normal.png",
+      "metallicRoughness": "stargate_01-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronCrystal_09",
+      "normal": "stargate_01-normal.png",
+      "metallicRoughness": "stargate_01-material.png",
+      "heightScale": 0
+    },
+    {
+      "name": "SM_Stargate_ChevronV_01",
+      "normal": "stargate_09-normal.png",
+      "metallicRoughness": "stargate_09-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_ChevronV_02",
+      "normal": "stargate_10-normal.png",
+      "metallicRoughness": "stargate_10-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_ChevronV_03",
+      "normal": "stargate_10-normal.png",
+      "metallicRoughness": "stargate_10-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_ChevronV_04",
+      "normal": "stargate_10-normal.png",
+      "metallicRoughness": "stargate_10-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_ChevronV_05",
+      "normal": "stargate_13-normal.png",
+      "metallicRoughness": "stargate_13-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_ChevronV_06",
+      "normal": "stargate_13-normal.png",
+      "metallicRoughness": "stargate_13-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_ChevronV_07",
+      "normal": "stargate_10-normal.png",
+      "metallicRoughness": "stargate_10-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_ChevronV_08",
+      "normal": "stargate_10-normal.png",
+      "metallicRoughness": "stargate_10-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_ChevronV_09",
+      "normal": "stargate_10-normal.png",
+      "metallicRoughness": "stargate_10-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_GlyphSwitchable",
+      "normal": "stargate_18-normal.png",
+      "metallicRoughness": "stargate_18-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_GlyphTrack",
+      "normal": "stargate_19-normal.png",
+      "metallicRoughness": "stargate_19-material.png",
+      "heightScale": 0.012
+    },
+    {
+      "name": "SM_Stargate_Segment",
+      "normal": "stargate_20-normal.png",
+      "metallicRoughness": "stargate_20-material.png",
+      "heightScale": 0.012
+    }
+  ]
+}

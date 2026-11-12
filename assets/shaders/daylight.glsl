@@ -6,6 +6,7 @@ uniform vec3 uFog;
 vec3 decodeColor(vec3 c) { return mix(c / 12.92, pow((c + .055) / 1.055, vec3(2.4)), step(vec3(.04045), c)); }
 uniform sampler2D uAtmosphereSky,uAtmosphereLight,uCloudVolume,uCloudShadow,uFogVolume,uCelestial;
 uniform float uCelestialPhase;
+#include "stars.glsl"
 uniform int uAtmosphereEnabled,uVolumeEnabled,uCloudEnabled,uFogDeferred;
 uniform vec3 uVolumeGrid;uniform mat4 uVolumeViewProjection;
 vec2 skyUv(vec3 ray){return vec2(atan(ray.z,ray.x)/6.2831853+.5,asin(clamp(ray.y,-1.0,1.0))/3.14159265+.5);}
@@ -16,7 +17,11 @@ float cloudVisibility(vec3 p){return uCloudEnabled==1?texture(uCloudShadow,clamp
 vec3 skyColor(vec3 ray) {
  if(uAtmosphereEnabled==1){vec2 uv=skyUv(ray);vec3 c=texture(uAtmosphereSky,uv).rgb;
  float night=1.0-smoothstep(-.16,.03,uSunDirection.y);
- c+=texture(uCelestial,vec2(fract(uv.x+uCelestialPhase),uv.y)).rgb*night*exp(-.025/max(ray.y,.008))*smoothstep(-.02,.05,ray.y); if(uCloudEnabled==1){vec4 cloud=texture(uCloudVolume,skyUv(ray));c=c*cloud.a+cloud.rgb;}return c;}
+ if(night>0. && ray.y>-.02){
+  vec3 celestial=texture(uCelestial,vec2(fract(uv.x+uCelestialPhase),uv.y)).rgb+starField(ray);
+  c+=celestial*night*exp(-.025/max(ray.y,.008))*smoothstep(-.02,.05,ray.y);
+ }
+ if(uCloudEnabled==1){vec4 cloud=texture(uCloudVolume,skyUv(ray));c=c*cloud.a+cloud.rgb;}return c;}
  return mix(uHorizon,uZenith,pow(max(ray.y,0),.42));
 }
 vec4 volumeAt(vec3 position,vec3 eye){
@@ -35,7 +40,7 @@ vec3 applyFog(vec3 color,vec3 position,vec3 eye){
  if(uFogDeferred==1)return color;
  if(uVolumeEnabled==1){vec4 v=volumeAt(position,eye);return color*v.a+v.rgb;}
  float air=exp(-length(position-eye)*(uFog.x+uFog.y*exp(-max((position.y+eye.y)*.5-uGroundLevel,0)*uFog.z)));
- return mix(dustLight(),mix(tintIndirect(skyColor(normalize(position-eye))),color,air),exp(-dustOpticalDepth(position,eye)));
+ return mix(dustLight(),mix(scatteringIndirect(tintIndirect(skyColor(normalize(position-eye))),uSunDirection.y),color,air),exp(-dustOpticalDepth(position,eye)));
 }
 
 uniform sampler2D uFarSunDepth;uniform mat4 uFarSunMatrix;uniform int uFarSunEnabled;

@@ -7,8 +7,7 @@ void main(){
  vec3 gal=normalize(vec3(.24,.76,.6));float band=exp(-pow(dot(d,gal)/.13,2));
  float dust=noise(d*17+uSeed)*.65+noise(d*39-uSeed)*.35;
  vec3 color=vec3(.009,.012,.022)+band*mix(vec3(.045,.045,.07),vec3(.08,.062,.08),noise(d*8))*smoothstep(.25,.72,dust);
- vec2 cell=floor(vUv*vec2(2048,1024));float h=hash(vec3(cell,uSeed));
- float star=step(.9982,h)*(.25+pow(hash(vec3(cell.yx,uSeed+3)),6)*2.5)*pow(cos(e),.4);
- color+=mix(vec3(.65,.8,1),vec3(1,.82,.6),hash(vec3(cell,uSeed+7)))*star;
+ // Only the smooth galactic background is baked here. Point stars are drawn
+ // from directions in stars.glsl so texture projection cannot stretch them.
  result=vec4(color,1);
 }

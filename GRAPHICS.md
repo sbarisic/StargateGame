@@ -2,17 +2,22 @@
 
 # Outdoor renderer
 
+The current surface contract is in **Deferred surface lighting and ambient
+occlusion** below. Older capture notes describe their original implementation.
+
 ## Rifle finish, viewmodel shadows and cloud layers (2026-11-11)
 
-Weapon and arms render into a 4x MSAA RGBA16Float/Depth32Float target at
-scene resolution across all quality presets. After the draw pass, color resolves
-into a single-sample RGBA16Float target without depth. Premultiplied-alpha
-composition preserves resolved edge coverage, also used by horizon glow masking.
-Hardware reporting fewer than four samples uses the single-sample color/depth
-path and logs the fallback once. Both targets resize with the scene and are
-included in target memory reporting (56 bytes/pixel for MSAA plus resolve,
-12 bytes/pixel for the fallback). World rendering and final FXAA are unchanged.
-MSAA implementation has not been built or tested; validation is left to the developer.
+Weapon and arms use a separate deferred G-buffer at scene resolution, with four
+samples where supported. Each sample is shaded independently before HDR colour
+and coverage are averaged. A nearest-covered-sample guide drives a separate
+10 cm screen-space AO evaluation using the weapon camera. No material, depth,
+or normal averaging crosses a silhouette. Premultiplied composition retains
+coverage for gate glow masking. The logged single-sample fallback remains.
+
+The 4x path allocates 182 bytes/pixel (160 G-buffer, 12 guide, 8 resolved HDR,
+2 AO); the single-sample path allocates 50. Viewmodel shadow memory is additional.
+Targets resize together and are released on shutdown. Final FXAA is retained.
+This migration has not been built or playtested; validation remains with the developer.
 
 The procedural rifle material uses matte coating roughness (0.62–0.94), low
 coating metallic response, and restrained sky reflections. Wear and brass retain
@@ -116,12 +121,14 @@ near cascade boundaries. The game shader fixes this without modifying FishGfx.
    planetary clock and winter weather once for the frame.
 2. Sample the atmospheric lookup tables, update the sky, cloud raymarch/history,
    cloud shadows, sunlight cascades, coarse terrain shadows, and volumetric fog.
-3. Draw opaque geometry and the event horizon into unfogged RGBA16F colour and
-   Depth32F depth. The sky receives atmospheric transport at its background depth.
-4. Composite aerial perspective into a separate target. Draw water while sampling
-   the original unfogged opaque colour/depth. Water applies underwater absorption
-   and camera-to-surface atmospheric transport separately.
-5. Draw snowfall, then extract and blur the depth-tested selective emission mask.
+3. Evaluate opaque surface materials into the G-buffer, including cutout grass
+   and volume hits. Compute screen-space AO and shade into unfogged HDR. Render
+   the sky at uncovered pixels and specialized gate membranes against scene depth.
+4. Composite aerial perspective into a separate target. Water samples unfogged
+   opaque HDR and displaced surface depth for transmission/reflections. Atmospheric
+   scattering is never multiplied by surface AO.
+5. Draw particles, previews and selection overlays; light and composite the separate
+   weapon G-buffer, then extract and blur the depth-tested selective emission mask.
 6. Tone-map, apply display conversion once, run FXAA, and draw sharp UI. F12
    captures the completed frame.
 
@@ -256,9 +263,42 @@ conversion. Chevron crystal/strip masks emit linear orange (1, 0.20, 0.025) at
 intensity 3.5. Ordinary metal and the two inactive chevrons do not emit.
 
 `GateLightSettings` controls seven orange point lights (range 3 m, intensity 1.6,
-source radius 0.22 m) and one blue point light at the membrane centre (range 7 m,
-intensity 3, radius 1.2 m). The blue source approximates a broad luminous disc; it
+source radius 0.22 m) and one blue point light at the membrane centre (range 10 m,
+intensity 12, radius 1.2 m). The blue source approximates a broad luminous disc; it
 is not area lighting. Both kinds illuminate nearby opaque surfaces and water.
+During the kawoosh the blue source moves forward with the plume, reaching 55%
+of its length, shifts toward pale blue, and gains up to 3x intensity in addition
+to the existing opening envelope. Its six shadow views refresh as it moves.
+The paired Sandbox gates share the same eight-light budget. Parallax receivers
+use original geometric positions/normals for shadow tests and displaced hits
+for lighting, preventing recesses from shadowing themselves against flat casters.
+
+`tools/export_gate_materials.py` integrates the authored engraving normals with a
+screened Poisson solve, discards broad bevel variation, and retains negative
+relief only. A 0.65 exponent makes shallow cuts more visible, with up to 12 mm
+of recessed detail packed into material alpha. Normals are rebaked into the
+existing gate UV atlases from this same metre-scaled height field, with 35% of
+the authored normal detail retained. This gives local lights groove-side normals
+consistent with parallax depth; it does not add local height-field shadow rays.
+RGB contains neutral
+unused AO, roughness 0.88–0.98, and weathered-metal metalness 0.70–0.90; luminous
+chevron materials remain nonmetallic without relief. Empty atlas texels are
+neutral, with padded island borders. No geometry or collision changes are made.
+`scripts/Export-Assets.ps1` includes this step; hashes and parameters are recorded
+in `assets/models/gate-material-provenance.json`.
+
+Night stars use explicit camera projection for their round pixel footprints.
+They do not use derivatives inside the sky-only shading branch, where foreground
+canopy/model lanes make derivatives undefined and can produce white edge pixels.
+
+Fog, clear-air scattering, dust, and clouds fade ambient illumination through
+twilight to 4% at night (sun elevation sine -0.16 to 0.03). This prevents the
+surface-readability ambient floor from lighting nighttime mist. Surface lighting,
+media extinction, and direct sun/gate lighting are unchanged. The analytic fog
+fallback uses the same fade.
+Manual acceptance remains with the developer: inspect night silhouettes, gate
+metal under a close lantern, and light spill during opening, open, and closing
+states, including both Sandbox gates and window resizing.
 
 Each light uses six guarded shadow views, with separate static/dynamic tiles in
 one depth atlas. Low/Performance/High use 128/256/512 interior pixels per face,
@@ -739,7 +779,7 @@ placement availability. Neighbouring chunks contribute to canopy and actual-wate
 bank masks. Deterministic 18 m regions and 2.6 m clusters are shared by terrain,
 vegetation and sand emission. Tree removal and building edits invalidate masks.
 Two ground layers plus exposed rock use normalized height-adjusted blends and
-triplanar slope mapping. AO affects indirect light only; dielectric GGX/Schlick
+triplanar slope mapping. Deferred AO supplies surface visibility; dielectric GGX/Schlick
 is terrain-only. Height changes blend edges, never geometry or physics.
 The old meadow colour override is no longer applied.
 Natural clearings use dry-brown-dirt-pbr-material; temperate and icy cliff slots
@@ -903,32 +943,58 @@ It provides inside, near, above, far and walking cameras. This is render-only
 inspection; the extra grove does not replace gameplay placements or add collision. See
 `TREE_PROTOTYPE.md` for controls and retained captures.
 
-## Ambient occlusion
+## Deferred surface lighting and ambient occlusion
 
-Opaque lighting writes HDR colour, ambient diffuse and geometric normal/material
-classification. A spatial horizon AO pass (GTAO-style slice integration), bilateral
-filter and depth-aware reconstruction remove only occluded ambient diffuse.
-Sunlight, direct gate/DHD light, specular and leaf transmission remain unchanged.
-The resolved unfogged target feeds aerial perspective and water transmission/SSR.
-Sky and gate membranes are excluded. Additive emission writes zero auxiliary
-contribution. Previews and debug overlays render after the AO resolve; the weapon,
-particles and UI do not receive AO.
+Terrain, buildings, props, characters, cables, foliage and volume vegetation share
+one material contract. Four RGBA16F attachments store linear albedo/roughness,
+octahedral shading normal/metalness/specular strength, octahedral geometric
+normal/transmission/material class, and HDR emission/sun self-shadow visibility.
+R32F retains geometric depth; Depth32F stores visible recessed parallax/volume
+hit depth. World positions are reconstructed. Background class zero is invalid.
+The renderer requires five colour attachments/draw buffers and reports unsupported
+hardware rather than showing a forward fallback.
 
-`--ao auto|off|low|performance|high` defaults to the graphics preset. The pause
-menu's Ambient occlusion button (O) persists the explicit quality under LOCALAPPDATA.
-Inspection overrides: `--ao-radius 1` (0.1-3 metres), `--ao-strength 1` (0-2),
-`--ao-view lit|raw|filtered|normals|ambient`. Debug outputs bypass tone mapping/fog.
+Parallax UV and depth use the same hit and distance/grazing fade. It does not
+change geometry, silhouettes, collision or picking. Geometric depth remains the
+shadow-bias reference; geometric normals guide AO, shading normals drive lighting.
+Opaque gate/DHD emission is in the G-buffer; selective bloom and gate membranes
+retain their specialized passes. Receiver IDs keep DHD spill on its own console.
+
+Screen-space AO is the sole surface ambient-occlusion term. Packed AO channels
+and baked grass/canopy AO remain in assets but are not sampled by lighting. No
+height-field ambient rays or procedural ambient-only root/crown attenuation remain.
+The horizon algorithm, edge-aware filter and reconstruction are shared by world
+and weapon projections; their AO never crosses between cameras.
 Low: half resolution, 2 slices x 3 samples each side; Performance: half, 3 x 4;
-High: full, 3 x 6. Sampling is fixed, with no temporal history. Thin leaves/grass
-have reduced occluder weight; receiver strength is 25%/35% respectively. F3 reports
-AO GPU time/targets and shared canopy visibility bytes. Screen-space AO cannot
-represent offscreen occluders and may lose detail at silhouettes or subpixel leaves.
+High: full, 3 x 6. Weapon AO runs at full resolution with a 10 cm radius.
+Grass-to-terrain contact weighting remains stronger within 40 cm. Leaf/grass
+receiver weights remain 25%/35%. AO Off forces visibility to one for every class.
 
-The independent GLSL implementation uses the slice integral described by Jimenez
+Deferred lighting multiplies indirect diffuse by effective visibility V and sun
+diffuse/transmission by 0.5 + 0.5 V. Direct specular, local lights and emission are
+unaffected. Sunlight self-shadowing and volume sunlight extinction remain separate.
+Atmospheric LUT illumination, water, fog/cloud integration, exposure, bloom,
+tone mapping and FXAA keep their existing specialized stages.
+
+Diagnostics are test-harness settings only. `aoView` accepts `lit`, `ao`, `albedo`,
+`normals`, `geometric-normals`, `geometric-depth`, `depth`, `material-class`,
+`indirect`, `sun-diffuse`, `transmission`, `specular`, `emission`, and `hdr`.
+Material/combined/raw/filtered/ambient inspection names are replaced. AO shows
+exact effective visibility; white is unoccluded. Depth views show camera distance
+scaled by 100 metres. Surface views bypass fog/tone mapping; `hdr` presents final
+linear composition. See TESTING.md for the fixed-camera comparison recipe.
+
+G-buffer GPU time includes terrain, mesh, characters, grass and canopy draws;
+AO and deferred lighting are reported separately. Weapon timing includes its
+material, guide, AO and lighting passes. Later composition has its own aggregate.
+Harness status reports actual target allocations separately from model memory,
+including the MSAA samples. No gameplay protocol, save or physics ABI changes.
+
+The independent AO implementation uses the slice integral described by Jimenez
 et al., Practical Realtime Strategies for Accurate Indirect Occlusion:
 https://research.activision.com/publications/2020-03/practical-real-time-strategies-for-accurate-indirect-occlusion
 Intel XeGTAO informed the separation/filtering approach; no Intel shader source
-is copied: https://github.com/GameTechDev/XeGTAO . FishGfx remains pinned.
+is copied: https://github.com/GameTechDev/XeGTAO .
 
 ## Distant grass and world canopies
 
@@ -942,8 +1008,8 @@ ranks that the distance shader would discard. Mip-filtered meadow normal detail
 and subtle tuft colour variation continue on terrain beyond geometric grass.
 Both use the active ecology field, including roads, canopy and water exclusions.
 
-All normal worlds enable species-specific volume trees, including canopy AO.
-The existing global AO pass already applies across presets. See `TREE_PROTOTYPE.md`
+All normal worlds enable species-specific volume trees. Their visible hit surfaces
+participate in the same deferred AO and lighting as mesh vegetation. See `TREE_PROTOTYPE.md`
 for the mesh fallback, projected-size transition and unchanged placement/collision.
 F3 reports ready/pending canopy resources. No new benchmark sweep was run.
 

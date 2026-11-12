@@ -4,10 +4,14 @@ namespace StargateGame.Server;
 
 public sealed partial class GameServer
 {
+    int LanternCount(StargateGame.Physics.PhysicsWorld world) => world.World.Definition.Props
+        .Concat(travels.Values.Where(t => t.Source.Physics == world && t.Prop is not null).Select(t => t.Prop!))
+        .Concat(travels.Values.Where(t => t.Destination?.Physics == world && t.ExitProp is not null).Select(t => t.ExitProp!))
+        .Where(p => p.Kind == PropKind.Lantern).Select(p => p.PersistentId).Distinct().Count();
     void SpawnSandboxProp(Session session, BuildCommand cmd)
     {
         void Reply(bool success,string reason) => BuildReply(session,new(cmd.RequestId,success,reason,CurrentChanges.Revision));
-        if (physics.World.Definition.Fixture != "gate-pair" || cmd.Prefab is not ("wooden-crate" or "barrel-red"))
+        if (physics.World.Definition.Fixture != "gate-pair" || cmd.Prefab is not ("wooden-crate" or "barrel-red" or "wooden-lantern"))
         { Reply(false,"Spawning is available only in Sandbox."); return; }
         var player=physics.Player(session.PlayerId);
         var eye=player.Position+Vector3.UnitY*Movement.ViewHeight(player);
@@ -21,9 +25,14 @@ public sealed partial class GameServer
         if (physics.SpawnSurface(cmd.Anchor,aim,40,session.PlayerId) is not { } hit)
         { Reply(false,"Point at a nearby surface."); return; }
         var registry=physics.World.Definition.Props;
-        if (registry.Length>=64){Reply(false,"Sandbox prop limit reached (64).");return;}
-        int id=registry.Select(p=>p.Id).DefaultIfEmpty(0).Max()+1;
-        var prop=cmd.Prefab=="barrel-red" ? PropDefinition.Barrel(id,hit,false) : new PropDefinition(id,hit,new(.5f),10);
+        var used = registry.Select(p => p.Id)
+            .Concat(travels.Values.Where(t => t.Source.Physics == physics).Select(t => t.Prop?.Id ?? 0))
+            .Concat(travels.Values.Where(t => t.Destination?.Physics == physics).Select(t => t.ExitProp?.Id ?? 0)).ToHashSet();
+        int id = Enumerable.Range(1,64).FirstOrDefault(i => !used.Contains(i));
+        if (id == 0){Reply(false,"Sandbox prop limit reached (64, including gate reservations).");return;}
+        if (cmd.Prefab=="wooden-lantern" && LanternCount(physics)>=LanternAsset.LocationLimit)
+        {Reply(false,"Lantern limit reached (8 per location).");return;}
+        var prop=cmd.Prefab=="wooden-lantern" ? PropDefinition.Lantern(id,hit) : cmd.Prefab=="barrel-red" ? PropDefinition.Barrel(id,hit,false) : new PropDefinition(id,hit,new(.5f),10);
         prop=prop with { PersistentId=Guid.NewGuid() };
         // Keep props upright. Back away from walls if the first resting pose overlaps.
         for(int attempt=0;attempt<9;attempt++)

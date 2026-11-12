@@ -19,7 +19,7 @@ public sealed partial class GameServer
         // Reach and line-of-sight checks still run separately in ValidateEdit.
         var dynamic=physics.Bodies().Select(body=>(Body:body,Definition:physics.World.Definition.Props.FirstOrDefault(p=>p.Id==body.Id)))
             .Where(p=>p.Definition is not null && Vector3.DistanceSquared(p.Body.Position,Vector3.Clamp(p.Body.Position,envelope.Min,envelope.Max))<=p.Definition.HalfExtent.LengthSquared())
-            .Select(p=>(p.Body.Id,Name:p.Definition!.IsBarrel?"barrel":"crate",Hull:physics.DoorPropHull(p.Body,p.Definition!)))
+            .SelectMany(p=>physics.DoorPropHulls(p.Body,p.Definition!).Select(hull=>(p.Body.Id,Name:p.Definition!.Name,Hull:hull)))
             .Where(p=>p.Hull is not null)
             .Select(p=>(p.Id,p.Name,Hull:p.Hull!,Local:p.Hull!.Vertices.Select(v=>Vector3.Transform(v,inverse)).ToArray())).ToArray();
         var players=physics.Players.Where(p=>new BuildBounds(p.Position-new Vector3(Movement.Radius,0,Movement.Radius),p.Position+new Vector3(Movement.Radius,Movement.BodyHeight(p),Movement.Radius)).Intersects(envelope,-.001f)).ToArray();

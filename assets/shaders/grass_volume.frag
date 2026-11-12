@@ -1,13 +1,11 @@
 #version 400 core
 uniform vec3 uViewPosition;uniform mat4 uView;
-uniform sampler3D uGrassColor,uGrassNormal,uGrassAmbient;
+uniform sampler3D uGrassColor,uGrassNormal;
 uniform sampler2D uSceneDepth;
 flat in vec2 vPatch;
-layout(location=0) out vec4 fragColor;
-#include "ao_outputs.glsl"
+#include "gbuffer_outputs.glsl"
+
 #include "daylight.glsl"
-#include "shadows.glsl"
-#include "gate_lighting.glsl"
 #include "grass_hybrid.glsl"
 vec3 grassUv(vec3 p){
  float h=p.y-grassSurface(p.xz).x;
@@ -31,9 +29,9 @@ void main(){
   if(abs(ray[axis])<.000001){if(uViewPosition[axis]<minimum[axis]||uViewPosition[axis]>maximum[axis])discard;}
   else{float a=(minimum[axis]-uViewPosition[axis])/ray[axis],b=(maximum[axis]-uViewPosition[axis])/ray[axis];begin=max(begin,min(a,b));end=min(end,max(a,b));}
  }
- float depth=texture(uSceneDepth,screen).r;
+ float sceneDepth=texture(uSceneDepth,screen).r;
  // Depth is OpenGL window depth, independent of the short/meadow volume height.
- if(depth<1.){vec4 p=uInverseViewProjection*vec4(screen*2.-1.,depth*2.-1.,1);end=min(end,dot(p.xyz/p.w-uViewPosition,ray));}
+ if(sceneDepth<1.){vec4 p=uInverseViewProjection*vec4(screen*2.-1.,sceneDepth*2.-1.,1);end=min(end,dot(p.xyz/p.w-uViewPosition,ray));}
  if(end<=begin)discard;
  float distanceToPatch=distance(vPatch+1.,uViewPosition.xz);
  if(distanceToPatch+2.<uTransition.x||distanceToPatch-2.>uRange)discard;
@@ -49,7 +47,7 @@ void main(){
   vec2 rest=vPatch+1.+grassRotation(vPatch)*(uv.xz*2.-1.);
   if(!grassKept(rest)||grassHash(rest)>=grassTransition(rest))continue;
   float e=extinction(uv,mip);optical+=e*stepSize;
-  if(optical>.38){hit=p;found=true;break;}
+  if(optical>.38){hit=p+ray*(stepSize*.5-(optical-.38)/max(e,1e-6));uv=grassUv(hit);found=true;break;}
  }
  if(!found)discard;
  vec3 normal=normalize(textureLod(uGrassNormal,uv,mip).xyz*2.-1.);
@@ -58,10 +56,8 @@ void main(){
  vec2 nxz=grassRotation(vPatch)*normal.xz;
  normal=normalize(vec3(nxz.x,normal.y/scale-dot(derivative,nxz),nxz.y));
  float sunDepth=0.;for(int i=0;i<4;i++)sunDepth+=extinction(grassUv(hit+uSunDirection*(.025+float(i)*.065)),mip)*.065;
- vec3 ambient;vec3 albedo=decodeColor(textureLod(uGrassColor,uv,mip).rgb);
- vec3 light=grassLight(hit,normal,albedo,h/(uGrassTip*scale),texture(uGrassAmbient,uv).rg,ambient);
- light=ambient+(light-ambient)*mix(.28,1.,exp(-sunDepth));
- vec4 clip=uGrassViewProjection*vec4(hit,1.);gl_FragDepth=clip.z/clip.w*.5+.5;
- writeAmbient(ambient,dot(normal,-ray)<0.?-normal:normal,3.);
- fragColor=vec4(applyFog(light,hit,uViewPosition),1.);
+ vec3 albedo=grassAlbedo(hit,decodeColor(textureLod(uGrassColor,uv,mip).rgb),h/(uGrassTip*scale));
+ vec4 clip=uGrassViewProjection*vec4(hit,1.);float depth=clip.z/clip.w*.5+.5;
+ if(dot(normal,-ray)<0.)normal=-normal;
+ writeSurface(albedo,.92,normal,0.,1.,normal,.20,3.,vec3(0),mix(.28,1.,exp(-sunDepth)),depth,depth);
 }

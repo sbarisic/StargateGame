@@ -11,7 +11,7 @@ sealed partial class SceneRenderer
 {
     sealed class GrassVolume
     {
-        public Texture Color = null!, Normal = null!, Ambient = null!;
+        public Texture Color = null!, Normal = null!;
         public Mesh3D Mesh = null!;
         public int Vertices;
         public float Extent,Tip;
@@ -80,11 +80,6 @@ sealed partial class SceneRenderer
                 }
                 yield return true;
             }
-            volume.Ambient = Own(graphics.CreateTexture(new TextureDescriptor(32, 8, TextureFormat.RG8Unorm, dimension: TextureDimension.Texture3D, depth: 32,
-                sampling: new(TextureFilter.Linear, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge))));
-            byte[] ambient = Get(entry.GetProperty("ambient").GetString()!);
-            if (ambient.Length != 32 * 8 * 32 * 2) throw new InvalidDataException("Invalid grass ambient field.");
-            volume.Ambient.Write<byte>(ambient, TextureDataFormat.RG8Unorm); bytes += ambient.Length;
             byte[] mesh = Get(entry.GetProperty("mesh").GetString()!); int count = BitConverter.ToInt32(mesh);
             if (count <= 0 || count > 100000 || mesh.Length != count * 32 + 4) throw new InvalidDataException("Invalid grass mesh.");
             Vector3[] positions = new Vector3[count], normals = new Vector3[count]; Vector2[] uv = new Vector2[count];
@@ -108,7 +103,7 @@ sealed partial class SceneRenderer
         void Configure(ShaderProgram shader)
         {
             Lighting(shader); GateLightingUniforms(shader); MeadowUniforms(shader);
-            shader.SetUniform("uSurface", 4); shader.SetUniform("uGrassColor", 1); shader.SetUniform("uGrassNormal", 2); shader.SetUniform("uGrassAmbient", 3);
+            shader.SetUniform("uSurface", 4); shader.SetUniform("uGrassColor", 1); shader.SetUniform("uGrassNormal", 2);
             shader.SetUniform("uSceneDepth", 6); shader.SetUniform("uTransition", transition); shader.SetUniform("uRange", (float)range);
             shader.SetUniform("uDensity", density / 24f); shader.SetUniform("uViewPosition", camera.Position);
             shader.SetUniform("uGrassViewProjection", camera.View * camera.Projection); shader.SetUniform("uInverseViewProjection", inverse);
@@ -143,7 +138,7 @@ sealed partial class SceneRenderer
             int variant = 4 + (int)(GroundCover.Hash(unchecked((uint)key.X * 73856093u ^ (uint)key.Z * 19349663u) ^ salt) % 4);
             var volume = grassVolumes[variant];
             using var surface = tile.Surface!.Bind(4);
-            using var color = volume.Color.Bind(1); using var normal = volume.Normal.Bind(2); using var ambient = volume.Ambient.Bind(3);
+            using var color = volume.Color.Bind(1); using var normal = volume.Normal.Bind(2);
             void TileUniforms(ShaderProgram program)
             {
                 program.SetUniform("uTile", new Vector4(key.X * 8, key.Z * 8, tile.Bounds.Min.Y, tile.Bounds.Max.Y + volume.Extent));

@@ -1,7 +1,7 @@
 using System.Numerics;
 namespace StargateGame.Shared;
 
-// One convex description for native dynamics, picking and membrane slicing.
+// Convex sections for picking; conservative envelope for membrane slicing.
 public static class PropGeometry
 {
     public sealed record Hull(Vector3[] Vertices, (int A, int B)[] Edges, (int A, int B, int C)[] Faces);
@@ -58,13 +58,21 @@ public static class PropGeometry
     }
     static readonly Hull BarrelHull = Build(new(.363f, .592f, .363f), true);
     public static Hull For(PropDefinition prop) => prop.IsBarrel && prop.Valid ? BarrelHull : Build(prop.HalfExtent, prop.IsBarrel);
+    static readonly Hull[] LanternHulls = LanternAsset.Sections.Select(section =>
+    {
+        var box = Build(section.Half, false);
+        return box with { Vertices = box.Vertices.Select(v => v + section.Centre).ToArray() };
+    }).ToArray();
+    public static IEnumerable<Hull> Parts(PropDefinition prop) => prop.Kind == PropKind.Lantern ? LanternHulls : [For(prop)];
     public static bool RayHit(Vector3 eye, Vector3 aim, BodyState body, PropDefinition prop, float limit, GateFrame? clip = null)
+        => Parts(prop).Any(hull => RayHull(eye, aim, body, hull, limit, clip));
+    static bool RayHull(Vector3 eye, Vector3 aim, BodyState body, Hull hull, float limit, GateFrame? clip = null)
     {
         var inverse = Quaternion.Inverse(body.Rotation);
         var origin = Vector3.Transform(eye - body.Position, inverse);
         var direction = Vector3.Transform(aim, inverse);
         float near = 0, far = limit;
-        var hull = For(prop);
+        var centre = hull.Vertices.Aggregate(Vector3.Zero, (a, b) => a + b) / hull.Vertices.Length;
         bool Plane(Vector3 n, float distance)
         {
             float a = distance - Vector3.Dot(n, origin), b = Vector3.Dot(n, direction);
@@ -80,7 +88,7 @@ public static class PropGeometry
         foreach (var (a, b, c) in hull.Faces)
         {
             var n = Vector3.Normalize(Vector3.Cross(hull.Vertices[b] - hull.Vertices[a], hull.Vertices[c] - hull.Vertices[a]));
-            if (Vector3.Dot(n, hull.Vertices[a]) < 0)
+            if (Vector3.Dot(n, hull.Vertices[a] - centre) < 0)
                 n = -n;
             if (!Plane(n, Vector3.Dot(n, hull.Vertices[a])))
                 return false;

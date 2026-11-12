@@ -191,6 +191,8 @@ public sealed partial class PhysicsWorld
         {
             if (props.Count >= 64)
                 throw new InvalidOperationException("Destination prop capacity reached.");
+            if (definition.Kind == PropKind.Lantern && propDefinitions.Values.Count(p => p.Kind == PropKind.Lantern) >= LanternAsset.LocationLimit)
+                throw new InvalidOperationException("Destination lantern limit reached (8).");
             AddProp(definition with
             {
                 Position = state.Position
@@ -227,8 +229,7 @@ public sealed partial class PhysicsWorld
         {
             if (!HasTerrain(state.Position, definition.HalfExtent.Length() + .1f))
                 return false;
-            using var settings = Native.Own(new ConvexHullShapeSettings(PropGeometry.For(definition).Vertices, .005f));
-            using var shape = Native.Own(settings.Create());
+            using var shape = Native.Own(CreatePropShape(definition));
             return ClearShape(shape, state.Position, state.Rotation, props.GetValueOrDefault(ignoreBody, BodyID.Invalid));
         }
     }
@@ -239,8 +240,7 @@ public sealed partial class PhysicsWorld
         lock (NativeGate)
         {
             var vertices = PropGeometry.For(definition).Vertices;
-            using var settings = Native.Own(new ConvexHullShapeSettings(vertices, .005f));
-            using var shape = Native.Own(settings.Create());
+            using var shape = Native.Own(CreatePropShape(definition));
             return TryPlacePropExit(shape, vertices, definition, desired, out result);
         }
     }

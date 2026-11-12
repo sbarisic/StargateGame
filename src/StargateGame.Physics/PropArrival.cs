@@ -53,8 +53,7 @@ public sealed partial class PhysicsWorld
             var gate = search.Gate;
             var definition = search.Definition;
             var desired = search.Desired;
-            using var settings = Native.Own(new ConvexHullShapeSettings(search.Vertices, .005f));
-            using var shape = Native.Own(settings.Create());
+            using var shape = Native.Own(CreatePropShape(definition));
             var hits = new List<ShapeCastResult>();
             int count = 0;
             while (search.Next < exitOffsets.Length * 2 && count < maxCandidates)
@@ -137,8 +136,7 @@ public sealed partial class PhysicsWorld
     {
         lock (NativeGate)
         {
-            using var settings = Native.Own(new ConvexHullShapeSettings(PropGeometry.For(definition).Vertices, .005f));
-            var shape = Own(settings.Create());
+            var shape = Own(CreatePropShape(definition));
             exitReservations.Add(id, (AddBody(shape, pose.Position, pose.Rotation, false), shape));
         }
     }

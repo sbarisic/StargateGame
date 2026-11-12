@@ -149,6 +149,10 @@ except ImportError:
     raise SystemExit(0)
 from mathutils import Vector
 
+if "--spawn-icons" in sys.argv:
+    import runpy
+    runpy.run_path(str(ROOT / "tools/render_lantern_thumbnail.py"), run_name="__main__")
+
 for prefab in ([dict(id="wooden-crate"), dict(id="barrel-red")] if "--spawn-icons" in sys.argv else catalog):
     if not prefab.get("selectable", True):
         continue

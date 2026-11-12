@@ -75,8 +75,8 @@ Use `--tree-prototype current`, `mesh`, or `volume` to compare the existing tree
 the improved trunk with mesh leaves, and the improved trunk with a volume canopy.
 `off` is the default. Inspection views include `tree-prototype-far`,
 `tree-prototype-below`, `tree-prototype-above`, `tree-prototype-back` and
-`tree-prototype-wind` (moving camera). `--tree-volume-view` accepts `lit`,
-`normals`, `density`, `sun` and `sky`. In smoke captures, `--tree-occlusion`
+`tree-prototype-wind` (moving camera). Deferred diagnostics now use the harness
+`aoView` setting; see TESTING.md. In smoke captures, `--tree-occlusion`
 places render-only crates before and behind the crown. It never moves physics bodies.
 The normal F3 model memory total includes the canopy allocation.
 
@@ -270,13 +270,14 @@ show the bounded graphics-lab terrain rather than a complete planet.
 
 ## Directional ambient visibility
 
-Version 3 replaces the single upward ambient ray with precomputed upper/lower
-hemisphere visibility, sampled in the wind-deformed local canopy coordinates.
-Sky and ground contributions remain separate, with the existing 45% fill floor
-and 35% ground weight. `--tree-volume-view sky` and `ground` inspect visibility.
-Use `--ao off` to isolate canopy lighting from scene contact AO. This does not
-change source density, leaf shape, rest-pose shadow proxies or normal gameplay
-tree selection. Rounded close-up foliage remains a separate limitation.
+Version 3 assets retain their precomputed upper/lower hemisphere channels on disk.
+The deferred renderer no longer uploads or samples these ambient fields. Visible
+canopy depth/normals enter the shared screen-space AO stage, and AO Off bypasses
+all surface occlusion. Ground-fill weight remains 35%; directional sunlight
+extinction and proxy shadows are preserved. The former tree-volume CLI diagnostic
+views are replaced by the harness surface views documented in TESTING.md.
+
+Historical evidence below predates this migration:
 
 AO review evidence: `artifacts/review-evidence/ambient-occlusion/forest-on`
 contains the lit underside; `forest-map` contains diagnostic views and

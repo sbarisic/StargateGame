@@ -65,8 +65,8 @@ sealed partial class GameApp
         }
         return true;
     }
-    UiRect CableColorRect(int i)=>new(SpawnPanel.X+12+i*43,SpawnPanel.Y+505,39,30);
-    UiRect CableSizeRect(int i)=>new(SpawnPanel.X+12+i*43,SpawnPanel.Y+546,39,30);
+    UiRect CableColorRect(int i)=>new(SpawnPanel.X+12+i*43,SpawnPanel.Y+SpawnPanel.H-96,39,30);
+    UiRect CableSizeRect(int i)=>new(SpawnPanel.X+12+i*43,SpawnPanel.Y+SpawnPanel.H-55,39,30);
     bool CableMenuClick()
     {
         for(int i=0;i<5;i++)if(CableColorRect(i).Contains(UiMouse)){cableColor=i;return true;}

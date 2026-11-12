@@ -7,10 +7,11 @@ public sealed partial class PhysicsWorld
 {
     // Match the same convex hull and gate plane used by the native prop body.
     // Completed transit proxies have an empty collider and cannot block a door.
-    public PropGeometry.Hull? DoorPropHull(BodyState body,PropDefinition definition)
+    public IEnumerable<PropGeometry.Hull> DoorPropHulls(BodyState body, PropDefinition definition)
+        => PropGeometry.Parts(definition).Select(hull => DoorPropHull(body, hull)).OfType<PropGeometry.Hull>();
+    PropGeometry.Hull? DoorPropHull(BodyState body,PropGeometry.Hull original)
     {
         if(completedProps.ContainsKey(body.Id))return null;
-        var original=PropGeometry.For(definition);
         var world=original.Vertices.Select(v=>Vector3.Transform(v,body.Rotation)+body.Position).ToArray();
         if(!propClips.TryGetValue(body.Id,out var gate))return new(world,original.Edges,original.Faces);
         List<Vector3> vertices=[],cap=[];List<(int,int,int)> faces=[];List<(int,int)> edges=[];

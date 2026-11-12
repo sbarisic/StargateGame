@@ -38,7 +38,7 @@ public sealed partial class WorldRepository
         string id = location.ToString("D");
         var definition = JsonSerializer.Deserialize<PlanetDefinition>((string)Scalar(db, "SELECT definition FROM locations WHERE id=$id;", ("$id", id))!, Protocol.Json)!;
         registry ??= definition.Props;
-        if (bodies.Length > 64 || !bodies.Select(b => b.Id).Order().SequenceEqual(registry.Select(p => p.Id).Order()) || registry.Select(p => p.Id).Distinct().Count() != registry.Length || registry.Any(p => p.Id is < 1 or > 64 || !p.Valid || p.PersistentId == Guid.Empty))
+        if (registry.Count(p => p.Kind == PropKind.Lantern) > LanternAsset.LocationLimit || bodies.Length > 64 || !bodies.Select(b => b.Id).Order().SequenceEqual(registry.Select(p => p.Id).Order()) || registry.Select(p => p.Id).Distinct().Count() != registry.Length || registry.Any(p => p.Id is < 1 or > 64 || !p.Valid || p.PersistentId == Guid.Empty))
             throw new InvalidDataException("Invalid persistent prop registry.");
         Execute(db, "UPDATE locations SET definition=$json WHERE id=$id;", ("$json", JsonSerializer.Serialize(definition with
         {

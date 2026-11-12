@@ -2,12 +2,10 @@
 uniform sampler2DArray uFoliageColor,uFoliageNormal,uFoliageMasks;uniform int uMaterial,uDetailed;
 uniform int uRegionalPlant;
 uniform vec3 uViewPosition;uniform mat4 uView;
-in vec3 vWorld,vNormal;flat in vec3 vRoot,vGroundNormal;flat in vec4 vGroundMaterial;in vec2 vUv;in float vFade,vShade,vStem;layout(location=0) out vec4 fragColor;
-#include "ao_outputs.glsl"
+in vec3 vWorld,vNormal;flat in vec3 vRoot,vGroundNormal;flat in vec4 vGroundMaterial;in vec2 vUv;in float vFade,vShade,vStem;
+#include "gbuffer_outputs.glsl"
 
 #include "daylight.glsl"
-#include "shadows.glsl"
-#include "gate_lighting.glsl"
 #include "meadow.glsl"
 #include "terrain_pbr.glsl"
 void main(){
@@ -31,9 +29,5 @@ void main(){
  vec3 base=mix(plant,ground.color,mix(grassy?.25:.35,grassy?.08:.15,smoothstep(0,.55,vStem)))*mix(.65,1.0,smoothstep(0,.45,vStem));
  if(uRegionalPlant>0)base=decodeColor(tex.rgb);
  float rough=max(.8,texture(uFoliageMasks,vec3(vUv,uMaterial)).g);
- float visibility=cloudVisibility(vWorld)*SampleSunVisibility(vWorld,normalize(vGroundNormal),max(uSunDirection.y,0.));
- vec3 ambient=base*mix(ambientGroundColor(),ambientSkyColor(),.70);
- vec3 light=ambient+base*(sunLightColor()*(max(dot(n,uSunDirection),0)+.2*max(dot(-n,uSunDirection),0))*visibility);
- writeAmbient(ambient,g,grassy?3.:2.);
- light+=gateLighting(vWorld,n,normalize(uViewPosition-vWorld),base,rough);fragColor=vec4(applyFog(light,vWorld,uViewPosition),1);
+ writeSurface(base,rough,n,0.,1.,g,.20,grassy?3.:2.,vec3(0),1.,gl_FragCoord.z,gl_FragCoord.z);
 }

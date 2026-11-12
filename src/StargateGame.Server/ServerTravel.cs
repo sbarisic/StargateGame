@@ -380,6 +380,11 @@ public sealed partial class GameServer
             {
                 var used = target.Physics.World.Definition.Props.Select(p => p.Id).Concat(travels.Values.Where(o => o.Destination == target).Select(o => o.ExitProp?.Id ?? 0)).Concat(travels.Values.Where(o => o.Source == target).Select(o => o.Prop?.Id ?? 0)).ToHashSet();
                 int id = Enumerable.Range(1, 64).FirstOrDefault(i => !used.Contains(i));
+                if (prop.Kind == PropKind.Lantern && LanternCount(target.Physics) >= LanternAsset.LocationLimit)
+                {
+                    t.Failure = "Destination lantern limit reached (8).";
+                    continue;
+                }
                 if (id == 0)
                 {
                     t.Failure = "Destination prop registry is full.";

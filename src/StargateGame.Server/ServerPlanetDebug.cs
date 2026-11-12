@@ -24,14 +24,15 @@ public sealed partial class GameServer
     Session? environmentOwner;
     Guid environmentRequest;
     readonly Dictionary<Guid, PlanetDebugStatus> debugResults = [];
+    PlanetDefinition DebugHomeDefinition => homeContext.Runtime?.Definition ?? homeContext.Physics.World.Definition;
     bool HomeDebugBusy => homeRegeneration is not null || environmentWrite is not null;
     bool HandlePlanetDebug(Session s, Message m)
     {
         if (!m.Kind.StartsWith("planet-debug-", StringComparison.Ordinal)) return false;
         Guid id = m.PlanetDebug?.Id ?? Guid.Empty;
-        void Reply(string phase, string detail) => s.Peer.Send(new() { Kind = "planet-debug-status", PlanetDebugState = new(id, phase, detail, 0, false, false, homeContext.Runtime?.Definition) });
+        void Reply(string phase, string detail) => s.Peer.Send(new() { Kind = "planet-debug-status", PlanetDebugState = new(id, phase, detail, 0, false, false, DebugHomeDefinition) });
         if (!devPlanets || !s.Loopback || s.PlayerId == 0) { Reply("Failed", "Developer planet control requires an authorized local client."); return true; }
-        if (m.Kind == "planet-debug-read") { Reply("Ready", repository is null ? "Fixed fixtures cannot be regenerated. Select the generated-planet launch profile." : "Saved starting planet settings."); return true; }
+        if (m.Kind == "planet-debug-read") { Reply("Ready", repository is null || DebugHomeDefinition.Fixture is not null ? "Time, clock and weather can be applied for this session. Fixed terrain cannot be regenerated." : "Saved starting planet settings."); return true; }
         if (id == Guid.Empty) { Reply("Failed", "Missing request identity."); return true; }
         if (m.Kind == "planet-debug-cancel")
         {
@@ -47,10 +48,26 @@ public sealed partial class GameServer
             var request = m.PlanetDebug ?? throw new InvalidDataException("Missing planet settings.");
             if (request.Settings is null) throw new InvalidDataException("Missing planet settings.");
             request.Settings.Validate();
-            if (repository is null || homeContext.Runtime is null || homeContext.Runtime.Definition.Fixture is not null)
-                throw new InvalidOperationException("Fixed fixtures cannot be regenerated. Select the generated-planet launch profile.");
             if (AllSessions.Count(p => p.PlayerId != 0 && !p.Peer.Closed) != 1 || AllSessions.Any(p => p != s && p.JoinName is not null))
                 throw new InvalidOperationException("Planet controls require you to be the only connected player.");
+            if (m.Kind == "planet-debug-environment" && (repository is null || DebugHomeDefinition.Fixture is not null))
+            {
+                // Fixtures have no saved planet to replace. Apply only environment state;
+                // their permanent gate connection must not block changing time/weather.
+                if (HomeDebugBusy || homeContext.Transition is { Data.Switch: true })
+                    throw new InvalidOperationException("Wait for the current planet operation to finish.");
+                var definition = DebugHomeDefinition;
+                var environment = request.Settings.Environment.Apply(definition.Environment ??
+                    PlanetEnvironmentDefinition.Create(definition.LocationId, definition.Seed, definition.Preset), DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                if (homeContext.Runtime is { } home) home.Definition = home.Definition with { Environment = environment };
+                homeContext.Physics.World.SetEnvironment(environment);
+                foreach (var peer in homeContext.Sessions)
+                    peer.Peer.Send(new() { Kind = "planet-environment", LocationId = definition.LocationId, PlanetEnvironment = environment });
+                CompleteHomeDebug(s, id, "Ready", "Environment applied for this session; terrain and placed objects are unchanged.", 0);
+                return true;
+            }
+            if (repository is null || homeContext.Runtime is null || homeContext.Runtime.Definition.Fixture is not null)
+                throw new InvalidOperationException("Fixed fixtures cannot be regenerated. Use Apply Environment to change time and weather.");
             if (HomeDebugBusy || links.Count > 0 || fixtureConnection is not null || travels.Count > 0 || relocations.Count > 0
                 || contexts.Any(c => c.Edit is not null || c.Preparing is not null && !c.CollisionPreparation || c.Transition is { Data.Switch: true } || c.SavingEdit is not null || c.UnloadSave is not null)
                 || AllSessions.Any(p => p.MoveLookup is not null || p.LookupReceipt is not null))
@@ -96,11 +113,11 @@ public sealed partial class GameServer
         if (phase is not null) job.Phase = phase;
         job.Reported = job.Watch.Elapsed.TotalSeconds;
         job.Session.Peer.Send(new() { Kind = "planet-debug-status", PlanetDebugState = new(job.Request.Id, job.Phase,
-            "Replacing saved starting planet", job.Reported, true, job.Save is null, homeContext.Runtime?.Definition) });
+            "Replacing saved starting planet", job.Reported, true, job.Save is null, DebugHomeDefinition) });
     }
     void CompleteHomeDebug(Session owner, Guid request, string phase, string detail, double elapsed)
     {
-        var state = new PlanetDebugStatus(request, phase, detail, elapsed, false, false, homeContext.Runtime?.Definition);
+        var state = new PlanetDebugStatus(request, phase, detail, elapsed, false, false, DebugHomeDefinition);
         debugResults[request] = state;
         if (debugResults.Count > 128) debugResults.Remove(debugResults.Keys.First());
         owner.Peer.Send(new() { Kind = "planet-debug-status", PlanetDebugState = state });

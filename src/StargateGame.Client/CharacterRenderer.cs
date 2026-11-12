@@ -7,7 +7,6 @@ namespace StargateGame.Client;
 sealed partial class SceneRenderer
 {
     public bool HandShadowBaseline { get; set; }
-    public int HandInspection { get; set; }
     public string HandInspectionPose { get; set; } = "";
     SkeletalAsset? military, rifle, preparingCharacter;
     readonly Dictionary<int, Matrix4x4[]> actorPoses = [];
@@ -44,12 +43,17 @@ sealed partial class SceneRenderer
         get;
         set;
     }
-    RenderTarget? viewmodelTarget;
-    RenderTarget? viewmodelMultisampleTarget;
-    static bool viewmodelMsaaFallbackLogged;
-    long ViewmodelTargetBytes =>
-        (long)(viewmodelTarget?.Width ?? 0) * (viewmodelTarget?.Height ?? 0) * (viewmodelMultisampleTarget is null ? 12 : 8)
-        + (long)(viewmodelMultisampleTarget?.Width ?? 0) * (viewmodelMultisampleTarget?.Height ?? 0) * 12 * (viewmodelMultisampleTarget?.SampleCount ?? 0);
+    RenderTarget? viewmodelTarget, viewmodelGbuffer, viewmodelGuide, viewmodelAoRaw, viewmodelAoFiltered;
+    bool viewmodelMsaaFallbackLogged, viewmodelSamplesKnown;
+    readonly Vector2[] viewmodelSamplePositions = new Vector2[4];
+    void RememberViewmodelSamples(RenderPass pass)
+    {
+        if (viewmodelSamplesKnown) return;
+        viewmodelSamplesKnown = true;
+        for (int i = 0; i < pass.Target.SampleCount; i++) viewmodelSamplePositions[i] = pass.GetSamplePosition(i);
+    }
+    long ViewmodelTargetBytes => TargetSize(viewmodelTarget, 8) + TargetSize(viewmodelGbuffer, 40)
+        + TargetSize(viewmodelGuide, 12) + TargetSize(viewmodelAoRaw, 1) + TargetSize(viewmodelAoFiltered, 1);
     RenderTarget? viewmodelShadow;
     Matrix4x4 viewmodelShadowMatrix;
     ShaderProgram? viewmodelComposite;
@@ -232,14 +236,16 @@ sealed partial class SceneRenderer
         var transform = Matrix4x4.CreateTranslation(0, bob - (LowerWeapon ? .22f : 0), 0) * cameraWorld;
         if (ShadowsEnabled && !HandShadowBaseline)
             DrawViewmodelShadow(frame, camera, snapshot, transform);
-        using (var pass = frame.BeginPass(viewmodelMultisampleTarget ?? viewmodelTarget, new RenderPassDescriptor { View = new(viewCamera), State = OpaqueState, ColorLoadAction = RenderLoadAction.Clear, ClearColor = new Color(0, 0, 0, 0), DepthLoadAction = RenderLoadAction.Clear }))
-        using (gpuTimer.Measure(pass, "character"))
+        using (var pass = frame.BeginPass(viewmodelGbuffer!, new RenderPassDescriptor { View = new(viewCamera), State = OpaqueState, ColorLoadAction = RenderLoadAction.Clear, ClearColor = new Color(0, 0, 0, 0), DepthLoadAction = RenderLoadAction.Clear }))
+        using (gpuTimer.Measure(pass, "weapon"))
         using (pass.PushModel(transform))
         using (shadows.CurrentFrame.Bind(shader, 9))
         using (viewmodelShadow?.DepthStencilAttachment.Bind(29))
         using (gateShadowAtlas?.DepthStencilAttachment.Bind(15))
         {
+            RememberViewmodelSamples(pass);
             Lighting(shader);
+            shader.SetUniform("uSurfaceViewProjection", viewCamera.View * viewCamera.Projection);
             GateLightingUniforms(shader);
             shader.SetUniform("uFogDeferred", 1);
             shader.SetUniform("uDhdMatte", 0);
@@ -247,53 +253,71 @@ sealed partial class SceneRenderer
             shader.SetUniform("uRockSnow", 0);
             shader.SetUniform("uTravelPlane", Vector4.Zero);
             shader.SetUniform("uShadowSurfaceBias", .015f);
-            shader.SetUniform("uArmShadowBaseline", HandShadowBaseline ? 1 : 0);
             shader.SetUniform("uViewmodelShadowEnabled", ShadowsEnabled && !HandShadowBaseline ? 1 : 0);
             shader.SetUniform("uViewmodelShadow", 29);
             shader.SetUniform("uViewmodelShadowMatrix", viewmodelShadowMatrix);
-            shader.SetUniform("uHandInspection", HandInspection);
-            shader.SetUniform("uShadowComponents", HandInspection == 3 ? 1 : HandInspection == 4 ? 2 : 0);
             shader.SetUniform("uRoughness", .8f);
             DrawSkin(pass, shader, rifle, riflePose, 1, false);
-            shader.SetUniform("uArmShadowBaseline", 0);
             shader.SetUniform("uViewmodelShadowEnabled", 0);
-            shader.SetUniform("uHandInspection", 0);
-            shader.SetUniform("uShadowComponents", 0);
         }
+        LightViewmodel(frame, viewCamera);
         CompositeViewmodel(frame, camera);
     }
 
+    void DisposeViewmodelTargets()
+    {
+        viewmodelSamplesKnown = false;
+        viewmodelTarget?.Dispose(); viewmodelGbuffer?.Dispose(); viewmodelGuide?.Dispose();
+        viewmodelAoRaw?.Dispose(); viewmodelAoFiltered?.Dispose();
+        viewmodelTarget = viewmodelGbuffer = viewmodelGuide = viewmodelAoRaw = viewmodelAoFiltered = null;
+    }
     void PrepareViewmodelTarget()
     {
-        if (viewmodelTarget?.Width != waterTarget!.Width || viewmodelTarget.Height != waterTarget.Height)
+        PrepareDeferredPrograms();
+        if (viewmodelTarget?.Width == waterTarget!.Width && viewmodelTarget.Height == waterTarget.Height) return;
+        DisposeViewmodelTargets();
+        bool multisample = graphics.Capabilities.MaximumSamples >= 4;
+        if (!multisample && !viewmodelMsaaFallbackLogged)
         {
-            viewmodelTarget?.Dispose();
-            viewmodelTarget = null;
-            viewmodelMultisampleTarget?.Dispose();
-            viewmodelMultisampleTarget = null;
-            bool multisample = graphics.Capabilities.MaximumSamples >= 4;
-            if (!multisample && !viewmodelMsaaFallbackLogged)
-            {
-                viewmodelMsaaFallbackLogged = true;
-                Console.WriteLine($"Viewmodel 4x MSAA unavailable (sample limit {graphics.Capabilities.MaximumSamples}); using single-sample rendering.");
-            }
-            if (multisample)
-                viewmodelMultisampleTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height,
-                    [TextureFormat.RGBA16Float], TextureFormat.Depth32Float, sampleCount: 4));
-            viewmodelTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height,
-                [TextureFormat.RGBA16Float], multisample ? null : TextureFormat.Depth32Float));
+            viewmodelMsaaFallbackLogged = true;
+            Console.WriteLine($"Viewmodel 4x MSAA unavailable (sample limit {graphics.Capabilities.MaximumSamples}); using single-sample rendering.");
         }
+        try
+        {
+            viewmodelGbuffer = CreateGbuffer(waterTarget.Width, waterTarget.Height, multisample ? 4 : 1);
+            viewmodelTarget = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height, [TextureFormat.RGBA16Float], null));
+            if (multisample)
+                viewmodelGuide = graphics.CreateRenderTarget(new(waterTarget.Width, waterTarget.Height, [TextureFormat.RGBA16Float], TextureFormat.Depth32Float));
+            if (viewmodelGuide is not null) SetGuideSampling(viewmodelGuide);
+        }
+        catch { DisposeViewmodelTargets(); throw; }
+    }
+    void LightViewmodel(RenderFrame frame, Camera camera)
+    {
+        var source = viewmodelGbuffer!;
+        if (viewmodelGuide is not null)
+        {
+            using var pass = frame.BeginPass(viewmodelGuide, new RenderPassDescriptor {
+                View = new(camera), State = ScreenState with { DepthTestEnabled = true, DepthWriteEnabled = true, DepthCompare = CompareFunction.Always },
+                ColorLoadAction = RenderLoadAction.DontCare, DepthLoadAction = RenderLoadAction.DontCare });
+            using var timing = gpuTimer.Measure(pass, "weapon");
+            using var geometry = source.ColorAttachments[2].Bind(1);
+            viewmodelGuideShader!.SetUniform("uGDepth", 0);
+            viewmodelGuideShader.SetUniform("uGGeometry", 1);
+            Mesh(pass, screen, source.DepthStencilAttachment, viewmodelGuideShader);
+        }
+        var depth = viewmodelGuide?.DepthStencilAttachment ?? source.DepthStencilAttachment;
+        var normal = viewmodelGuide?.ColorAttachments[0] ?? source.ColorAttachments[2];
+        RenderSurfaceAo(frame, camera, depth, normal, .1f, ref viewmodelAoRaw, ref viewmodelAoFiltered, weapon: true);
+        LightGbuffer(frame, camera, source, viewmodelTarget!, depth, normal, viewmodelAoFiltered, weapon: true);
     }
 
     void CompositeViewmodel(RenderFrame frame, Camera camera)
     {
-        // Resolve only after the draw pass ends. RGB and alpha both contain
-        // sample coverage, so composition must not multiply RGB by alpha again.
-        if (viewmodelMultisampleTarget is not null)
-            frame.ResolveColor(viewmodelMultisampleTarget, 0, viewmodelTarget, 0);
+        // Lighting resolves HDR and coverage after shading every covered sample.
         viewmodelDrawn = true;
         viewmodelComposite ??= LoadProgram("fullscreen.vert", "viewmodel_composite.frag");
-        using (var pass = frame.BeginPass(waterTarget, new RenderPassDescriptor { View = new(camera), State = ScreenState with { BlendEnabled = true, SourceBlend = BlendFactor.One, DestinationBlend = BlendFactor.OneMinusSourceAlpha }, ColorLoadAction = RenderLoadAction.Load }))
+        using (var pass = frame.BeginPass(SurfaceInspection ? resolvedOpaque! : waterTarget!, new RenderPassDescriptor { View = new(camera), State = ScreenState with { BlendEnabled = true, SourceBlend = BlendFactor.One, DestinationBlend = BlendFactor.OneMinusSourceAlpha }, ColorLoadAction = RenderLoadAction.Load }))
             Mesh(pass, screen, viewmodelTarget.ColorAttachments[0], viewmodelComposite);
     }
 
@@ -318,7 +342,7 @@ sealed partial class SceneRenderer
             View = new(light), State = OpaqueState with { ColorWriteMask = ColorWriteMask.None,
                 CullMode = CullMode.None, DepthBiasSlope = 1, DepthBiasConstant = 1 },
             DepthLoadAction = RenderLoadAction.Clear });
-        using var timing = gpuTimer.Measure(pass, "character");
+        using var timing = gpuTimer.Measure(pass, "weapon");
         DrawActors(pass, depthShader, ViewFrustum.FromCamera(light), snapshot, true, excludeLocal: true);
         depthShader.SetUniform("uTravelPlane", Vector4.Zero);
         using var model = pass.PushModel(transform);

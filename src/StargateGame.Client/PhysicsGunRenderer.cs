@@ -46,14 +46,17 @@ sealed partial class SceneRenderer
         viewCamera.SetPerspective(viewmodelTarget!.Width, viewmodelTarget.Height,
             2 * MathF.Atan(MathF.Tan(MathF.PI / 6) * viewmodelTarget.Width / viewmodelTarget.Height), .015f, 20);
         Matrix4x4.Invert(viewCamera.View, out var cameraWorld);
-        using (var pass = frame.BeginPass(viewmodelMultisampleTarget ?? viewmodelTarget,
+        using (var pass = frame.BeginPass(viewmodelGbuffer!,
             new RenderPassDescriptor { View = new(viewCamera), State = OpaqueState,
                 ColorLoadAction = RenderLoadAction.Clear, ClearColor = new Color(0,0,0,0), DepthLoadAction = RenderLoadAction.Clear }))
+        using (gpuTimer.Measure(pass, "weapon"))
         using (pass.PushModel(Matrix4x4.CreateTranslation(.19f, -.16f, -.47f) * cameraWorld))
         using (shadows.CurrentFrame.Bind(shader, 9))
         using (gateShadowAtlas?.DepthStencilAttachment.Bind(15))
         {
+            RememberViewmodelSamples(pass);
             Lighting(shader);
+            shader.SetUniform("uSurfaceViewProjection", viewCamera.View * viewCamera.Projection);
             GateLightingUniforms(shader);
             shader.SetUniform("uTerrain", 0);
             shader.SetUniform("uSkinning", 0);
@@ -84,6 +87,7 @@ sealed partial class SceneRenderer
             shader.SetUniform("uHasModelNormal", 0);
             shader.SetUniform("uHasMetallicRoughness", 0);
         }
+        LightViewmodel(frame, viewCamera);
         CompositeViewmodel(frame, camera);
     }
 }

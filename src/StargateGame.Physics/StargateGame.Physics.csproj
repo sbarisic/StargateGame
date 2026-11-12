@@ -10,6 +10,6 @@
     <ProjectReference Include="../StargateGame.WorldGen/StargateGame.WorldGen.csproj" />
     <PackageReference Include="JoltPhysicsSharp" Version="2.23.0" />
     <EmbeddedResource Include="../../assets/collision/*.sgc" Link="Collision/%(Filename)%(Extension)" />
-    <EmbeddedResource Include="../StargateGame.Building/*.cs;../StargateGame.Shared/BuildingState.cs;*.cs;../StargateGame.Shared/GateTravel.cs;../StargateGame.Shared/KawooshShape.cs;../StargateGame.Shared/GateEffectTimeline.cs;../StargateGame.Shared/PropGeometry.cs;../StargateGame.Shared/Movement.cs;../StargateGame.Shared/World.cs;../StargateGame.Shared/Terrain.cs;../StargateGame.Shared/WaterSurface.cs;../StargateGame.WorldGen/PlanetPlan.cs;../StargateGame.WorldGen/ChunkStorage.cs;../../native/rollback.inl;../../tools/build_native.py" LogicalName="SimulationSource.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="../StargateGame.Building/*.cs;../StargateGame.Shared/BuildingState.cs;*.cs;../StargateGame.Shared/GateTravel.cs;../StargateGame.Shared/KawooshShape.cs;../StargateGame.Shared/GateEffectTimeline.cs;../StargateGame.Shared/PropGeometry.cs;../StargateGame.Shared/LanternAsset.cs;../StargateGame.Shared/Movement.cs;../StargateGame.Shared/World.cs;../StargateGame.Shared/Terrain.cs;../StargateGame.Shared/WaterSurface.cs;../StargateGame.WorldGen/PlanetPlan.cs;../StargateGame.WorldGen/ChunkStorage.cs;../../native/rollback.inl;../../tools/build_native.py" LogicalName="SimulationSource.%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

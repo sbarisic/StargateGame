@@ -57,6 +57,9 @@ sealed partial class SceneRenderer
         DustUniforms(p);
         p.SetUniform("uCelestial", 22);
         p.SetUniform("uCelestialPhase", (float)environmentFrame.Phase);
+        p.SetUniform("uCelestialSeed", celestialSeed);
+        p.SetUniform("uStarViewProjection", starViewProjection);
+        p.SetUniform("uStarViewport", new Vector2(opaqueTarget?.Width ?? 1920,opaqueTarget?.Height ?? 1080));
         p.SetUniform("uAtmosphereSky", 16);
         p.SetUniform("uAtmosphereLight", 17);
         p.SetUniform("uCloudVolume", 18);

@@ -11,7 +11,7 @@ void main() {
     if (depth >= .99999 || materialClass(materialNormal) < .5) { result=vec4(1); return; }
     vec3 position = surfacePosition(vUv, depth);
     vec3 view = normalize(uEye-position);
-    vec3 normal = normalize(materialNormal.xyz*2.-1.);
+    vec3 normal = octDecode(materialNormal.xy);
     if (dot(normal,view)<0.) normal=-normal;
     vec2 pixel = 1.0 / vec2(textureSize(uDepth,0));
     float radiusPixels = min(160., uRadius*uProjectionScale/max(length(position-uEye),.1));
@@ -41,8 +41,17 @@ void main() {
                 if(sampleDepth>=.99999) continue;
                 vec3 delta=surfacePosition(sampleUv,sampleDepth)-position;
                 float distance=length(delta);
-                if(distance<.015||distance>=uRadius) continue;
-                float weight=occluderWeight(materialClass(texture(uNormals,sampleUv)));
+                if(distance<min(.015,uRadius*.015)||distance>=uRadius) continue;
+                float occluder=materialClass(texture(uNormals,sampleUv));
+                float weight=occluderWeight(occluder);
+                // Stronger local contact only for grass above terrain. Keep
+                // foliage thickness and building receivers at their old weights.
+                if(materialClass(materialNormal)>3.5 && occluder>2.5 && occluder<3.5){
+                    float contactRange=min(uRadius,.4);
+                    float contact=1.-smoothstep(contactRange*.2,contactRange,distance);
+                    contact*=smoothstep(0.,.03,dot(delta,normal));
+                    weight=mix(weight,.65,contact);
+                }
                 weight*=1.-smoothstep(uRadius*.35,uRadius,distance);
                 // Reduce single-layer depth's implied thickness behind foreground objects.
                 weight*=1.-.5*smoothstep(.15,.8,dot(delta,view)/uRadius);

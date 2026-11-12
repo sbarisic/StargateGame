@@ -1,17 +1,17 @@
 #version 400 core
 #include "terrain_coverage.glsl"
-uniform int uArmShadowBaseline,uHandInspection;
 uniform sampler2D uTexture;
 uniform sampler2D uGrass,uCliff,uSand,uSnow;
 uniform sampler2D uGrassNormal,uCliffNormal,uSandNormal,uSnowNormal;
-uniform sampler2D uModelNormal,uMetallicRoughness;
+uniform sampler2D uModelNormal,uMetallicRoughness,uModelEmission;
+uniform vec3 uModelEmissionGain;
 uniform int uHasMetallicRoughness;
 uniform float uModelHeightScale,uModelParallaxRange;
 uniform int uModelParallaxSteps;
 uniform int uHasModelNormal;
 uniform int uRockSnow,uTreeMode;
 flat in vec2 vTreeRange;uniform float uLeafTransmission,uLeafOlive,uLeafSaturation;uniform vec3 uLeafTint;
-in vec3 vTreeLocal;in float vTreeAo;
+in vec3 vTreeLocal;
 uniform float uFoliageCutoff;
 uniform int uTerrain,uLandscapeView;
 uniform vec3 uTint,uViewPosition;
@@ -19,17 +19,13 @@ uniform float uRoughness;
 uniform int uDhdMatte;
 uniform int uArmSkin;
 uniform mat4 uView;
-in vec3 vWorld,vNormal;
-in vec2 vUv;
+sample in vec3 vWorld,vNormal;
+sample in vec2 vUv;
 in float vDistance;
 in vec4 vMaterial;
-layout(location=0) out vec4 fragColor;
-#include "ao_outputs.glsl"
+#include "gbuffer_outputs.glsl"
 
 #include "daylight.glsl"
-#include "shadows.glsl"
-#include "gate_lighting.glsl"
-#include "dhd_lighting.glsl"
 #include "snow_surface.glsl"
 #include "meadow.glsl"
 #include "terrain_pbr.glsl"
@@ -52,6 +48,8 @@ vec3 terrainNormal(sampler2D surface,float metres,vec3 weights,vec3 g){
 // Height-field light ray inspired by LiveTrower's CC0 shader:
 // https://godotshaders.com/shader/parallax-occlusion-mapping-with-self-shadowing/
 float modelReliefVisibility=1.;
+float modelHitDepth=0.;
+uniform int uDeferredReceiver;
 float modelHeightShadow(vec2 uv,vec2 dx,vec2 dy,vec2 lightUv,float facing,float strength){
  if(facing<=0.)return 0.;
  float start=1.-textureGrad(uMetallicRoughness,uv,dx,dy).a;
@@ -90,15 +88,16 @@ vec2 modelReliefUv(vec2 uv,vec3 g){
   depth+=stepDepth;at-=ray*stepDepth;
   sampled=1.-textureGrad(uMetallicRoughness,at,dx,dy).a;
  }
- if(depth==0.)return uv;
- float low=depth-stepDepth,high=depth;
+ bool topHit=depth==0.;
+ float low=max(0.,depth-stepDepth),high=depth;
  for(int i=0;i<5;i++){
   float mid=(low+high)*.5;
   float surface=1.-textureGrad(uMetallicRoughness,uv-ray*mid,dx,dy).a;
   if(mid<surface)low=mid;else high=mid;
  }
- vec2 hitUv=uv-ray*((low+high)*.5);
- modelReliefVisibility=modelHeightShadow(hitUv,dx,dy,
+ vec2 hitUv=topHit?uv:uv-ray*((low+high)*.5);
+ modelHitDepth=topHit?0.:(low+high)*.5*strength;
+ if(!topHit)modelReliefVisibility=modelHeightShadow(hitUv,dx,dy,
      vec2(dot(uSunDirection,gradU),dot(uSunDirection,gradV)),dot(uSunDirection,g),strength);
  return hitUv;
 }
@@ -126,7 +125,7 @@ void main(){terrainCoverage(vWorld);
  vec3 base=surface.rgb*uTint;
  if(uTerrain==1)base=vec3(.30,.36,.20);
  TerrainSurface terrainPbrSurface;
- if(uTerrain==2 && uLandscapeView>0){fragColor=vec4(vMaterial.rgb,1);writeAmbient(vec3(0),g,0.);return;}
+ if(uTerrain==2 && uLandscapeView>0){writeSurface(vec3(0),1.,g,0.,0.,g,0.,9.,vMaterial.rgb,1.,gl_FragCoord.z,gl_FragCoord.z);return;}
  if(uTerrain==2){
   terrainPbrSurface=terrainMaterial(vWorld,g,vMaterial,vDistance,vUv);base=terrainPbrSurface.color;n=terrainPbrSurface.normal;
   if(uMeadowEnabled!=0){
@@ -155,14 +154,6 @@ void main(){terrainCoverage(vWorld);
  }
  float rifleRoughness=.54,rifleMetal=0.;
  if(uRifleFinish!=0)rifleFinish(vUv,vWorld,base,n,rifleRoughness,rifleMetal);
- float diffuse=mix(max(dot(n,uSunDirection),0.0),max(0.0,(dot(n,uSunDirection)+.18)/1.18),snowCoverage);
- vec3 receiverNormal=normalize(cross(dFdx(vWorld),dFdy(vWorld)));
- if(dot(receiverNormal,g)<0.0)receiverNormal=-receiverNormal;
- vec3 offsetNormal=uArmSkin!=0&&uArmShadowBaseline==0?g:receiverNormal;
- float visibility=cloudVisibility(vWorld)*SampleSunVisibilityNormals(vWorld,offsetNormal,receiverNormal,max(dot(offsetNormal,uSunDirection),0.0));
- visibility*=uTerrain==2?terrainPbrSurface.shadow:modelReliefVisibility;
- vec3 ambient=mix(ambientGroundColor(),ambientSkyColor(),n.y*.5+.5);
- vec3 view=normalize(uViewPosition-vWorld),halfway=normalize(view+uSunDirection);
  float rough=uTerrain>0?.88:uRoughness;
  if(snowCoverage>0.0)rough=mix(rough,mix(.72,.94,snowNoise(snowUv*3.2)),snowCoverage);
  if(uTerrain==2)rough=terrainPbrSurface.rough;
@@ -173,39 +164,16 @@ void main(){terrainCoverage(vWorld);
   // Keep the source texture variation without waxy cloth/skin highlights.
   rough=uHasMetallicRoughness==0?.82:max(.74,rough);
   metal=0.;
-  // Packed arm occlusion affects indirect light only; sun/gate light and
-  // viewmodel self-shadows continue to describe the current pose.
-  if(uHasMetallicRoughness!=0)ambient*=textureGrad(uMetallicRoughness,modelUv,modelDx,modelDy).r;
  }
- if(uTreeMode>0)ambient*=mix(1.,.72,clamp(surfaceData(vWorld.xz).r,0.,1.));
- if(uTreeMode==2){
-  rough=max(.90,rough);metal=0.;
-  vec3 olive=mix(vec3(dot(base,vec3(.2126,.7152,.0722))),base,uLeafSaturation)*uLeafTint;
-  base=mix(base,olive,uLeafOlive);
-  // Crown occlusion reduces indirect light, not the direct sun or transmitted light.
-  ambient*=vTreeAo;
- }
- float power=mix(96.0,6.0,rough*rough);
- float spec=pow(max(dot(n,halfway),0.0),power)*(power+2.0)/8.0;
- vec3 f0=mix(vec3(.04),base,metal);
- // The DHD housing/buttons are weathered matte surfaces. Raising roughness
- // alone only spreads the legacy specular lobe into a broad white patch.
- float specularStrength=uDhdMatte!=0?.18:uTreeMode==2?.18:uArmSkin!=0?.30:uRifleFinish!=0?.45:1.0;
- f0*=specularStrength;
- vec3 lit=base*(ambient*(1.0-metal*.45)+sunLightColor()*diffuse*visibility*(1.0-metal))+sunLightColor()*f0*spec*diffuse*visibility;
- if(uTerrain==2)lit=base*ambient*terrainPbrSurface.ao+sunLightColor()*terrainBrdf(base,n,view,uSunDirection,rough)*visibility;
- if(uRifleFinish!=0)lit=base*ambient*(1.-metal)+sunLightColor()*rifleSunBrdf(base,n,view,uSunDirection,rough,metal)*visibility+rifleEnvironment(base,n,view,rough,metal);
- float grain=pow(max(dot(n,halfway),0.0),160.0)*.025*(1.0-smoothstep(3.0,14.0,vDistance));
- lit+=snowCoverage*sunLightColor()*grain*visibility;
- lit+=gateLighting(vWorld,n,view,base,rough,specularStrength);
- lit+=dhdLighting(vWorld,g,n,view,base,rough,specularStrength);
- // Restrained backlighting for two-sided needles/leaves; wood stays opaque.
- if(uTreeMode==2)lit+=base*sunLightColor()*max(dot(-n,uSunDirection),0.0)*uLeafTransmission*visibility;
- writeAmbient(base*ambient*(uTerrain==2?terrainPbrSurface.ao:uRifleFinish!=0?1.0-metal:1.0-metal*.45),receiverNormal,uTreeMode==2?2.:1.);
- if(uArmSkin!=0){
-  if(uHandInspection==1)lit=g*.5+.5;
-  if(uHandInspection==2)lit=n*.5+.5;
-  if(uHandInspection==3||uHandInspection==4)lit=vec3(visibility);
- }
- fragColor=vec4(applyFog(lit,vWorld,uViewPosition),1);
+ if(uTreeMode==2){rough=max(.90,rough);metal=0.;vec3 olive=mix(vec3(dot(base,vec3(.2126,.7152,.0722))),base,uLeafSaturation)*uLeafTint;base=mix(base,olive,uLeafOlive);}
+ float spec=uDhdMatte!=0?.18:uTreeMode==2?.18:uArmSkin!=0?.30:uRifleFinish!=0?.45:1.;
+ float kind=uDhdMatte!=0?float(uDeferredReceiver):uTerrain==2?4.:uTreeMode==2?5.:uRifleFinish!=0?6.:uArmSkin!=0?7.:snowCoverage>.5?8.:1.;
+ vec3 receiver=normalize(cross(dFdx(vWorld),dFdy(vWorld)));if(dot(receiver,g)<0.)receiver=-receiver;
+ vec3 ray=normalize(uViewPosition-vWorld);
+ float distanceAlongRay=uTerrain==2?terrainPbrSurface.depth:modelHitDepth/max(abs(dot(ray,g)),.15);
+ if(uRockSnow!=0)distanceAlongRay=mix(distanceAlongRay,snowHitDistance,snowCoverage);
+ vec3 hit=vWorld-ray*distanceAlongRay;
+ float depth=projectedSurfaceDepth(hit,gl_FragCoord.z);
+ vec3 emission=dot(uModelEmissionGain,uModelEmissionGain)>0.?textureGrad(uModelEmission,modelUv,modelDx,modelDy).rgb*uModelEmissionGain:vec3(0);
+ writeSurface(base,rough,n,metal,spec,receiver,uTreeMode==2?uLeafTransmission:snowCoverage,kind,emission,uTerrain==2?terrainPbrSurface.shadow:modelReliefVisibility,gl_FragCoord.z,max(gl_FragCoord.z,depth));
 }

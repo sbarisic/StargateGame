@@ -10,6 +10,7 @@ uniform int uWaterReflections,uWaterTraceSteps,uWaterRefineSteps,uWaterDiagnosti
 #include "daylight.glsl"
 #include "shadows.glsl"
 #include "gate_lighting.glsl"
+#include "prop_lighting.glsl"
 #include "water_optics.glsl"
 vec3 reconstruct(vec2 uv,float depth){vec4 p=uInverseViewProjection*vec4(uv*2.0-1.0,depth*2.0-1.0,1.0);return p.xyz/p.w;}
 vec4 rippleLayer(vec2 q,vec2 travel,float metres,float strength,mat2 rotation){
@@ -128,6 +129,7 @@ void main(){terrainCoverage(vWorld);
  float islands=smoothstep(.63,.79,medium.a*.65+fine.a*.35);
  float foam=clamp((shoreline*(.04+current)+contact*(.15+current))*islands*uFoamStrength,0.0,1.0);
  color=mix(color,ambientSkyColor()*.7+sunLightColor()*.25*visibility,foam);
+ color+=propLighting(vWorld,n,view,vec3(.025,.07,.09),uWaterRoughness);
  color+=gateLighting(vWorld,n,view,vec3(.025,.07,.09),uWaterRoughness);
  color=mix(textureLod(uOpaqueColor,uv,0).rgb,color,smoothstep(0.0,.04,vertical));
  vec3 above=applyFog(color,vWorld,uViewPosition);

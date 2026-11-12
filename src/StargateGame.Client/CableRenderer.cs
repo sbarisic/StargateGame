@@ -17,11 +17,18 @@ sealed partial class SceneRenderer
         public float[] ArcLengths=[];
         public AxisAlignedBoundingBox Bounds;
         public Vector3 SurfaceA, SurfaceB, NormalA, NormalB;
-        public bool Visible, Suspended;
+        public bool Visible, Suspended, Sleeping;
+        public float QuietTime;
+        public Vector3[] QuietPose=[];
+        public Vector3 SleepA, SleepB, SleepNormalA, SleepNormalB;
+        public long CollisionRevision;
+        public readonly Dictionary<(bool Player,int Id),CableObstacle> SleepObstacles=[];
         public int Sides;
         public double Accumulator;
         public void Dispose()=>Mesh.Dispose();
     }
+    readonly record struct CableObstacle(Vector3 Center,Quaternion Rotation,float Radius);
+    readonly Dictionary<(bool Player,int Id),CableObstacle> cableObstacles=[];
     Mesh3D? cableMarkers;
     bool cableMarkersVisible;
     readonly Vector3[] cableMarkerPositions=new Vector3[48],cableMarkerNormals=new Vector3[48];
@@ -65,6 +72,14 @@ sealed partial class SceneRenderer
         var keep=all.Select(c=>c.Id).ToHashSet();
         foreach(var id in cableVisuals.Keys.Where(id=>!keep.Contains(id)).ToArray()){cableVisuals[id].Dispose();cableVisuals.Remove(id);}
         int budget=4096;CableRaycasts=0;
+        cableObstacles.Clear();
+        foreach(var body in bodies)
+        {
+            var prop=physics.World.Definition.Props.FirstOrDefault(p=>p.Id==body.Id);
+            if(prop is not null)cableObstacles[(false,body.Id)]=new(body.Position,body.Rotation,prop.HalfExtent.Length());
+        }
+        foreach(var player in physics.Players)
+            cableObstacles[(true,player.Id)]=new(player.Position+Vector3.UnitY*.9f,Quaternion.Identity,1.1f);
         for(int order=0;order<all.Length;order++)
         {
             var record=all[(order+cableRoundRobin)%all.Length];
@@ -85,6 +100,7 @@ sealed partial class SceneRenderer
                 v=new(){Record=record,Mesh=graphics.CreateMesh3D(),Nodes=nodes,Previous=(Vector3[])nodes.Clone(),BeforeStep=(Vector3[])nodes.Clone()};cableVisuals.Add(record.Id,v);
             }
             bool attachmentsMoved=v.SurfaceA!=surfaceA||v.SurfaceB!=surfaceB||v.NormalA!=an||v.NormalB!=bn;
+            bool shapeChanged=v.Record.Length!=record.Length||v.Record.Diameter!=record.Diameter||v.Record.A!=record.A||v.Record.B!=record.B;
             v.Record=record;
             v.SurfaceA=surfaceA;v.SurfaceB=surfaceB;v.NormalA=an;v.NormalB=bn;
             var lo=Vector3.Min(a,b);var hi=Vector3.Max(a,b);
@@ -94,9 +110,21 @@ sealed partial class SceneRenderer
             if(!nearby){v.Suspended=true;v.Accumulator=0;if(v.Positions.Length==0||attachmentsMoved)BuildCableTube(v,camera.Position,1);continue;}
             v.Suspended=false;
             if(resumed){Array.Copy(v.Nodes,v.Previous,v.Nodes.Length);Array.Copy(v.Nodes,v.BeforeStep,v.Nodes.Length);}
+            bool wake=resumed||shapeChanged||v.CollisionRevision!=physics.CableCollisionRevision;
+            v.CollisionRevision=physics.CableCollisionRevision;
+            if(v.Sleeping)wake|=Vector3.DistanceSquared(v.SleepA,surfaceA)>2.5e-7f||Vector3.DistanceSquared(v.SleepB,surfaceB)>2.5e-7f
+                ||Vector3.DistanceSquared(v.SleepNormalA,an)>1e-6f||Vector3.DistanceSquared(v.SleepNormalB,bn)>1e-6f||CableObstaclesMoved(v,lo,hi);
+            if(wake){v.Sleeping=false;v.QuietTime=0;}
+            if(v.Sleeping)
+            {
+                v.Accumulator=0;
+                int sides=Vector3.Distance(camera.Position,(a+b)*.5f)<40?12:6;
+                if(attachmentsMoved||v.Sides!=sides)BuildCableTube(v,camera.Position,1);
+                continue;
+            }
             v.Accumulator=Math.Min(v.Accumulator+dt,2d/30);
             int count=v.Nodes.Length;
-            while(v.Accumulator>=1d/30 && budget>count*2)
+            while(v.Accumulator>=1d/30 && budget>=count*3)
             {
                 v.Accumulator-=1d/30;Array.Copy(v.Nodes,v.BeforeStep,count);
                 for(int i=1;i<count-1;i++)
@@ -108,8 +136,9 @@ sealed partial class SceneRenderer
                 for(int iteration=0;iteration<8;iteration++)
                 {
                     v.Nodes[0]=a;v.Nodes[^1]=b;
-                    for(int i=0;i<count-1;i++)
+                    for(int step=0;step<count-1;step++)
                     {
+                        int i=(iteration&1)==0?step:count-2-step;
                         var delta=v.Nodes[i+1]-v.Nodes[i];float d=delta.Length();if(d<1e-6f)continue;
                         var correction=delta*((d-segment)/d);
                         if(i==0)v.Nodes[i+1]-=correction;
@@ -120,9 +149,19 @@ sealed partial class SceneRenderer
                 v.Nodes[0]=a;v.Nodes[^1]=b;
                 for(int i=1;i<count-1&&budget>0;i++)
                 {
+                    var motion=v.Nodes[i]-v.BeforeStep[i];
+                    if(motion.LengthSquared()>1e-10f)
+                    {
+                        budget--;CableRaycasts++;
+                        // Sweep the leading edge, not just the centre. Otherwise a resting
+                        // node sinks by its radius before repeatedly popping back out.
+                        if(physics.CableRay(v.BeforeStep[i],v.Nodes[i]+Vector3.Normalize(motion)*(radius+.002f)) is {} contact)
+                            ProjectCableContact(v,i,contact.Point,contact.Normal,radius);
+                    }
+                    // Retain support even when the length solve makes motion horizontal.
                     budget--;CableRaycasts++;
-                    if(physics.CableRay(v.BeforeStep[i],v.Nodes[i]) is {} contact)
-                    {v.Nodes[i]=contact.Point+contact.Normal*(radius+.002f);v.Previous[i]=v.Nodes[i];}
+                    if(physics.CableRay(v.Nodes[i]+Vector3.UnitY*.002f,v.Nodes[i]-Vector3.UnitY*(radius+.004f)) is {} support)
+                        ProjectCableContact(v,i,support.Point,support.Normal,radius);
                 }
                 for(int i=0;i<count-1&&budget>0;i++)
                 {
@@ -135,9 +174,25 @@ sealed partial class SceneRenderer
                     budget--;CableRaycasts++;
                     if(physics.CableRay(from,to) is {} contact)
                     {
-                        int node=i+1==count-1?i:i+1;
-                        if(node>0&&node<count-1){v.Nodes[node]=contact.Point+contact.Normal*(radius+.002f);v.Previous[node]=v.Nodes[node];}
+                        // Keep the tangential positions. Snapping a whole node to the
+                        // span hit shortened it and fought the length solve every tick.
+                        if(i>0)ProjectCableContact(v,i,contact.Point,contact.Normal,radius);
+                        if(i+1<count-1)ProjectCableContact(v,i+1,contact.Point,contact.Normal,radius);
                     }
+                }
+                if(v.QuietPose.Length!=count)v.QuietPose=new Vector3[count];
+                if(v.QuietTime==0)Array.Copy(v.BeforeStep,v.QuietPose,count);
+                bool quiet=!shapeChanged;
+                for(int i=0;i<count&&quiet;i++)quiet=Vector3.DistanceSquared(v.Nodes[i],v.BeforeStep[i])<4e-6f
+                    &&Vector3.DistanceSquared(v.Nodes[i],v.QuietPose[i])<16e-6f;
+                v.QuietTime=quiet?v.QuietTime+1f/30:0;
+                if(v.QuietTime>=.75f && record.Id!=Guid.Empty)
+                {
+                    v.Sleeping=true;v.Accumulator=0;
+                    Array.Copy(v.Nodes,v.Previous,count);Array.Copy(v.Nodes,v.BeforeStep,count);
+                    v.SleepA=surfaceA;v.SleepB=surfaceB;v.SleepNormalA=an;v.SleepNormalB=bn;
+                    v.SleepObstacles.Clear();foreach(var obstacle in cableObstacles)v.SleepObstacles.Add(obstacle.Key,obstacle.Value);
+                    break;
                 }
             }
             // Endpoints always track presented transforms, even when the ray budget is exhausted.
@@ -145,6 +200,35 @@ sealed partial class SceneRenderer
             BuildCableTube(v,camera.Position,(float)Math.Clamp(v.Accumulator*30,0,1));
         }
         if(all.Length>0)cableRoundRobin=(cableRoundRobin+1)%all.Length;
+    }
+    static void ProjectCableContact(CableVisual v,int node,Vector3 point,Vector3 normal,float radius)
+    {
+        float correction=radius+.002f-Vector3.Dot(v.Nodes[node]-point,normal);
+        if(correction<=0)return;
+        var velocity=v.Nodes[node]-v.Previous[node];
+        v.Nodes[node]+=normal*correction;
+        // Projection is not a physical impulse. Remove inward motion and damp
+        // sliding at contacts instead of feeding correction energy into Verlet.
+        velocity-=normal*Math.Min(0,Vector3.Dot(velocity,normal));
+        v.Previous[node]=v.Nodes[node]-velocity*.2f;
+    }
+    bool CableObstaclesMoved(CableVisual v,Vector3 lo,Vector3 hi)
+    {
+        foreach(var entry in cableObstacles)
+        {
+            var current=entry.Value;
+            bool existed=v.SleepObstacles.TryGetValue(entry.Key,out var previous);
+            float margin=Math.Max(current.Radius,existed?previous.Radius:0)+v.Record.Diameter+.1f;
+            // Swept bounds also wake a cable crossed between presentation frames.
+            var min=existed?Vector3.Min(current.Center,previous.Center):current.Center;
+            var max=existed?Vector3.Max(current.Center,previous.Center):current.Center;
+            if(max.X+margin<lo.X||min.X-margin>hi.X||max.Y+margin<lo.Y||min.Y-margin>hi.Y||max.Z+margin<lo.Z||min.Z-margin>hi.Z)continue;
+            if(!existed||Vector3.DistanceSquared(current.Center,previous.Center)>1e-6f
+                ||8*current.Radius*current.Radius*(1-Math.Min(1,Math.Abs(Quaternion.Dot(current.Rotation,previous.Rotation))))>1e-6f)return true;
+        }
+        foreach(var entry in v.SleepObstacles)
+            if(!cableObstacles.ContainsKey(entry.Key)&&Vector3.Distance(entry.Value.Center,Vector3.Clamp(entry.Value.Center,lo,hi))<entry.Value.Radius+v.Record.Diameter+.1f)return true;
+        return false;
     }
     void BuildCableTube(CableVisual v,Vector3 camera,float alpha)
     {

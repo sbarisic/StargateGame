@@ -107,7 +107,7 @@ sealed partial class GameApp
                 session.ScrollCarriedProp(e.Offset.Y);
                 return;
             }
-            if (spawnMenuOpen) return;
+            if (spawnMenuOpen) { spawnScroll += e.Offset.Y > 0 ? -1 : 1; ClampSpawnScroll(); return; }
             if (buildPaletteOpen)
             {
                 palettePage = Math.Clamp(palettePage + (e.Offset.Y > 0 ? -1 : 1), 0, (BuildPaletteItemCount - 1) / Layout.PageSize);
@@ -799,7 +799,7 @@ sealed partial class GameApp
             scene.InspectionCharacters = Arguments.Number(args, "--characters", 1, 0, 8);
             scene.HideWeapon = Arguments.Get(args,"--view","player").StartsWith("region:",StringComparison.Ordinal) || args.Contains("--tree-forest-tour") || Arguments.Get(args, "--view", "player").StartsWith("tree-forest-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("horizon-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("character-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("settlement", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("tree-prototype", StringComparison.Ordinal);
             scene.InspectionAnimation = labClip >= 0 ? labClips[labClip] : Arguments.Get(args, "--animation", "") is { Length: > 0 } clip ? clip : null;
-            scene.InspectionTime = labAnimationTime ?? (double.TryParse(Arguments.Get(args, "--animation-time", ""), System.Globalization.CultureInfo.InvariantCulture, out var clipTime) ? clipTime : null);
+            scene.InspectionTime = (double?)testVisualTime ?? labAnimationTime ?? (double.TryParse(Arguments.Get(args, "--animation-time", ""), System.Globalization.CultureInfo.InvariantCulture, out var clipTime) ? clipTime : null);
             var hintSymbols = addressBook.Selection(BookUniverse)?.Symbols ?? [];
             var hint = addressHint.Sample(session.World.Definition.LocationId, hintSymbols, now);
             scene.DhdHintActive = hintSymbols.Length == 6 && !buildMode && !bookOpen && session.Gate is { Phase: GatePhase.Idle or GatePhase.Dialing or GatePhase.Failed };
@@ -866,11 +866,9 @@ sealed partial class GameApp
             scene.TreeForestSeed = Arguments.Number(args, "--tree-forest-seed", 7319, 0, int.MaxValue);
             scene.TreeSpecies = Arguments.Get(args, "--tree-species", "broadleaf");
             scene.CanopyLodBaseline = Arguments.Get(args, "--canopy-lod", "balanced") switch { "baseline" => true, "balanced" => false, _ => throw new ArgumentException("--canopy-lod expects balanced or baseline.") };
-            scene.TreeVolumeInspection = Arguments.Get(args, "--tree-volume-view", "lit");
             scene.TreeSettings = scene.TreeSettings with { WindStrength = Arguments.Get(args, "--tree-wind", "on") == "off" ? 0 : .12f };
             scene.HandShadowBaseline = Smoke && args.Contains("--hand-shadow-baseline");
             scene.HandInspectionPose = Smoke ? Arguments.Get(args, "--hand-pose", "") : "";
-            scene.HandInspection = Smoke ? Arguments.Get(args, "--hand-view", "lit") switch { "normals" => 1, "mapped-normals" => 2, "static" => 3, "dynamic" => 4, _ => 0 } : 0;
             scene.SettlementCamera(camera.Position);
             scene.DebugWorld = debugCollision ? session.Physics : null;
             scene.ExposureTransitHold = session.TransitWhite > 0;
@@ -900,6 +898,7 @@ sealed partial class GameApp
         {
             if (scene is not null && session is not null)
                 scene.PresentScene(pass);
+            CaptureTest(pass, beforeUi: true);
             uiWatch.Restart();
             using (pass.PushView(new RenderView(uiCamera)))
             using (pass.PushState(RenderState.Default with
@@ -980,7 +979,10 @@ sealed partial class GameApp
                 DepthWriteEnabled = false,
                 CullMode = CullMode.None
             }))
+            {
                 DrawUiRecoveryFixture(pass);
+                DrawFpsCounter(pass);
+            }
             uiWatch.Stop();
             if (UiChecking && uiCpuTimes.Count < 20000)
                 uiCpuTimes.Add(uiWatch.Elapsed.TotalMilliseconds);

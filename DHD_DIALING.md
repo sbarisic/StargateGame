@@ -13,6 +13,9 @@ it. This loading delay does not delay the source kawoosh.
 
 - Aim at a physical DHD key within three metres and left-click.
 - Enter six distinct destination glyphs, key 01 (local origin), then the orb.
+- Press the orb during an incomplete address to cancel and clear its symbols.
+  Sandbox accepts six destination glyphs without origin, so cancellation there
+  applies to one through five symbols; normal dialing cancels one through six.
 - Backspace removes the last accepted symbol; hold one second to reset. Keep
   aiming at this DHD within reach. Build mode retains left-click for building.
 - Press either connected DHD orb to close. Otherwise the connection stays open
@@ -21,8 +24,9 @@ it. This loading delay does not delay the source kawoosh.
 Hover shows a glyph name and outline. Keys depress about 6 mm over 120 ms;
 accepted glyphs stay orange and replicate to other observers. Invalid glyph input
 preserves progress. A failed orb activation resets the gate, clears all selected
-symbols and chevrons, and releases the dial session. This includes an incomplete
-address, failed lock, unavailable/busy receiver, and destination preparation failure
+symbols and chevrons, and releases the dial session. A partial-address orb press
+is an accepted cancellation rather than a failed activation. Failures include
+failed lock, unavailable/busy receiver, and destination preparation failure
 or timeout. The error remains visible; enter a new sequence to try again.
 Clicking a lit glyph does not toggle it. Origin locks the departure context and
 never supplies a destination coordinate. Hidden overlapping key 13 is unavailable.

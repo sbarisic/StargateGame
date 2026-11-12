@@ -80,7 +80,8 @@ sealed partial class GameApp
         }
         generatorDraft = d with { Generation = g };
     }
-    bool GeneratorAvailable => session is { Developer: true, PlayerCount: 1, DebugHome: { Fixture: null } } && session.PlanetDebugState?.Busy != true && !session.PlanetVisualPending;
+    bool EnvironmentAvailable => session is { Developer: true, PlayerCount: 1, DebugHome: not null } && session.PlanetDebugState?.Busy != true && !session.PlanetVisualPending;
+    bool GeneratorAvailable => EnvironmentAvailable && session?.DebugHome?.Fixture is null;
     void RunGeneratorAction(int action)
     {
         if (session is null) return;
@@ -88,7 +89,7 @@ sealed partial class GameApp
         if (action == 2 && session.PlanetDebugState?.Busy != true) { LoadGenerator(); session.ReadPlanetDebug(); return; }
         if (action == 3 && session.PlanetDebugState?.Busy != true) { generatorDraft = generatorDraft with { Generation = new() }; return; }
         if (action == 4) { generatorScroll = generatorFocus = 0; return; }
-        if (!GeneratorAvailable || !ParseGenerator()) return;
+        if (!(action == 0 ? EnvironmentAvailable : GeneratorAvailable) || !ParseGenerator()) return;
         session.ApplyPlanetDebug(generatorDraft, action == 1);
     }
     void GeneratorInput(InputManager input)
@@ -159,8 +160,8 @@ sealed partial class GameApp
         Text(pass, r.X + 20, r.Bottom - 185, "Scroll / TAB Focus / Arrows Adjust / CTRL+A Replace / ESC Close", 13, UiTheme.Muted);
         string[] actions = ["Apply Environment", "Regenerate Starting Planet", "Reload Current Settings", "Reset Parameters", "Scroll to top", "Cancel Generation"];
         for (int i = 0; i < actions.Length; i++) Button(pass, GeneratorAction(i), actions[i], selected: generatorFocus == 14 + i,
-            size: 14, enabled: i == 5 ? session?.PlanetDebugState?.CanCancel == true : i is 0 or 1 ? GeneratorAvailable : session?.PlanetDebugState?.Busy != true);
-        Text(pass, r.X + 20, r.Bottom - 72, Fit("Regeneration clears this planet's terrain edits and placed objects.", r.W - 40, 14), 14, UiTheme.Amber);
+            size: 14, enabled: i == 5 ? session?.PlanetDebugState?.CanCancel == true : i == 0 ? EnvironmentAvailable : i == 1 ? GeneratorAvailable : session?.PlanetDebugState?.Busy != true);
+        Text(pass, r.X + 20, r.Bottom - 72, Fit(session?.DebugHome?.Fixture is not null ? "Apply Environment changes time, clock and weather for this session. Terrain is fixed." : "Regeneration clears this planet's terrain edits and placed objects.", r.W - 40, 14), 14, UiTheme.Amber);
         var state = session?.PlanetDebugState;
         string status = generatorError.Length > 0 ? generatorError : state is null ? "Reading saved settings..." : $"{state.Phase} / {state.ElapsedSeconds:F1}s / {state.Detail}";
         Text(pass, r.X + 20, r.Bottom - 43, Fit(status, r.W - 40, 14), 14, generatorError.Length > 0 || state?.Phase == "Failed" ? UiTheme.Error : UiTheme.Cyan);

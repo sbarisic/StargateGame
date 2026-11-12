@@ -15,7 +15,15 @@ sealed record AmbientOcclusionSettings
     {
         "auto" => AmbientOcclusionQuality.Auto, "off" => AmbientOcclusionQuality.Off,
         "low" => AmbientOcclusionQuality.Low, "performance" => AmbientOcclusionQuality.Performance,
-        "high" => AmbientOcclusionQuality.High, _ => throw new ArgumentException("--ao expects auto, off, low, performance or high.")
+        "high" => AmbientOcclusionQuality.High, _ => throw new ArgumentException("AO quality expects auto, off, low, performance or high.")
+    };
+    public static int InspectionId(string value) => value switch
+    {
+        "lit" => 0, "ao" => 1, "albedo" => 2, "normals" => 3, "geometric-normals" => 4,
+        "geometric-depth" => 5, "depth" => 6, "material-class" => 7, "indirect" => 8,
+        "sun-diffuse" => 9, "transmission" => 10, "specular" => 11, "emission" => 12, "hdr" => 13,
+        "roughness" => 14, "metalness" => 15, "specular-strength" => 16, "surface-auxiliary" => 17, "sun-visibility" => 18,
+        _ => throw new ArgumentException("Unknown deferred inspection view: " + value)
     };
     static string FilePath => Path.Combine(StargateGame.Shared.UserData.Root, "ambient-occlusion.json");
     public static AmbientOcclusionSettings Load()

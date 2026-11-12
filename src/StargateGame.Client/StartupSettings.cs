@@ -86,20 +86,7 @@ sealed partial class GameApp
         };
         scene.HorizonStress = args.Contains("--horizon-stress");
         scene.HorizonWaveDiagnostics = args.Contains("--horizon-wave-check");
-        float AoNumber(string key, float fallback, float minimum, float maximum)
-        {
-            if (!float.TryParse(Arguments.Get(args, key, fallback.ToString(System.Globalization.CultureInfo.InvariantCulture)),
-                System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float value)
-                || !float.IsFinite(value) || value < minimum || value > maximum)
-                throw new ArgumentException($"{key} must be between {minimum} and {maximum}.");
-            return value;
-        }
-        scene.AoSettings = aoSettings with {
-            Quality = AmbientOcclusionSettings.Parse(Arguments.Get(args, "--ao", aoSettings.Quality.ToString())),
-            Radius = AoNumber("--ao-radius", 1, .1f, 3),
-            Strength = AoNumber("--ao-strength", 1, 0, 2),
-            Inspection = Arguments.Get(args, "--ao-view", "lit")
-        };
+        scene.AoSettings = aoSettings with { Inspection = "lit" };
         scene.SetGraphics(graphicsSettings);
     }
 }

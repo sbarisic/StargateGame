@@ -6,6 +6,7 @@ uniform float uUnderwater;
 #include "daylight.glsl"
 #include "shadows.glsl"
 #include "gate_lighting.glsl"
+#include "prop_lighting.glsl"
 vec3 reconstruct(vec2 uv,float depth){vec4 p=uInverseViewProjection*vec4(uv*2-1,depth*2-1,1);return p.xyz/p.w;}
 vec2 ripples(vec2 q){
  return vec2(sin(dot(q,vec2(2.8,1.4))+uTime*.65),cos(dot(q,vec2(-1,3.6))-uTime*.5))*.025
@@ -56,6 +57,7 @@ void main(){terrainCoverage(vWorld);
  float visibility=cloudVisibility(vWorld)*SampleSunVisibility(vWorld,vec3(0,1,0),max(n.y,0));
  vec3 color=mix(transmitted,reflected,fresnel);color+=sunLightColor()*pow(max(dot(reflect(-uSunDirection,n),view),0),220)*visibility*.7;
  float foam=(1-smoothstep(.03,.22,vertical))*shore*(.5+.5*sin(q.x*11+sin(q.y*8)))*.12;color=mix(color,ambientSkyColor(),foam);
+ color+=propLighting(vWorld,n,view,vec3(.025,.07,.09),.28);
  color+=gateLighting(vWorld,n,view,vec3(.025,.07,.09),.28);
  color=mix(texture(uOpaqueColor,uv).rgb,color,smoothstep(0,.06,vertical));
  vec3 above=applyFog(color,vWorld,uViewPosition);

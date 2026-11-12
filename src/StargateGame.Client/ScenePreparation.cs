@@ -49,7 +49,7 @@ sealed partial class SceneRenderer
     IEnumerable<bool> PrepareCommonResources()
     {
         PreparationStage = "Compiling world shader";
-        shader = LoadProgram("world.vert", "world.frag");
+        shader = LoadProgram("surface.vert", "world.frag");
         yield return false;
         using (var pixel = new System.Drawing.Bitmap(1, 1))
         {
@@ -83,7 +83,7 @@ sealed partial class SceneRenderer
         while (!catalog.IsCompleted)
             yield return false;
         _ = catalog.GetAwaiter().GetResult();
-        foreach (string name in new[] { "stargate", "dhd", "wooden-crate", "barrel-red", "barrel-black" })
+        foreach (string name in new[] { "stargate", "dhd", "wooden-crate", "barrel-red", "barrel-black", "wooden-lantern" })
             RequestModel(name);
         while (modelJobs.Count > 0)
         {

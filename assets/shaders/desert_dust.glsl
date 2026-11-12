@@ -3,7 +3,7 @@
 #include "surface_ecology.glsl"
 #include "mist_rooms.glsl"
 uniform float uDustExtinction,uDustGust,uDustMoving;uniform vec2 uDustTravel,uDustWind;
-vec3 dustLight(){return decodeColor(vec3(201,155,105)/255.0)*(ambientSkyColor()*.7+sunLightColor()*max(uSunDirection.y,0.0)*.65);}
+vec3 dustLight(){return decodeColor(vec3(201,155,105)/255.0)*(scatteringIndirect(ambientSkyColor(),uSunDirection.y)*.7+sunLightColor()*max(uSunDirection.y,0.0)*.65);}
 float dustDensity(vec3 p){
  if(uDustExtinction<=0.0)return 0.0;
  vec4 data=surfaceData(p.xz);float ground=data.b> -4000?data.b:uGroundLevel,h=p.y-ground;

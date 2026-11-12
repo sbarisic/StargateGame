@@ -6,6 +6,8 @@ namespace StargateGame.Physics;
 
 public sealed partial class PhysicsWorld
 {
+    // Changes only when collision bodies are replaced, not on simulation ticks.
+    public long CableCollisionRevision => topology;
     Vector3 CableNormal(RayCastResult hit,Vector3 point)
     {
         var locks=system.BodyLockInterface;

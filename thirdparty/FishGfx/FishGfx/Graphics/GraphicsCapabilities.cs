@@ -72,6 +72,7 @@ public sealed class GraphicsCapabilities
 		int maximumCubeTextureSize,
 		int maximumSamples,
 		int maximumColorAttachments,
+		int maximumDrawBuffers,
 		float maximumAnisotropy
 	)
 	{
@@ -93,6 +94,7 @@ public sealed class GraphicsCapabilities
 		MaximumCubeTextureSize = maximumCubeTextureSize;
 		MaximumSamples = Math.Max(1, maximumSamples);
 		MaximumColorAttachments = maximumColorAttachments;
+		MaximumDrawBuffers = maximumDrawBuffers;
 		MaximumAnisotropy = Math.Max(1, maximumAnisotropy);
 		extensionSet = new HashSet<string>(extensionCopy, StringComparer.Ordinal);
 	}
@@ -132,6 +134,8 @@ public sealed class GraphicsCapabilities
 	public int MaximumSamples { get; }
 
 	public int MaximumColorAttachments { get; }
+
+	public int MaximumDrawBuffers { get; }
 
 	public float MaximumAnisotropy { get; }
 

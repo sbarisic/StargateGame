@@ -311,14 +311,7 @@ public sealed partial class PhysicsWorld : IDisposable
     {
         if (prop.Id <= 0 || props.ContainsKey(prop.Id))
             throw new ArgumentException("Duplicate prop ID.");
-        Shape shape;
-        if (prop.IsBarrel)
-        {
-            using var settings = Native.Own(new ConvexHullShapeSettings(PropGeometry.For(prop).Vertices, .01f));
-            shape = Own(settings.Create());
-        }
-        else
-            shape = Own(new BoxShape(prop.HalfExtent));
+        Shape shape = Own(CreatePropShape(prop));
         originalPropShapes[prop.Id] = shape;
         props.Add(prop.Id, AddBody(shape, prop.Position, Quaternion.Identity, true, prop.Mass));
         propDefinitions.Add(prop.Id, prop);
@@ -630,7 +623,7 @@ public sealed partial class PhysicsWorld : IDisposable
             snapshot.Bodies.Length > 64 || !snapshot.Bodies.Select(b => b.Id).Order().SequenceEqual((snapshot.Registry ?? definition.Props).Select(p => p.Id).Order()) ||
             !snapshot.Commands.Select(c => c.PlayerId).Order().SequenceEqual(snapshot.Players.Select(p => p.Id).Order()))
             throw new InvalidDataException("Invalid physics snapshot topology.");
-        if (snapshot.Registry is { } registry && (registry.Any(p => p is null || p.Id is < 1 or > 64 || !p.Valid || !Vec(p.Position)) || registry.Select(p => p.Id).Distinct().Count() != registry.Length))
+        if (snapshot.Registry is { } registry && (registry.Count(p => p?.Kind == PropKind.Lantern) > LanternAsset.LocationLimit || registry.Any(p => p is null || p.Id is < 1 or > 64 || !p.Valid || !Vec(p.Position)) || registry.Select(p => p.Id).Distinct().Count() != registry.Length))
             throw new InvalidDataException("Invalid prop registry.");
         foreach (var p in snapshot.Players)
             if (!Enum.IsDefined(p.Surface) || p.Id <= 0 || p.Name is null || p.Name.Length > 24 || !Vec(p.Position) || !Vec(p.Velocity) || !Vec(p.GroundNormal) || !Vec(p.GroundVelocity) || !Vec(p.ArrivalMomentum) ||
@@ -829,6 +822,7 @@ public sealed partial class PhysicsWorld : IDisposable
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         hash.AppendData(Encoding.UTF8.GetBytes(StargateGame.Building.BuildingPrefabs.Hash));
         hash.AppendData(Encoding.UTF8.GetBytes(WeaponCatalog.Identity));
+        hash.AppendData(Encoding.UTF8.GetBytes(LanternAsset.Identity));
         using (var interaction = typeof(DhdInteraction).Assembly.GetManifestResourceStream("DhdInteraction")!)
         using (var memory = new MemoryStream())
         {

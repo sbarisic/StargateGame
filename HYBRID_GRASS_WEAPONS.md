@@ -100,12 +100,13 @@ arms (`20261110-221126-506-gate-pair`). Its vegetation was not used for the cook
 grass performance comparison. The first loose run lacked the isolated output's
 vegetation-model link; after adding that link the run completed normally.
 
-Inspection switches include `--hand-view=normals|mapped-normals|static|dynamic`,
+Deferred surface diagnostics now use harness `aoView` (see TESTING.md), replacing
+`--hand-view`. Historical pose/shadow inspection switches include
 `--hand-pose=idle|aim|walk|reload|holster`, and `--hand-shadow-baseline` in smoke
 captures. The baseline selects the previous geometric offset/body shadow path.
 
-Winter canopy diagnostics now include `--tree-volume-view=albedo|shadow`, in
-addition to normals, sun transmission, sky and ground visibility. All three
+The following historical canopy captures predate deferred lighting; current
+diagnostics use harness `aoView`, and baked ambient visibility is no longer used. All three
 winter spruces and winter birch were captured from opposite directions under
 low-angle sun, including wind-on and wind-off cases. Spruce 1 also has overhead
 component captures. These renders do **not** demonstrate a global inverted

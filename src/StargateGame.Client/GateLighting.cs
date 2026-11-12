@@ -26,17 +26,17 @@ sealed record GateLightSettings
     {
         get;
         init;
-    } = new(.12f, .35f, 1);
+    } = new(.20f, .48f, 1);
     public float MembraneIntensity
     {
         get;
         init;
-    } = 3;
+    } = 12;
     public float MembraneRange
     {
         get;
         init;
-    } = 7;
+    } = 10;
 }
 
 sealed partial class SceneRenderer
@@ -88,6 +88,7 @@ sealed partial class SceneRenderer
     void InvalidateGateShadows(AxisAlignedBoundingBox? bounds = null)
     {
         InvalidateWeatherShelter(bounds);
+        InvalidatePointShadows(bounds);
         farSunRevision = -1;
         for (int i = 0; i < gateLights.Count * 6; i++)
             if (bounds is null || gateLightFrusta[i].Intersects(bounds.Value))
@@ -112,7 +113,7 @@ sealed partial class SceneRenderer
         var centre = EventHorizonState.Centre(gate);
         var b = modelBounds[gate.Model];
         gateEmissionVisible = endpoints.Any(e => frustum.Intersects(new(b.Min * e.Scale + e.Position, b.Max * e.Scale + e.Position)));
-        float influence = GateLights.MembraneRange + EventHorizonState.ModelRadius * gate.Scale;
+        float influence = GateLights.MembraneRange + (EventHorizonState.ModelRadius + KawooshShape.Length) * gate.Scale;
         if (!endpoints.Any(e => frustum.Intersects(new(EventHorizonState.Centre(e) - new Vector3(influence), EventHorizonState.Centre(e) + new Vector3(influence)))))
         {
             DisposeGateLights();
@@ -162,29 +163,40 @@ sealed partial class SceneRenderer
             gateDepthShader ??= LoadProgram("gate_depth.vert", "depth.frag");
             gateEmissionShader ??= LoadProgram("world.vert", "gate_emission.frag");
             gateEmissionShader.SetUniform("uSceneDepth", 1);
-            Vector3[] directions = [Vector3.UnitX, -Vector3.UnitX, Vector3.UnitY, -Vector3.UnitY, Vector3.UnitZ, -Vector3.UnitZ];
-            Vector3[] ups = [-Vector3.UnitY, -Vector3.UnitY, Vector3.UnitZ, -Vector3.UnitZ, -Vector3.UnitY, -Vector3.UnitY];
             for (int i = 0; i < gateLights.Count; i++)
                 for (int face = 0; face < 6; face++)
                 {
                     var light = gateLights[i];
                     int index = i * 6 + face;
-                    var view = Matrix4x4.CreateLookAt(light.Position, light.Position + directions[face], ups[face]);
-                    var projection = Matrix4x4.CreatePerspectiveFieldOfView(2 * MathF.Atan(tile / (float)resolution), 1, .04f, light.Range);
+                    var shadowView = PointShadowView(light.Position, light.Range, resolution, face);
+                    var view = shadowView.View; var projection = shadowView.Projection;
                     gateLightMatrices[index] = view * projection;
                     gateLightFrusta[index] = ViewFrustum.FromMatrix(view * projection);
-                    gateLightViews[index] = new(view, projection, light.Position, new(tile, tile), .04f, light.Range);
+                    gateLightViews[index] = shadowView;
                 }
         }
         for (int i = 0; i < gateLightSources.Count; i++)
         {
             var source = gateLightSources[i];
             using var endpoint = SelectGate(source.Gate);
+            var effect=GateEffect;
+            float surge=effect.Extension;
             var color = source.Part is { } part ? (ChevronOn(part) ? GateLights.ChevronColor * GateLights.ChevronIntensity * GateEmissionScale : Vector3.Zero) :
-                GateSurface ? GateLights.MembraneColor * GateLights.MembraneIntensity * GateEffect.Light : Vector3.Zero;
+                GateSurface ? Vector3.Lerp(GateLights.MembraneColor,new(.55f,.75f,1),surge)*GateLights.MembraneIntensity*effect.Light*(1+2*surge) : Vector3.Zero;
+            var position=source.Part is null ? EventHorizonState.Centre(source.Gate)
+                +Vector3.TransformNormal(Vector3.UnitZ,source.Gate.Transform)*(KawooshShape.Length*.55f*surge) : gateLights[i].Position;
+            if(position!=gateLights[i].Position)
+                for(int face=0;face<6;face++)
+                {
+                    int index=i*6+face;
+                    var view=PointShadowView(position,gateLights[i].Range,resolution,face);
+                    gateLightViews[index]=view;gateLightMatrices[index]=view.View*view.Projection;
+                    gateLightFrusta[index]=ViewFrustum.FromMatrix(gateLightMatrices[index]);
+                    gateStaticDirty[index]=true;gateActorState[index]=null;
+                }
             gateLights[i] = gateLights[i] with
             {
-                Color = color
+                Color = color, Position=position
             };
         }
         for (int face = 0; face < gateLights.Count * 6; face++)
@@ -202,7 +214,7 @@ sealed partial class SceneRenderer
                 if (faceFrustum.Intersects(new(p.Position - new Vector3(.4f, .01f, .4f), p.Position + new Vector3(.4f, 1.8f, .4f))))
                     visible.Add(new(0, p.Id, p.Position, Quaternion.CreateFromAxisAngle(Vector3.UnitY, -p.Yaw)));
             foreach (var p in snapshot.Bodies.OrderBy(p => p.Id))
-                if (faceFrustum.Intersects(new(p.Position - new Vector3(.9f), p.Position + new Vector3(.9f))))
+                if (World.Definition.Props.FirstOrDefault(d => d.Id == p.Id)?.CastsShadows == true && faceFrustum.Intersects(new(p.Position - new Vector3(.9f), p.Position + new Vector3(.9f))))
                     visible.Add(new(1, p.Id, p.Position, p.Rotation));
             var current = visible.ToArray();
             if (gateActorState[face] is not { } previous || !previous.SequenceEqual(current))

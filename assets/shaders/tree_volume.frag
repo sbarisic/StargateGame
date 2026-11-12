@@ -1,17 +1,14 @@
 #version 400 core
 in vec2 vUv;
-layout(location=0) out vec4 outColor;
-#include "ao_outputs.glsl"
+#include "gbuffer_outputs.glsl"
 
 uniform vec3 uViewPosition, uCanopyMinimum, uCanopyMaximum;
 uniform mat4 uInverseViewProjection, uCanopyViewProjection, uTreeWorld, uTreeInverse;
 uniform vec3 uCanopyRoot;
-uniform sampler3D uCanopy, uCanopyNormals, uCanopyAmbient;
+uniform sampler3D uCanopy, uCanopyNormals;
 uniform float uCellSize, uDensityReferenceDistance, uDensityScale, uCanopyTime, uWindStrength;
 uniform float uPrimaryStepCells, uOpacityThreshold, uTransmissionStrength;
-uniform float uSkyFillFloor, uGroundFillWeight;
 uniform float uCanopyCoverage, uCanopyScale;
-uniform int uVolumeInspection;
 uniform vec4 uCanopyLod; // mip, last resident mip, march limit, sunlight samples
 #define uCanopyMip uCanopyLod.x
 #define uCanopyLastMip uCanopyLod.y
@@ -21,8 +18,6 @@ uniform vec2 uCanopyWind;
 uniform vec3 uLeafTint;
 uniform float uLeafSaturation;
 #include "daylight.glsl"
-#include "shadows.glsl"
-#include "gate_lighting.glsl"
 
 vec2 bendAmplitude() {
     float gust = sin(dot(uCanopyRoot.xz, vec2(.62, .37)) - uCanopyTime * 1.8) + .35 * sin(dot(uCanopyRoot.xz, vec2(1.9, -1.3)) - uCanopyTime * 3.1);
@@ -154,34 +149,10 @@ void main() {
     // doing so turns the upper crown's normals downward when viewed from below.
     float diffuse = abs(dot(normal, uSunDirection));
     vec3 biasNormal = dot(normal, uSunDirection) < 0.0 ? -normal : normal;
-    float proxyVisibility = SampleSunVisibility(worldPosition, biasNormal, diffuse);
     float sunTransmission = canopyTransmission(position, mat3(uTreeInverse) * uSunDirection, uLightSteps);
-    vec3 ambientRatio = vec3(textureSize(uCanopyAmbient, 0)) / vec3(textureSize(uCanopyNormals, 0));
-    float ambientMip = max(0.0, sampleMip + log2(max(ambientRatio.x, max(ambientRatio.y, ambientRatio.z))));
-    vec2 ambientVisibility = pow(clamp(textureLod(uCanopyAmbient, uv, ambientMip).rg, vec2(.001), vec2(1)), vec2(uDensityScale));
-    float skyVisibility = ambientVisibility.r;
-    float groundVisibility = ambientVisibility.g;
-    float visibility = min(proxyVisibility, sunTransmission) * cloudVisibility(worldPosition);
-    vec3 albedo = decodeColor(leaf.rgb);
-    albedo = mix(vec3(dot(albedo, vec3(.2126, .7152, .0722))), albedo, uLeafSaturation) * uLeafTint;
-    // Two-sided leaves receive both sky fill and reflected ground light. Do not
-    // let upward-oriented leaf axes exclude the lower hemisphere entirely.
-    vec3 skyFill = ambientSkyColor() * mix(uSkyFillFloor, 1.0, skyVisibility);
-    vec3 groundFill = ambientGroundColor() * mix(uSkyFillFloor, 1.0, groundVisibility);
-    vec3 ambient = mix(skyFill, groundFill, uGroundFillWeight);
-    float transmission = uTransmissionStrength * pow(max(dot(worldRay, uSunDirection), 0.0), 3.0) * (1.0 - diffuse);
-    vec3 lit = albedo * (ambient + sunLightColor() * (diffuse + transmission) * visibility);
-    lit += gateLighting(worldPosition, normal, -worldRay, albedo, .92, 0.0);
-    lit += gateLighting(worldPosition, -normal, -worldRay, albedo, .92, 0.0);
-    if (uVolumeInspection == 1) lit = normal * .5 + .5;
-    if (uVolumeInspection == 2) lit = vec3(textureLod(uCanopyNormals, uv, sampleMip).a);
-    if (uVolumeInspection == 3) lit = vec3(sunTransmission);
-    if (uVolumeInspection == 4) lit = vec3(skyVisibility);
-    if (uVolumeInspection == 5) lit = vec3(groundVisibility);
-    if (uVolumeInspection == 6) lit = albedo;
-    if (uVolumeInspection == 7) lit = vec3(proxyVisibility);
-    vec4 clip = uCanopyViewProjection * vec4(worldPosition, 1);
-    gl_FragDepth = clip.z / clip.w * .5 + .5;
-    writeAmbient(uVolumeInspection == 0 ? albedo * ambient : vec3(0), dot(normal, -worldRay) < 0.0 ? -normal : normal, uVolumeInspection == 0 ? 2. : 0.);
-    outColor = vec4(uVolumeInspection == 0 ? applyFog(lit, worldPosition, uViewPosition) : lit, 1);
+    vec3 albedo=decodeColor(leaf.rgb);
+    albedo=mix(vec3(dot(albedo,vec3(.2126,.7152,.0722))),albedo,uLeafSaturation)*uLeafTint;
+    vec4 clip=uCanopyViewProjection*vec4(worldPosition,1);float depth=clip.z/clip.w*.5+.5;
+    vec3 geometric=dot(normal,-worldRay)<0.?-normal:normal;
+    writeSurface(albedo,.92,normal,0.,0.,geometric,uTransmissionStrength,5.,vec3(0),sunTransmission,depth,depth);
 }

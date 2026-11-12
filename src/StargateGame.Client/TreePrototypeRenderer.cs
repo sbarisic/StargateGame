@@ -13,7 +13,6 @@ sealed record TreeVolumeSettings
     public float OpacityThreshold { get; init; } = .35f;
     public int SunSteps { get; init; } = 24;
     public float Transmission { get; init; } = .10f;
-    public float SkyFillFloor { get; init; } = .45f;
     public float GroundFillWeight { get; init; } = .35f;
 }
 
@@ -38,7 +37,6 @@ sealed partial class SceneRenderer
     public int CanopyDraws => CanopyLodCounts.Sum();
     public double CanopyGpuMilliseconds => gpuTimer.CanopyMilliseconds;
     public double CanopyCpuMilliseconds { get; private set; }
-    public string TreeVolumeInspection { get; set; } = "lit";
     public string TreePrototype
     {
         get;
@@ -46,8 +44,7 @@ sealed partial class SceneRenderer
     } = "off";
     sealed class PrototypeVolume
     {
-        public Texture? Color, Normals, Ambient;
-        public long AmbientBytes;
+        public Texture? Color, Normals;
         public Vector3 Minimum, Maximum;
         public float Cell, DensityReference;
         public long Bytes;
@@ -234,38 +231,6 @@ sealed partial class SceneRenderer
             }
             if (uploaded != selection.PayloadBytes)
                 throw new InvalidDataException("Canopy byte count mismatch.");
-            var ambient = descriptor.GetProperty("ambient");
-            if (ambient.GetProperty("encoding").GetString() != "upper-lower-hemisphere-visibility")
-                throw new InvalidDataException("Invalid canopy ambient encoding.");
-            var ambientLevels = ambient.GetProperty("levels");
-            int aw = ambientLevels[0].GetProperty("size")[0].GetInt32();
-            int ah = ambientLevels[0].GetProperty("size")[1].GetInt32();
-            int ad = ambientLevels[0].GetProperty("size")[2].GetInt32();
-            if (aw < 1 || ah < 1 || ad < 1 || Math.Max(aw, Math.Max(ah, ad)) > 64 || ambientLevels.GetArrayLength() > 7)
-                throw new InvalidDataException("Invalid canopy ambient dimensions.");
-            volume.Ambient = Own(graphics.CreateTexture(new TextureDescriptor(aw, ah, TextureFormat.RG8Unorm,
-                dimension: TextureDimension.Texture3D, depth: ad, mipLevels: ambientLevels.GetArrayLength(),
-                sampling: new(TextureFilter.LinearMipmapLinear, TextureFilter.Linear, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge))));
-            yield return true;
-            for (int mip = 0; mip < ambientLevels.GetArrayLength(); mip++)
-            {
-                var entry = ambientLevels[mip];
-                int mw = Math.Max(1, aw >> mip), mh = Math.Max(1, ah >> mip), md = Math.Max(1, ad >> mip);
-                if (!entry.GetProperty("size").EnumerateArray().Select(v => v.GetInt32()).SequenceEqual(new[] { mw, mh, md }))
-                    throw new InvalidDataException("Invalid ambient mip dimensions.");
-                string key = entry.GetProperty("path").GetString()!;
-                if (!key.StartsWith("vegetation/prototype/", StringComparison.Ordinal) || key.Contains(".."))
-                    throw new InvalidDataException("Invalid ambient block path.");
-                while (!modelAssets.TryTake(key, out data)) yield return false;
-                string hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(data));
-                if (data.Length != mw * mh * md * 2 || !hash.Equals(entry.GetProperty("sha256").GetString(), StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidDataException("Canopy ambient checksum or size mismatch.");
-                volume.Ambient.Write<byte>(data, TextureDataFormat.RG8Unorm, new TextureRegion3D(0, 0, 0, mw, mh, md), mip);
-                volume.AmbientBytes += data.Length;
-                yield return true;
-            }
-            if (volume.AmbientBytes != ambient.GetProperty("bytes").GetInt64())
-                throw new InvalidDataException("Canopy ambient byte count mismatch.");
             if (prototypeQuad is null)
             {
                 prototypeQuad = Own(graphics.CreateMesh3D());
@@ -287,15 +252,14 @@ sealed partial class SceneRenderer
 
     void ReleasePrototypeTextures(PrototypeVolume volume)
     {
-        foreach (var texture in new[] { volume.Color, volume.Normals, volume.Ambient })
+        foreach (var texture in new[] { volume.Color, volume.Normals })
             if (texture is not null)
             {
                 resources.Remove(texture);
                 texture.Dispose();
             }
         volume.Levels = 0;
-        volume.Color = volume.Normals = volume.Ambient = null;
-        volume.AmbientBytes = 0;
+        volume.Color = volume.Normals = null;
         volume.Ready = false;
         volume.Bytes = 0;
     }
@@ -372,20 +336,12 @@ sealed partial class SceneRenderer
         var viewProjection = camera.View * camera.Projection;
         program.SetUniform("uCanopy", 1);
         program.SetUniform("uCanopyNormals", 2);
-        program.SetUniform("uCanopyAmbient", 3);
         program.SetUniform("uInverseViewProjection", inverse);
         program.SetUniform("uCanopyViewProjection", viewProjection);
         program.SetUniform("uViewPosition", camera.Position);
         program.SetUniform("uPrimaryStepCells", Math.Clamp(VolumeTreeSettings.StepCells, .35f, 1f));
         program.SetUniform("uOpacityThreshold", Math.Clamp(VolumeTreeSettings.OpacityThreshold, .1f, .8f));
         program.SetUniform("uTransmissionStrength", Math.Clamp(VolumeTreeSettings.Transmission, 0, .2f));
-        program.SetUniform("uSkyFillFloor", Math.Clamp(VolumeTreeSettings.SkyFillFloor, 0, 1));
-        program.SetUniform("uGroundFillWeight", Math.Clamp(VolumeTreeSettings.GroundFillWeight, 0, 1));
-        program.SetUniform("uVolumeInspection", TreeVolumeInspection switch
-        {
-            "lit" => 0, "normals" => 1, "density" => 2, "sun" => 3, "sky" => 4, "ground" => 5, "albedo" => 6, "shadow" => 7,
-            _ => throw new ArgumentException("--tree-volume-view expects lit, normals, density, sun, sky, ground, albedo or shadow.")
-        });
         program.SetUniform("uCanopyTime", (float)weatherFrame.Time);
         program.SetUniform("uWindStrength", TreeSettings.WindStrength);
         using var gates = gateShadowAtlas?.DepthStencilAttachment.Bind(15);
@@ -423,7 +379,6 @@ sealed partial class SceneRenderer
             ApplyTreeLeafPalette(program, definition.LeafModel);
             using var color = volume.Color!.Bind(1);
             using var normal = volume.Normals!.Bind(2);
-            using var ambientBinding = volume.Ambient!.Bind(3);
             Mesh(pass, prototypeQuad!, white, program);
         }
         CanopyCpuMilliseconds = cpu.Elapsed.TotalMilliseconds;

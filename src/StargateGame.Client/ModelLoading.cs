@@ -219,7 +219,7 @@ sealed partial class SceneRenderer
                 int chevron = name == "stargate" && label.Contains("Chevron") ? int.Parse(label[^2..]) : 0;
                 bool leaf = part.TryGetProperty("surfaceRole", out var role) && role.GetString() == "leaf";
                 parts.Add(new(mesh, T("texture")!, T("normal"), cutoff, T("emissionTexture"), emissionColor, part.TryGetProperty("emissionIntensity", out var ei) ? ei.GetSingle() : 0, lightPosition,
-                    part.TryGetProperty("dhdKeyId", out var key) ? key.GetInt32() : 0, part.TryGetProperty("dhdOrb", out var orb) && orb.GetBoolean(), chevron, T("metallicRoughness"), leaf, part.TryGetProperty("heightScale", out var relief) ? relief.GetSingle() : 0));
+                    part.TryGetProperty("dhdKeyId", out var key) ? key.GetInt32() : 0, part.TryGetProperty("dhdOrb", out var orb) && orb.GetBoolean(), chevron, T("metallicRoughness"), leaf, part.TryGetProperty("heightScale", out var relief) ? relief.GetSingle() : 0, part.TryGetProperty("alphaMode", out var alphaMode) && alphaMode.GetString() == "BLEND"));
             }
             Handle(name).CpuReady();
             ReleaseModel(name);
