@@ -138,6 +138,7 @@ public sealed partial class PhysicsWorld : IDisposable
                     foreach (var prop in definition.Props.OrderBy(p => p.Id))
                         AddProp(prop);
                 }
+                SyncHingedDoors();
                 system.OptimizeBroadPhase();
             }
             catch
@@ -356,7 +357,7 @@ public sealed partial class PhysicsWorld : IDisposable
                 Shape = state.Crouched ? crouchShape : characterShape,
                 InnerBodyShape = state.Crouched ? crouchShape : characterShape,
                 InnerBodyLayer = CharacterLayer,
-                Mass = 80,
+                Mass = Movement.CharacterSupportMass,
                 MaxStrength = Movement.PushStrength,
                 MaxSlopeAngle = MathF.PI / 4,
                 SupportingVolume = new Plane(Vector3.UnitY, -Movement.Radius),
@@ -464,6 +465,7 @@ public sealed partial class PhysicsWorld : IDisposable
         lock (NativeGate)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
+            StepDoors();
             foreach (var (id, c) in characters)
             {
                 var last = commands[id];
@@ -557,7 +559,7 @@ public sealed partial class PhysicsWorld : IDisposable
             return dormant;
         return new BodyState(p.Key, b.GetPosition(p.Value), b.GetRotation(p.Value), b.GetLinearVelocity(p.Value), b.GetAngularVelocity(p.Value), !b.IsActive(p.Value));
     }).ToArray();
-    public PhysicsSnapshot Snapshot() => new(Tick, Epoch, players.Values.ToArray(), Bodies(), commands.Values.ToArray(), propDefinitions.Values.OrderBy(p => p.Id).ToArray(), CurrentClips(), TravelGate, Carries, EntrySupports, npcMotions.Values.ToArray());
+    public PhysicsSnapshot Snapshot() => new(Tick, Epoch, players.Values.ToArray(), Bodies(), commands.Values.ToArray(), propDefinitions.Values.OrderBy(p => p.Id).ToArray(), CurrentClips(), TravelGate, Carries, EntrySupports, npcMotions.Values.ToArray(), DoorStates);
     public void Acknowledge(int id, long sequence) => players[id] = players[id] with { LastInput = Math.Max(sequence, players[id].LastInput) };
     public void Apply(PhysicsSnapshot snapshot)
     {
@@ -610,6 +612,7 @@ public sealed partial class PhysicsWorld : IDisposable
                 players[state.Id] = state;
             }
             ApplyNpcs(snapshot.Npcs ?? []);
+            ApplyDoorStates(snapshot.Doors ?? []);
             TravelGate = snapshot.TravelGate;
             SetPropClips(snapshot.Clips ?? []);
             SetCarries(snapshot.Carries ?? []);
@@ -625,6 +628,8 @@ public sealed partial class PhysicsWorld : IDisposable
     public static void Validate(PhysicsSnapshot snapshot, PlanetDefinition definition)
     {
         ValidateNpcs(snapshot.Npcs);
+        if (snapshot.Doors is { } doors && (doors.Length > 4096 || doors.Any(d => d is null || d.Id == Guid.Empty || !float.IsFinite(d.Angle) || d.Angle < 0 || d.Angle > MathF.PI / 2) || doors.Select(d => d.Id).Distinct().Count() != doors.Length))
+            throw new InvalidDataException("Invalid door motion snapshot.");
         if(snapshot.Npcs?.Any(n=>n.CommandTick>snapshot.Tick||n.EffectiveTick>snapshot.Tick)==true)
             throw new InvalidDataException("NPC collision state is ahead of its baseline.");
         static bool Vec(Vector3 v) => float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z) && v.LengthSquared() < 1e8f;
@@ -696,6 +701,7 @@ public sealed partial class PhysicsWorld : IDisposable
             if (!Native.SG_Restore(checkpoint.Handle, system.Handle, handles, (uint)handles.Length))
                 throw new InvalidOperationException("Jolt checkpoint restore failed.");
             npcMotions.Clear(); foreach(var n in checkpoint.State.Npcs ?? []) npcMotions.Add(n.Slot,n);
+            ApplyDoorStates(checkpoint.State.Doors ?? [], false);
             players.Clear();
             foreach (var p in checkpoint.State.Players)
                 players.Add(p.Id, p);

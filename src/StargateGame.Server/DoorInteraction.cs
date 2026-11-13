@@ -28,7 +28,10 @@ public sealed partial class GameServer
             Console.WriteLine($"DOOR rejected door={door.Id} blocker={id} kind={name} section={sweep.Section} interval={sweep.Degree}..{sweep.Degree+1} candidates={dynamic.Length+players.Length} ms={Stopwatch.GetElapsedTime(started).TotalMilliseconds:F2}");
             return $"Door blocked by {name}.";
         }
-        foreach(var sweep in profile.Sweeps)
+        float angle = physics.DoorStates.FirstOrDefault(d => d.Id == door.Id)?.Angle ?? (door.Open ? 0 : MathF.PI / 2);
+        float targetAngle = door.Open ? MathF.PI / 2 : 0;
+        // Only the remaining arc matters when a moving leaf is reversed.
+        foreach(var sweep in profile.Sweeps.Where(s => s.Degree + 1 > Math.Min(angle, targetAngle) * 180 / MathF.PI && s.Degree < Math.Max(angle, targetAngle) * 180 / MathF.PI))
         {
             Matrix4x4.Invert(sweep.Pose,out var inv);
             foreach(var p in dynamic)

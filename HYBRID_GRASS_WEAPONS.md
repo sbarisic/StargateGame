@@ -7,15 +7,112 @@ directories and temporary saves.
 
 ## Grass
 
+Near-mesh density, growth and distance fading now select whole blades using a
+flat root attribute. Previously those decisions sampled changing positions along
+each curved blade and could cut gaps into its middle. Hard exclusion boundaries
+still clip fragments to keep grass out of buildings. Grass descriptor version 3
+adds a root stream; matching client and cooked content are required.
+`python tools/bake_grass_volume.py --roots-only` adds this stream only when the
+generated mesh bytes exactly match the existing assets, leaving volume fields
+unchanged. Normal full bakes also generate the roots.
+
+### Rendering optimization update (13 November 2026)
+
+The independent harness settings `grassDepthCulling`, `grassShaderReuse` and
+`grassScreenLod` now default to true. Set all three false for the comparison
+baseline. Settings, capability, submitted patch counts, mip distribution and
+readiness are exposed in rendering observations and screenshot metadata.
+
+`grassVolumeDensity` independently controls primary volume density (0.1 to 1,
+default 0.8). It leaves nearby meshes and the mesh/volume overlap unchanged, then
+smoothly reaches the requested density between the transition's far distance and
+twice that distance (28 to 56 metres on Performance). The blend uses world-space
+sample distance, so it stays continuous across patch boundaries. Sunlight sampling,
+grass placement and draw distance are unchanged. This is an appearance control:
+lower optical density can require longer marches and does not guarantee a speedup.
+Set it to 1 for the previous fullness; the performance recipe fixes it at 1 to
+keep the optimization comparison independent of this appearance adjustment.
+
+Depth rejection reuses the existing post-canopy depth snapshot. Each tile caches
+sixteen compact ranges from its existing surface field, covering ground height,
+height scale and interpolation support. Patch proxies include the possible
+threshold-reconstruction displacement; invalid ranges fall back to tile bounds.
+The original march interval bounds wind-displaced samples in XZ, and occupied
+samples' unbent roots remain inside their patch. Tighter proxies therefore do not
+change marching intervals or sample positions. Front-to-back volume draws follow
+the nearby mesh phase, with the same per-tile instance draws as before.
+
+The volume shader uses conservative nearest depth and `depth_greater` on OpenGL
+4.2 or ARB_conservative_depth hardware. Camera-inside and near-plane crossings
+use near depth. Unsupported hardware retains explicit scene-depth clipping,
+tighter raster bounds and ordinary hit-depth writes. Forced early fragment tests
+are not used. No extra depth copy, new texture or asset rebake is required.
+
+Shader reuse shares identical-coordinate terrain samples and computes patch
+rotation once per invocation. Wind remains position-dependent. Surface samples
+are shared with exclusion checks only when the reconstructed coordinates match
+exactly. Mesh blades, placement, density, draw distance, palette, ambient lighting
+and the four sunlight samples are unchanged.
+
+Screen LOD uses projected patch width/height at the actual render resolution.
+It blends additional fractional filtering after the mesh overlap, with a two-metre
+patch guard, and caps at resident mip 3. Integration spacing uses the original
+unclipped interval; the final clipped segment keeps its quadrature point. Occupancy
+lookups cover both contributing density mip footprints. There is no hierarchical
+skip traversal. Subtle distant detail differences are intentional.
+
+Run `scripts/Test.ps1 check -Group grass-rendering` for focused checks and
+`scripts/Test.ps1 run -Scenario sandbox -Recipe grass-performance` for measurement.
+The recipe fixes 1920x1080, Performance quality, VSync off, noon, exposure, camera
+and wind phase. It waits for asset/tile-growth readiness, warms each mode for five
+seconds, and samples eight seconds before capturing evidence outside the timing
+window. Existing build outputs and incremental content caches are reused.
+
+Completed GPU queries report mesh, volume, other foliage and existing depth-copy
+times separately, with median/p95/max and an aggregate grass value. CPU and frame
+times, submitted triangles, patches and mip counts accompany them. GPU total sums
+instrumented passes rather than measuring presentation latency. Mip counts describe
+submitted patches, including patches later rejected by the shader or depth test.
+
+Measured on AMD Radeon RX 9070 XT, driver 32.0.23017.1001:
+
+| Mode | Grass + copy median (ms) | Frame median (ms) |
+| --- | --- | --- |
+| Baseline | 10.71 | 18.42 |
+| Depth only | 4.77 | 12.45 |
+| Shader reuse only | 10.33 | 18.05 |
+| Screen LOD only | 10.38 | 18.09 |
+| Combined | 4.48 | 12.15 |
+
+A confirming pair after adding the patch overlap guard measured 10.73/10.88 ms
+baseline grass median/p95 versus 4.50/4.68 ms combined. Frame median fell from
+18.49 to 12.24 ms; render CPU rose from 1.66 to 1.86 ms. The existing depth copy
+cost about 0.027 ms. Both modes submitted 1,712 volume patches and 758,608 nearby
+mesh triangles. This is about 58% less grass GPU time and 34% less frame time in
+this view, not a general FPS guarantee.
+
+Validation passed 14 focused checks, including 4,538 occupied wind/slope samples,
+all eight asset variants, and 28,967 filtered-empty samples across fractional mips.
+The harness checks also passed. Paired low-camera, boundary, pond-bank slope,
+low-sun and 720p captures showed no obvious new gaps or seams. The low-camera pair
+was pixel-identical; all other pairs had a zero 99th-percentile channel difference.
+Bounded movement with live wind completed. Static evidence does not establish
+absence of temporal artifacts in every scene; the fallback has not been tested on
+physical hardware lacking conservative depth support.
+
+### Existing grass system
+
 Hybrid is the default. Use `--grass-renderer=mesh|hybrid`, or H / the Grass control
 in the pause menu, to switch. `--grass=off` still disables grass. The existing mesh
 renderer remains active until volume assets and shaders are ready.
 
-`tools/bake_grass_volume.py` produces four deterministic variants from the current
+`tools/bake_grass_volume.py` produces eight deterministic variants from the current
 blade profile and grass atlas. Each variant has a matching nearby mesh, a
 128 × 32 × 128 density/color/normal/occupancy hierarchy, and cached hemisphere
-visibility. Its footprint is 2 × 2 m and vertical domain is 0.5 m; actual blades
-retain the 0.10–0.28 m height range. Fullness comes from coverage and thickness.
+visibility. Each footprint is 2 × 2 m. Four short variants have a 0.5 m vertical
+domain and 0.28 m tips; four meadow variants have a 1 m domain and 0.75 m tips.
+The surface field continuously scales meadow height. Fullness comes from coverage
+and thickness.
 
 The renderer retains 8 m streaming tiles and existing placement/ecology masks.
 Each tile holds sixteen patches and a terrain-height, coverage, material, and
@@ -25,9 +122,19 @@ transition mask, terrain-relative roots, and root-weighted wind.
 
 | Quality | Mesh/volume transition | Hybrid range | Mesh-only range |
 | --- | --- | --- | --- |
-| Low | 6–10 m | 128 m | 64 m |
-| Performance (Medium) | 10–14 m | 224 m | 112 m |
-| High | 14–18 m | 320 m | 160 m |
+| Low | 12–20 m | 128 m | 64 m |
+| Performance (Medium) | 20–28 m | 224 m | 112 m |
+| High | 28–36 m | 320 m | 160 m |
+
+The mesh/volume transition distances are doubled. This retains individual blades
+farther from the player and increases mesh rendering work; total grass range and
+placement are unchanged. Earlier performance measurements below predate this change.
+
+First-person walk/run clips now share idle's weapon origin. Both skeletal roots
+receive the same correction to keep hands attached, while authored motion remains.
+Clip changes blend local poses over 150 ms, including interrupted transitions.
+Inspection poses remain exact. Crouch, aim and action poses retain their authored
+offsets; hand shadows use the same final pose as the visible model.
 
 The outer 15% fades toward meadow shading. Habitat-driven terrain shading carries
 the meadow appearance farther toward the horizon, where individual blades are

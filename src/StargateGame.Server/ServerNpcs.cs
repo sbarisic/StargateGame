@@ -34,6 +34,7 @@ public sealed partial class GameServer
         public readonly Dictionary<Guid,NpcActor> Actors=[];
         public readonly Dictionary<Guid,NpcReply> Receipts=[];
         public readonly Dictionary<Session,long> LastCommand=[];
+        public readonly Dictionary<Session,long> LastNavigationDebug=[];
         public NpcNavigation Navigation=new();
         public PhysicsWorld? Physics;
         public long Revision,Published=-1,LastSavedTick,GeometryCommit=-1;
@@ -42,9 +43,10 @@ public sealed partial class GameServer
         public readonly HashSet<int> HostilePlayers=[];
     }
     readonly Dictionary<Guid,NpcLocation> npcLocations=[];
-    NpcLocation GetNpcs()
+    NpcLocation GetNpcs() => GetNpcs(context);
+    NpcLocation GetNpcs(LocationContext target)
     {
-        var id=physics.World.Definition.LocationId;
+        var id=target.Physics.World.Definition.LocationId;
         if(!npcLocations.TryGetValue(id,out var n))
         {
             string file=repository?.DatabasePath??fixtureDatabasePath;
@@ -70,7 +72,7 @@ public sealed partial class GameServer
             foreach(var a in location.Actors.Values){a.Path=[];a.RouteRevision=-1;}
         }
         foreach(var a in location.Actors.Values)
-            if(!physics.NpcMotions.Any(m=>m.Id==a.Record.Id)&&physics.HasTerrain(a.Record.Position))
+            if(!npcFlights.ContainsKey(a.Record.Id)&&!physics.NpcMotions.Any(m=>m.Id==a.Record.Id)&&physics.HasTerrain(a.Record.Position))
                 physics.AddNpc(a.Record.Id,a.Record.Position,a.Record.Yaw);
         if((physics.Tick%6==0||location.GeometryCommit!=physics.NavigationCommitVersion)&&physics.Players.Any(p=>!p.TransitFrozen))
         {location.Navigation.Pump(physics);location.GeometryCommit=physics.NavigationCommitVersion;}
@@ -80,7 +82,7 @@ public sealed partial class GameServer
             a.Record=a.Record with{Position=motion.Position,Yaw=motion.Yaw};
             if(a.Path.Length>0&&location.Navigation.CorridorRevision(a.Path)==long.MinValue)
             {a.Path=[];a.NextPlan=0;StopNpc(a,"Waiting for committed navigation",NavigationOutcome.PendingNavigation);}
-            if(a.Record.Order.Kind==NpcOrderKind.Follow&&!physics.Players.Any(p=>p.Id==a.Record.Order.FollowPlayer&&!p.TransitFrozen))
+            if(a.Record.Order.Kind==NpcOrderKind.Follow&&!physics.Players.Any(p=>p.Id==a.Record.Order.FollowPlayer))
             {a.Record=a.Record with{Order=new(NpcOrderKind.Hold,[motion.Position])};location.Revision++;location.Dirty=true;CancelNpcTask(a);}
             if(!physics.Players.Any(p=>!p.TransitFrozen&&Vector3.DistanceSquared(p.Position,motion.Position)<150*150))
             {a.Intent=Vector3.Zero;a.Task="Suspended";physics.SetNpcIntent(motion.Id,Vector3.Zero,a.Yaw);continue;}
@@ -105,13 +107,26 @@ public sealed partial class GameServer
         location.Saving=NpcStorage.Save(location.File,location.Id,location.Revision,records);
     }
     void SendNpcs(Session s,NpcLocation l)=>s.Peer.Send(new(){Kind="npcs",LocationId=l.Id,Npcs=new(l.Revision,physics.Tick,
-        l.Actors.Values.Select(a=>a.Record).ToArray(),l.Actors.Values.Select(a=>new NpcStatus(a.Record.Id,a.Schedule,a.Task,a.Outcome,a.Reason,a.Path.Take(8).ToArray(),a.Memory.LastOrDefault(m=>m.Danger)?.Point)).ToArray())});
+        l.Actors.Values.Where(a=>!npcFlights.ContainsKey(a.Record.Id)).Select(a=>a.Record).ToArray(),l.Actors.Values.Where(a=>!npcFlights.ContainsKey(a.Record.Id)).Select(a=>new NpcStatus(a.Record.Id,a.Schedule,a.Task,a.Outcome,a.Reason,a.Path.Take(8).ToArray(),a.Memory.LastOrDefault(m=>m.Danger)?.Point)).ToArray())});
     bool HandleNpcs(Session s,Message m)
     {
-        if(m.Kind is not ("npc-state" or "npc-command"))return false;
+        if(m.Kind is not ("npc-state" or "npc-command" or "navigation-debug"))return false;
         var l=GetNpcs();
         if(m.LocationId!=l.Id)return true;
         if(m.Kind=="npc-state"){if(l.Ready)SendNpcs(s,l);return true;}
+        if(m.Kind=="navigation-debug")
+        {
+            // Diagnostics never share NPC command receipts or rate limits.
+            if(!devPlanets||!s.Loopback||s.PlayerId==0||!l.Ready||HomeDebugBusy)return true;
+            long debugNow=Environment.TickCount64;
+            if(debugNow-l.LastNavigationDebug.GetValueOrDefault(s)<500)return true;
+            l.LastNavigationDebug[s]=debugNow;
+            var viewer=physics.Player(s.PlayerId);
+            if(viewer.TransitFrozen)return true;
+            _=l.Navigation.Route(viewer.Position,viewer.Position);
+            SendNpcDebug(s,l,Movement.EyePosition(viewer),navigationOnly:true);
+            return true;
+        }
         if(m.NpcCommand is not {} cmd)return true;
         void Reply(bool ok,string text,Guid target=default)
         {
@@ -126,6 +141,8 @@ public sealed partial class GameServer
         if(now-l.LastCommand.GetValueOrDefault(s)<100){Reply(false,"Wait before issuing another NPC command.");return true;}l.LastCommand[s]=now;
         var player=physics.Player(s.PlayerId);var eye=Movement.EyePosition(player);
         if(player.TransitFrozen){Reply(false,"NPC orders unavailable during travel.");return true;}
+        if(npcFlights.ContainsKey(cmd.Target)||npcFlights.Values.Any(f=>f.Commit is not null&&(f.Source==context||f.Destination==context)))
+        {Reply(false,"NPC transfer is in progress.");return true;}
         if(cmd.Action is "configure" or "debug" or "probe" or "noise" or "gunshot")
         {
             if(!devPlanets||!s.Loopback){Reply(false,"Harness developer authority required.");return true;}
@@ -356,8 +373,9 @@ public sealed partial class GameServer
         var delta=position-approach;delta.Y=0;
         if(delta.LengthSquared()>.16f){destination=approach;a.WaitingDoor=door.Id;a.Task="Approach door outside swing";return true;}
         a.WaitingDoor=door.Id;a.Task="Use door / wait for clearance";a.Outcome=NavigationOutcome.Blocked;
-        if(edit is not null||preparing is not null||savingEdit is not null)return false;
-        string blocked=ValidateDoorSweep(door);if(blocked.Length>0)
+        if (door.Open) return false; // Wait for the moving leaf, do not toggle it closed again.
+        if(DoorSavePending||edit is not null||preparing is not null||savingEdit is not null)return false;
+        string blocked=ValidateDoorSweep(door with { Open = true });if(blocked.Length>0)
         {
             a.Reason=blocked;
             if(physics.Tick>=a.NextPlan){a.Retries++;a.NextPlan=physics.Tick+30*Math.Min(3,a.Retries);a.TaskState=NpcTaskState.Failed;}
@@ -366,11 +384,19 @@ public sealed partial class GameServer
         var cmd=new BuildCommand(Guid.NewGuid(),CurrentChanges.Revision,"door",Target:door.Id);
         var result=BuildingRules.Edit(CurrentChanges,cmd,physics.World.SampleHeight,Dry);
         if(!result.Valid){a.Reason=result.Error;return false;}
-        edit=new(null,cmd,result,link.Centre);preparing=PrepareCollision(PhysicsWorld.IncludeBuildingOwners(result.State,physics.TerrainCoordinates));
+        BeginDoorMotion(null,cmd,result);
         return false;
     }
     async Task FlushNpcs()
     {
+        // A commit may finish after the simulation loop stops. Reconcile its
+        // ownership before final snapshots can overwrite the atomic transfer.
+        foreach(var (id, flight) in npcFlights.ToArray())
+        {
+            if(flight.Commit is null)continue;
+            try { await flight.Commit; ReleaseNpcFlight(id,flight); }
+            catch(Exception e) { Console.Error.WriteLine("NPC transit shutdown: "+e.Message); }
+        }
         foreach(var l in npcLocations.Values)
         {
             if(l.Saving is {} saving)try{await saving;}catch(Exception e){Console.Error.WriteLine("NPC save: "+e.Message);}

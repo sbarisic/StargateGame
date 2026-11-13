@@ -8,7 +8,7 @@ sealed partial class GameApp
     double nextRifleFire;
     void CharacterInput(InputManager input)
     {
-        if (session is null || paused || buildMode || buildPaletteOpen || dhdHover >= 0)
+        if (session is null || paused || buildMode || buildPaletteOpen || LookingAtDhd || session.Reloading)
             return;
         var state = session.LocalCharacter;
         Key[] slots = [Key.Alpha1, Key.Alpha2, Key.Alpha3, Key.Alpha4];
@@ -22,15 +22,15 @@ sealed partial class GameApp
         if (!state.Equipped)
             return;
         bool aim = input.IsMouseButtonDown(MouseButton.Right);
-        if (input.WasKeyPressed(Key.R))
+        if (input.WasKeyPressed(Key.R) && session.EquippedRifle is { } rifle && Rifle.CanReload(rifle))
         {
             session.Character(true, aim, "reload");
-            nextRifleFire = timer.Elapsed.TotalSeconds + 2.8;
+            nextRifleFire = timer.Elapsed.TotalSeconds + Rifle.ReloadTicks / 60.0;
         }
         else if (input.IsMouseButtonDown(MouseButton.Left) && timer.Elapsed.TotalSeconds >= nextRifleFire)
         {
             session.Character(true, aim, "fire");
-            nextRifleFire = timer.Elapsed.TotalSeconds + .12;
+            nextRifleFire = timer.Elapsed.TotalSeconds + (session.EquippedRifle?.Chambered == true ? Rifle.FireTicks / 60.0 : .3);
         }
         else if (aim != state.Aiming && state.Action != "reload")
             session.Character(true, aim, "idle");

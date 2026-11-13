@@ -12,7 +12,7 @@ sealed partial class GameApp
     Vector2 spawnWorldCursor;
     enum SpawnAction { Prop, Cable, Npc, NpcOrders }
     sealed record SpawnItem(string Model, string Name, SpawnAction Action);
-    static readonly SpawnItem[] spawnItems = [new("wooden-crate", "Box", SpawnAction.Prop), new("barrel-red", "Barrel", SpawnAction.Prop), new("wooden-lantern", "Wooden Lantern", SpawnAction.Prop), new("cable", "Cable tool", SpawnAction.Cable), new("military-soldier", "Military Soldier", SpawnAction.Npc), new("military-soldier", "NPC Orders", SpawnAction.NpcOrders)];
+    static readonly SpawnItem[] spawnItems = [new("wooden-crate", "Box", SpawnAction.Prop), new("barrel-red", "Barrel", SpawnAction.Prop), new("wooden-lantern", "Wooden Lantern", SpawnAction.Prop), new("zpm-hub", "ZPM Hub", SpawnAction.Prop), new("zpm", "ZPM", SpawnAction.Prop), new("cable", "Cable tool", SpawnAction.Cable), new("military-soldier", "Military Soldier", SpawnAction.Npc), new("military-soldier", "NPC Orders", SpawnAction.NpcOrders)];
     bool CableSelected => spawnItems[spawnSelection].Action == SpawnAction.Cable;
     int SpawnColumns => UiWidth >= 800 ? 2 : 1;
     int SpawnTotalRows => (spawnItems.Length + SpawnColumns - 1) / SpawnColumns;
@@ -31,6 +31,7 @@ sealed partial class GameApp
     UiRect SpawnScrollButton(bool down) => new(SpawnPanel.X+SpawnPanel.W-(down?42:76),SpawnPanel.Y+SpawnPanel.H-26,28,22);
     void SetSpawnMenu(bool open)
     {
+        if(open && session?.Reloading==true)return;
         if(open)spawnWorldCursor=new(UiWidth*.5f,UiHeight*.5f);
         if(open&&physicsGunEquipped)
         {
@@ -63,7 +64,7 @@ sealed partial class GameApp
             if(NpcMenuClick())return true;
             if(CableSelected&&CableMenuClick())return true;
             for(int i=SpawnFirstItem;i<SpawnEndItem;i++)
-                if(SpawnTile(i).Contains(UiMouse)){spawnSelection=i;if(CableSelected)EquipCable();else if(spawnItems[i].Action==SpawnAction.NpcOrders)EquipNpcs();else{if(cableTool)ExitCable();ExitNpcs();SpawnAtCursor();}return true;}
+                if(SpawnTile(i).Contains(UiMouse)){spawnSelection=i;if(CableSelected)EquipCable();else if(spawnItems[i].Action==SpawnAction.NpcOrders)EquipNpcs();else{if(cableTool)ExitCable();ExitNpcs();}return true;}
             if(!SpawnPanel.Contains(UiMouse))SpawnAtCursor();
         }
         return true;
@@ -112,7 +113,7 @@ sealed partial class GameApp
                 Text(pass,r.X+8,r.Y+3,down?"v":"^",14,UiTheme.Text);
             }
         float hintX=panel.X+panel.W+20;
-        Text(pass,hintX,UiHeight-60,npcTool?npcHint:CableSelected ? "Release Q / Click two surfaces / Wheel: slack / Right: cancel or remove" : "Click a thumbnail to spawn at the last world cursor / G: physics gun",16,UiTheme.Amber);
+        Text(pass,hintX,UiHeight-60,npcTool?npcHint:CableSelected ? "Release Q / Click two surfaces / Wheel: slack / Right: cancel or remove" : "Select item / Click outside menu to spawn",16,UiTheme.Amber);
         if(npcTool)Text(pass,hintX,UiHeight-36,NpcOrderFeedback,15,UiTheme.Text);
         else if(spawnItems[spawnSelection].Action is SpawnAction.Npc or SpawnAction.NpcOrders)
             Text(pass,hintX,UiHeight-36,session?.NpcPending==true?"Sending NPC command...":session?.LastNpcReply?.Reason??"",15,UiTheme.Text);

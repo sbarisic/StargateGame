@@ -19,6 +19,7 @@ sealed partial class GameApp
     string BuildName(int index) => index < BuildingPrefabs.Palette.Count ? BuildingPrefabs.Palette[index].Title : index == BuildingPrefabs.Palette.Count ? "Demolish" : "Clear scenery";
     void SetBuildPalette(bool open)
     {
+        if(open && session?.Reloading==true)return;
         if (args.Contains("--building-picker-check") && buildPaletteOpen != open)
             Console.WriteLine($"BUILD PICKER {(open ? "open" : "closed")} selected={SelectedBuild}");
         uiInputConsumed = true;
@@ -47,6 +48,7 @@ sealed partial class GameApp
     }
     bool PaletteInput(InputManager input)
     {
+        if(session?.Reloading==true)return false;
         if(cableTool||npcTool)return false;
         ReflowPalette();
         if (buildPaletteOpen && (!input.IsKeyDown(Key.B) && !paletteInspectionHolding || paused))

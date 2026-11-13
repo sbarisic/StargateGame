@@ -1,6 +1,6 @@
 namespace StargateGame.Shared;
 
-public sealed record WeaponItem(Guid Id, string CatalogId = "rifle");
+public sealed record WeaponItem(Guid Id, string CatalogId = "rifle", int Magazine = 29, bool Chambered = true, int Reserve = 120);
 public sealed record WeaponInventory(long Revision, WeaponItem?[] Slots, Guid? Equipped);
 public sealed record WeaponContainer(Guid Location, Guid Piece, long Revision, WeaponItem?[] Slots);
 public sealed record WeaponRequest(Guid Id, string Action, long InventoryRevision = 0, Guid? Item = null,
@@ -12,7 +12,7 @@ public static class WeaponCatalog
     public const int PersonalSlots = 4, ContainerSlots = 16;
     public const float Reach = 2.5f;
     // Included in content compatibility independently of save/world generation revisions.
-    public const string Identity = "weapons-v1:rifle:4:16:2.5:weapon-crate:furnishing-chest";
+    public const string Identity = "weapons-v2:rifle:30+1:120:reload164:fire8:4:16:2.5";
     public static bool IsContainer(string prefab) => prefab is "weapon-crate" or "furnishing-chest";
     public static WeaponInventory Starter(bool equipped)
     {

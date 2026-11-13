@@ -18,7 +18,7 @@ public sealed partial class PhysicsWorld
     InteractionFilter? interactionFilter;
     readonly HashSet<BodyID> interactionBuildings = [];
     readonly BuildingQuery buildingQuery = new();
-    public BuildingQuery BuildingQuery { get { buildingQuery.Update(Changes); return buildingQuery; } }
+    public BuildingQuery BuildingQuery { get { buildingQuery.Update(PosedChanges); return buildingQuery; } }
     // Buildings are tested individually by BuildingQuery, never ignored by batch.
     public bool BuildingVisibilityBlocked(Vector3 eye, Vector3 aim, float distance, int player, Guid ignore = default)
         => BuildingQuery.Ray(eye, aim, distance, ignore).Piece is not null ||

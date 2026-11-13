@@ -153,6 +153,14 @@ public sealed partial class Mesh3D : IDisposable
 		);
 	}
 
+    /// <summary>Texture coordinates with two additional per-vertex shader values.</summary>
+    public void SetUVs(Vector4[] uvs)
+    {
+        ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(uvs);
+        SetAttribute(ref uvBuffer, ref uvBinding, uvs, UvAttribute, 4,
+            VertexElementType.Float, false, 0, sizeof(float) * 4);
+    }
 	public void SetUVs(Vector2[] uvs)
 	{
 		ThrowIfDisposed();

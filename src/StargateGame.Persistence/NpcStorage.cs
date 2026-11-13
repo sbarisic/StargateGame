@@ -32,4 +32,20 @@ public static class NpcStorage
         c.Parameters.AddWithValue("$id",location.ToString());c.Parameters.AddWithValue("$schema",NpcRules.Schema);c.Parameters.AddWithValue("$revision",revision);
         c.Parameters.AddWithValue("$json",JsonSerializer.Serialize(records,Protocol.Json));c.ExecuteNonQuery();
     });
+    public static Task Transfer(string file, Guid source, long sourceRevision, NpcRecord[] from, Guid destination, long destinationRevision, NpcRecord[] to) => Task.Run(() =>
+    {
+        if (source == destination || from.Length > NpcRules.Limit || to.Length > NpcRules.Limit ||
+            from.Any(n => !NpcRules.Valid(n) || n.Location != source) || to.Any(n => !NpcRules.Valid(n) || n.Location != destination) ||
+            from.Concat(to).Select(n => n.Id).Distinct().Count() != from.Length + to.Length)
+            throw new InvalidDataException("Invalid NPC transfer records.");
+        using var db = Open(file); using var transaction = db.BeginTransaction();
+        foreach (var (location, revision, records) in new[] { (source, sourceRevision, from), (destination, destinationRevision, to) })
+        {
+            using var c = db.CreateCommand(); c.Transaction = transaction;
+            c.CommandText = "INSERT INTO npcs VALUES($id,$schema,$revision,$json) ON CONFLICT(location) DO UPDATE SET schema_version=excluded.schema_version,revision=excluded.revision,json=excluded.json";
+            c.Parameters.AddWithValue("$id", location.ToString()); c.Parameters.AddWithValue("$schema", NpcRules.Schema);
+            c.Parameters.AddWithValue("$revision", revision); c.Parameters.AddWithValue("$json", JsonSerializer.Serialize(records, Protocol.Json)); c.ExecuteNonQuery();
+        }
+        transaction.Commit();
+    });
 }

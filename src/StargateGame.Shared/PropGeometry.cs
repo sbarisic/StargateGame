@@ -57,7 +57,12 @@ public static class PropGeometry
         return new(vertices.ToArray(), edges.ToArray(), faces.ToArray());
     }
     static readonly Hull BarrelHull = Build(new(.363f, .592f, .363f), true);
-    public static Hull For(PropDefinition prop) => prop.IsBarrel && prop.Valid ? BarrelHull : Build(prop.HalfExtent, prop.IsBarrel);
+    public static Hull For(PropDefinition prop) => prop.Kind switch
+    {
+        PropKind.ZpmHub => ZpmAsset.HubHull,
+        PropKind.Zpm => ZpmAsset.ModuleHull,
+        _ => prop.IsBarrel && prop.Valid ? BarrelHull : Build(prop.HalfExtent, prop.IsBarrel)
+    };
     static readonly Hull[] LanternHulls = LanternAsset.Sections.Select(section =>
     {
         var box = Build(section.Half, false);

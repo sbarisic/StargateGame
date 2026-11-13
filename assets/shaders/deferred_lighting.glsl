@@ -13,7 +13,10 @@ uniform mat4 uInverseViewProjection;
 vec3 reconstruct(vec2 uv,float depth){vec4 p=uInverseViewProjection*vec4(uv*2.-1.,depth*2.-1.,1);return p.xyz/p.w;}
 vec3 deferredSky(vec3 ray){
  vec3 color=skyColor(ray);
- float haze=max(uOvercast,1.-smoothstep(.01,.10,ray.y));
+ // Ground-level horizon haze must not cover clouds seen from above. Their
+ // own aerial perspective already accounts for the air up at cloud altitude.
+ float groundHaze=exp(-max(uViewPosition.y-uGroundLevel,0.)*.002);
+ float haze=max(uOvercast,1.-smoothstep(.01,.10,ray.y))*groundHaze;
  if(haze>0.)color=mix(color,applyFog(color,uViewPosition+ray*6500.,uViewPosition),haze);
  return color;
 }

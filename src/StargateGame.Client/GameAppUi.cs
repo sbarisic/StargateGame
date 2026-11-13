@@ -250,10 +250,11 @@ sealed partial class GameApp
             Panel(pass, l.Equipment);
             DrawRifleIcon(pass, l.Equipment);
             Text(pass, l.Equipment.X + 112, l.Equipment.Y + 12, "RIFLE", 16, UiTheme.Amber);
-            Text(pass, l.Equipment.X + 112, l.Equipment.Y + 36, h.Aiming ? "AIMING" : "EQUIPPED", 14);
+            var ammo=session.EquippedRifle;
+            Text(pass, l.Equipment.X + 112, l.Equipment.Y + 36, session.Reloading ? "RELOADING" : ammo is null ? "EMPTY" : $"{ammo.Magazine}+{(ammo.Chambered?1:0)} / {ammo.Reserve}", 14);
         }
     }
-    UiRect GrassSettingButton => new(Layout.Pause.X + 436, Layout.Pause.Y + 510, 400, 36);
+    UiRect GrassSettingButton => Layout.PauseSecondaryAction(1);
     void CycleGrassRenderer() { if (scene is not null) scene.GroundCoverSettings = scene.GroundCoverSettings with { Hybrid = !scene.GroundCoverSettings.Hybrid }; }
     void DrawPauseConsole(RenderPass pass)
     {
@@ -272,9 +273,9 @@ sealed partial class GameApp
         if (session?.Developer == true) Button(pass, GeneratorPauseButton, "Planet Generator / F4", selected: pauseFocus == 10);
         float x = r.X + 436, y = r.Y + 80;
         Text(pass, x, y, "CONTROLS", 16, UiTheme.Amber);
-        string[] controls = ["WASD  Move / swim", "SHIFT Walk / swim slowly", "SPACE Jump / rise", "CTRL  Crouch / dive", "E     Use / pick up / drop", "I Inventory / 1-4 Slots / 0 Empty", "RMB   Aim    LMB Fire / throw", "R     Reload / rotate build", "B     Hold building picker", "TAB   Stargate addresses", "F3    Stats  SHIFT+F3 Collision", "F4    Developer planets", "ESC   Close menu / stop build"];
+        string[] controls = ["WASD  Move / swim", "SHIFT Walk / swim slowly", "SPACE Jump / rise", "CTRL  Crouch / dive", "E     Use / pick up / drop", "I Inventory / 1-4 Slots / 0 Empty", "RMB   Aim    LMB Fire / throw", "R     Reload / rotate build", "B     Hold building picker", "TAB   Stargate addresses", "F3    Stats  SHIFT+F3 Collision", "F4 Planets / CTRL+F3 Navmesh", "ESC   Close menu / stop build"];
         for (int i = 0; i < controls.Length; i++)
-            Text(pass, x, y + 36 + i * 27, controls[i], 14, UiTheme.Muted);
+            Text(pass, x, y + 36 + i * 24, controls[i], 14, UiTheme.Muted);
         Button(pass, GrassSettingButton, "Grass / " + (scene?.GroundCoverSettings.Hybrid == false ? "Mesh" : "Hybrid"), key: "H");
         Button(pass, ExposureSettingsButton, "Filmic / exposure", selected: pauseFocus == 9, key: "J");
         Text(pass, r.X + 24, r.Bottom - 36, "TAB Focus / SPACE Activate / Arrows Adjust", 14, UiTheme.Muted);

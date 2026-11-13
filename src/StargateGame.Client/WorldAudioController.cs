@@ -5,7 +5,7 @@ using StargateGame.Audio;
 using StargateGame.Shared;
 namespace StargateGame.Client;
 
-sealed class WorldAudioController : IDisposable
+sealed partial class WorldAudioController : IDisposable
 {
     sealed class Voice
     {
@@ -100,6 +100,15 @@ sealed class WorldAudioController : IDisposable
                     audio.RegisterCue(cue);
                 }
                 cues = bank.Cues.ToDictionary(c => c.CueId);
+                // Reuse the same samples for the shooter's listener-relative
+                // sounds. Other players still use the original spatial cues.
+                foreach (string id in new[] { "rifle.fire", "rifle.dry" }.Concat(RifleReloadAudio.Markers.Select(m => m.Cue)))
+                    if (cues.TryGetValue(id, out var source))
+                    {
+                        var localCue = source with { CueId = id + ".local", SpatialMode = AudioSpatialMode.TwoDimensional, DopplerFactor = 0 };
+                        audio.RegisterCue(localCue);
+                        cues.Add(localCue.CueId, localCue);
+                    }
             }
             catch (Exception e) when (e is IOException or FormatException or JsonException)
             {
@@ -165,6 +174,7 @@ sealed class WorldAudioController : IDisposable
     {
         audio.StopAll(fadeSeconds: .2f);
         voices.Clear();
+        reloads.Clear();
         players.Clear();
         contacts.Clear();
         // Physics epochs also change when props are destroyed by the kawoosh. Keep
@@ -373,23 +383,36 @@ sealed class WorldAudioController : IDisposable
         audio.SetListener(new(eye, forward, Vector3.UnitY, local.Velocity));
         audio.Update(dt);
         voices.RemoveAll(v => !audio.IsActive(v.Handle));
+        ReloadEvents(session, local, remotes, scene.GateVisualTick);
         if (gate is not null && dhd is not null)
             GateEvents(session, scene);
         while (session.AudioSounds.TryDequeue(out var sound))
         {
+            // Accepted character state schedules each mechanical event. The old
+            // start notification must not play a second, monolithic reload.
+            if (sound.Kind == WorldSoundKind.RifleReload) continue;
             if (sound.Tick < session.ServerTick - 60)
                 continue;
             if (sound.Kind == WorldSoundKind.Scrape)
                 Loop("scrape:" + sound.BodyId, "scrape", sound.Position, sound.Strength, 1, sound.BodyId, now + .25);
             else
-                Play(sound.Kind switch
+            {
+                string cue = sound.Kind switch
                 {
                     WorldSoundKind.Impact => "impact",
+                    WorldSoundKind.RifleFire => "rifle.fire",
+                    WorldSoundKind.RifleDry => "rifle.dry",
+                    WorldSoundKind.RifleImpact => "rifle.impact",
                     WorldSoundKind.Door => "door",
                     WorldSoundKind.Place => "build.place",
                     WorldSoundKind.GateArrival => "gate.contact",
                     _ => "build.remove"
-                }, sound.Position, 2, sound.Strength, body: sound.BodyId);
+                };
+                if (sound.SourcePlayer != 0 && sound.SourcePlayer == local.Id &&
+                    sound.Kind is WorldSoundKind.RifleFire or WorldSoundKind.RifleDry)
+                    cue += ".local";
+                Play(cue, sound.Position, 2, sound.Strength, body: sound.BodyId);
+            }
         }
         if (session.AudioErrors > 0)
         {

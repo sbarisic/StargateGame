@@ -13,6 +13,14 @@ if (args.Length > 0 && args[0] == "--job-owner")
 
 int checks = 0;
 void Check(bool value, string name) { if (!value) throw new Exception(name); checks++; }
+using (var current = Process.GetCurrentProcess())
+{
+    var stopped = new SessionManifest(Guid.NewGuid().ToString("N"), current.Id, "", "", "", 1,
+        new ScenarioOptions(), "stopped", [], 0, CoordinatorStartedUtc: current.StartTime.ToUniversalTime());
+    Check(!HarnessClient.Alive(stopped), "stopped manifests cannot become live through PID reuse");
+    Check(HarnessClient.Alive(stopped with { State = "ready" }), "live matching coordinator identity");
+    Check(!HarnessClient.Alive(stopped with { State = "ready", CoordinatorPid = int.MaxValue }), "missing coordinator identity");
+}
 string runtimeFixture = Path.Combine(Path.GetTempPath(), "stargate-runtime-paths-" + Guid.NewGuid().ToString("N"));
 string debugClient = Path.Combine(runtimeFixture, "Client", "bin", "Debug", "net10.0-windows");
 Directory.CreateDirectory(debugClient);
@@ -116,6 +124,13 @@ await using (var operations = new Operations())
     var result = await operations.Submit(r, (r, _) => Task.FromResult(TestResult.Ok(r)), _ => throw new IOException("release failed"), CancellationToken.None);
     Check(result.Outcome == "passed" && operations.Read(r.Id).CleanupError!.Contains("release failed"), "cleanup failure is separate from execution");
     Check(operations.Request(r.Id) == r, "completed hold retains its request for explicit cancellation");
+}
+await using (var operations = new Operations())
+{
+    var r = new TestRequest { Session = "unit", Action = TestAction.Recipe, Async = true };
+    await operations.Submit(r, (_, _) => throw new TimeoutException("step deadline"), _ => Task.CompletedTask, CancellationToken.None);
+    var timedOut = await operations.Wait(r.Id, 2, CancellationToken.None);
+    Check(timedOut.State == "timed-out" && timedOut.Result?.ErrorCode == "timed-out", "recipe step timeout retains its completion category");
 }
 string concurrentName = "stargate-concurrent-" + Guid.NewGuid().ToString("N");
 var blocked = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);

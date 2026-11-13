@@ -6,6 +6,16 @@ namespace StargateGame.Building;
 
 public static class DoorGeometry
 {
+    public const float Speed = MathF.PI / 1.6f; // 90 degrees in 0.8 seconds.
+    public static Vector3 Pivot(BuildingPiece door) => door.Kind == PieceKind.Prefab && BuildingPrefabs.Get(door.Prefab).DoorPivot is { } p ? V(p) : new(0, 0, -.045f);
+    public static BuildBounds[] Sections(BuildingPiece door) => door.Kind == PieceKind.Prefab
+        ? BuildingPrefabs.Get(door.Prefab).DoorSections!.Select(s => new BuildBounds(V(s[0]), V(s[1]))).ToArray()
+        : [new(new(0, .002f, -.045f), new(1.08f, 2.278f, .045f))];
+    public static Matrix4x4 Pose(StructureRecord structure, BuildingPiece door, float angle)
+    {
+        var pivot = Pivot(door);
+        return Matrix4x4.CreateTranslation(-pivot) * Matrix4x4.CreateRotationY(angle) * Matrix4x4.CreateTranslation(pivot) * Root(structure, door);
+    }
     public sealed record Sweep(int Section, int Degree, Matrix4x4 Pose, BuildBounds Bounds);
     public sealed record Profile(Sweep[] Sweeps, BuildBounds Envelope);
     static readonly ConcurrentDictionary<string,Profile> profiles=[];
@@ -37,7 +47,7 @@ public static class DoorGeometry
         return new(sweeps.ToArray(),new(lo,hi));
     });
     public static Matrix4x4 Root(StructureRecord structure,BuildingPiece door)=>door.Kind==PieceKind.Prefab
-        ?BuildingPrefabs.Transform(structure,door with{Open=false})
+        ?BuildingPrefabs.Transform(structure,door with{Open=false,DoorAngle=null})
         :Matrix4x4.CreateTranslation(.96f,0,0)*Matrix4x4.CreateRotationY(-door.Rotation*MathF.PI/6)*Matrix4x4.CreateTranslation(door.Point.Position+Vector3.UnitY*door.Level*3)*BuildingGeometry.Transform(structure);
 
     // Door poses preserve the vertical axis; exact segment/AABB distance gives

@@ -35,7 +35,7 @@ public sealed partial class PhysicsWorld
         {
             var c=Native.Own(new CharacterVirtual(new CharacterVirtualSettings {
                 Shape=capsule,InnerBodyShape=capsule,InnerBodyLayer=NpcLayer,
-                Mass=80,MaxStrength=Movement.PushStrength,MaxSlopeAngle=definition.SlopeDegrees*MathF.PI/180,
+                Mass=Movement.CharacterSupportMass,MaxStrength=Movement.PushStrength,MaxSlopeAngle=definition.SlopeDegrees*MathF.PI/180,
                 SupportingVolume=new Plane(Vector3.UnitY,-definition.Radius),EnhancedInternalEdgeRemoval=true
             },new Vector3(0,-4096,0),Quaternion.Identity,(ulong)(1000+slot),system));
             npcCharacters.Add(c);system.BodyInterface.RemoveBody(c.InnerBodyID);
@@ -95,7 +95,8 @@ public sealed partial class PhysicsWorld
             bool grounded=c.GroundState==GroundState.OnGround && Vector3.Dot(c.LinearVelocity-c.GroundVelocity,c.GroundNormal)<.1f;
             // The same bounded extrapolation is recorded in prediction checkpoints.
             Vector3 wish=Tick-n.CommandTick<=6?n.WishVelocity:Vector3.Zero;
-            var velocity=new JoltCharacterMovement(c).Accelerate(c.LinearVelocity,wish,grounded,CharacterDefinitions.Soldier.RunSpeed);
+            float airSpeed = Math.Max(CharacterDefinitions.Soldier.RunSpeed, new Vector2(c.LinearVelocity.X,c.LinearVelocity.Z).Length());
+            var velocity=new JoltCharacterMovement(c).Accelerate(c.LinearVelocity,wish,grounded,airSpeed);
             velocity.Y-=Movement.Gravity*Movement.Dt;
             if(!HasTerrain(c.Position+velocity*Movement.Dt,2))velocity.X=velocity.Z=0;
             c.LinearVelocity=velocity;

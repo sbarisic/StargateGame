@@ -21,14 +21,14 @@ public sealed partial class PhysicsWorld
         if (anchor.Kind == "world") return HasTerrain(anchor.Point, .1f);
         if (anchor.Kind == "building")
         {
-            var piece = Changes.Pieces.FirstOrDefault(p => p.Id == anchor.Owner);
+            var piece = PosedChanges.Pieces.FirstOrDefault(p => p.Id == anchor.Owner);
             var structure = piece is null ? null : Changes.Structures.FirstOrDefault(s => s.Id == piece.StructureId);
             if (piece is null || structure is null) return false;
             transform = piece.Kind == PieceKind.Prefab ? BuildingPrefabs.Transform(structure,piece) : BuildingGeometry.Transform(structure);
             if(piece.Kind==PieceKind.Door)
             {
                 var pivot=new Vector3(0,0,-.045f);
-                transform=Matrix4x4.CreateTranslation(-pivot)*Matrix4x4.CreateRotationY(piece.Open?MathF.PI/2:0)*Matrix4x4.CreateTranslation(pivot)*DoorGeometry.Root(structure,piece);
+                transform=Matrix4x4.CreateTranslation(-pivot)*Matrix4x4.CreateRotationY(piece.DoorAngle ?? (piece.Open?MathF.PI/2:0))*Matrix4x4.CreateTranslation(pivot)*DoorGeometry.Root(structure,piece);
             }
             return true;
         }

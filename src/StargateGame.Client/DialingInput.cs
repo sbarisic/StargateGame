@@ -99,6 +99,19 @@ sealed partial class GameApp
         throw new InvalidOperationException("Dial inspection could not pick key " + key);
     }
     int dhdHover = -1;
+    (StaticEntity Entity, DhdHit Hit)? dhdFocus;
+    bool LookingAtDhd => dhdFocus is not null;
+    void UpdateDhdFocus(Vector3 eye, Vector3 aim)
+    {
+        dhdFocus = null;
+        if (session is null) return;
+        var target = session.World.Definition.Entities.Where(e => e.Model == "dhd")
+            .Select(e => (Entity: e, Hit: DhdInteraction.PickConsole(e, eye, aim)))
+            .Where(p => p.Hit is not null).OrderBy(p => p.Hit!.Value.Distance).FirstOrDefault();
+        if (target.Entity is { } dhd && target.Hit is { } hit
+            && !session.Physics.InteractionBlocked(eye, aim, hit.Distance - .015f, ignoreEntity: dhd.Id, ignorePlayer: session.Local.Id))
+            dhdFocus = (dhd, hit);
+    }
     double backspaceAt;
     bool backspaceReset;
     void DialingInput(InputManager input, Vector3 eye, Vector3 aim, BodyState[] renderedBodies)
@@ -111,12 +124,10 @@ sealed partial class GameApp
             backspaceAt = 0;
             return;
         }
-        var target = session.World.Definition.Entities.Where(e => e.Model == "dhd").Select(e => (Entity: e, Hit: DhdInteraction.Pick(e, eye, aim))).Where(p => p.Hit is not null).OrderBy(p => p.Hit!.Value.Distance).FirstOrDefault();
-        var dhd = target.Entity;
-        if (dhd is not null && target.Hit is { } picked && !session.Physics.InteractionBlocked(eye, aim, picked.Distance - .015f, ignoreEntity: dhd.Id, ignorePlayer: session.Local.Id))
+        if (dhdFocus is { } focus && focus.Hit.Key >= 0)
         {
-            session.SelectDhd(dhd.Id);
-            dhdHover = picked.Key;
+            session.SelectDhd(focus.Entity.Id);
+            dhdHover = focus.Hit.Key;
         }
         if (scene is not null)
             scene.DhdHover = dhdHover;

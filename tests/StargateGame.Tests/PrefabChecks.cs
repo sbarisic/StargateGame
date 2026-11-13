@@ -78,6 +78,99 @@ static class PrefabChecks
         Verify.Check(!duplicate.Valid, "occupied prefab socket rejects duplicate");
         return state;
     }
+    public static void HingedDoor()
+    {
+        var foundation = BuildingRules.Edit(WorldChanges.Empty, new(Guid.NewGuid(), 0, "place", PieceKind.Prefab, Anchor: new(0, .5f, 0), Prefab: "kit-stone-foundation"), (_, _) => 0, (_, _) => true);
+        var assembled = BuildingRules.Edit(foundation.State, new(Guid.NewGuid(), 1, "place", PieceKind.Prefab, foundation.Piece!.Id, Prefab: "kit-assembled-door"), (_, _) => 0, (_, _) => true);
+        Verify.Check(assembled.Valid, "hinged door fixture uses the normal assembled doorway");
+        var state = assembled.State;
+        var chunks = new ChunkCoordinate(0, 0).Around(1).ToArray();
+        var definition = PlanetDefinition.Default with { Entities = [], Props = [], Preset = "temperate" };
+        using var world = new PhysicsWorld(definition, true, new Flat(), chunks, state);
+        var door = state.Pieces.Single(BuildingPrefabs.IsDoor);
+        var structure = state.Structures.Single();
+        void Target(bool open)
+        {
+            int rebuilt = world.RebuiltBatches; long epoch = world.Epoch, revision = world.Changes.Revision;
+            using var checkpoint = world.Save();
+            world.SetDoorTarget(door.Id, open);
+            Verify.Check(world.Epoch == epoch && world.Changes.Revision == revision && world.RebuiltBatches == rebuilt, "hinge target changes no world revision, epoch or collision batch");
+            world.Restore(checkpoint);
+            Verify.Check(world.Changes.Pieces.Single(p=>p.Id==door.Id).Open != open, "checkpoint restores previous hinge target without replacing bodies");
+            world.SetDoorTarget(door.Id, open);
+        }
+        float Angle() => world.DoorStates.Single().Angle;
+        Target(true);
+        Verify.Near(Angle(), 0, .0001f, "door target change preserves hinge pose");
+        for (int i = 0; i < 12; i++) world.Step();
+        float partial = Angle();
+        Verify.Near(partial, DoorGeometry.Speed * Movement.Dt * 12, .0001f, "door moves continuously at bounded hinge speed");
+        var sections = DoorGeometry.Sections(door);
+        var section = sections[sections.Length / 2];
+        var pose = DoorGeometry.Pose(structure, door, partial);
+        var centre = Vector3.Transform((section.Min + section.Max) / 2, pose);
+        var normal = Vector3.TransformNormal(Vector3.UnitZ, pose);
+        Verify.Check(world.InteractionBlocked(centre + normal * .2f, -normal, .4f), "native collider follows partially open leaf");
+        Verify.Check(world.BuildingQuery.Ray(centre + normal * .2f, -normal, .4f).Piece?.Id == door.Id, "interaction target follows partially open leaf");
+        using (var checkpoint = world.Save())
+        {
+            world.Step(); world.Restore(checkpoint);
+            Verify.Near(Angle(), partial, .0001f, "prediction checkpoint restores hinge angle");
+        }
+        using (var replica = new PhysicsWorld(definition, true, new Flat(), chunks, world.Changes))
+        {
+            replica.Apply(world.Snapshot());
+            Verify.Near(replica.DoorStates.Single().Angle, partial, .0001f, "replicated snapshot restores in-flight angle");
+        }
+        world.AddPlayer(new(1, "Door blocker", centre with { Y = structure.Origin.Y + .01f }, default, 0, 0, false, 0));
+        world.Step();
+        Verify.Check(world.DoorStates.Single().Blocked && Angle() == partial, "hinge pauses for a player entering the swing");
+        world.RemovePlayer(1);
+        world.AddProp(new(1, centre, new Vector3(.5f), 10));
+        world.Step();
+        Verify.Check(world.DoorStates.Single().Blocked && Angle() == partial, "hinge pauses for a prop entering the swing");
+        world.RemoveProp(1);
+        world.Step();
+        Verify.Check(!world.DoorStates.Single().Blocked && Angle() > partial, "hinge resumes when obstruction leaves");
+        Target(false);
+        float reversing = Angle(); world.Step();
+        Verify.Check(Angle() < reversing && Angle() > 0, "reversing a moving door does not snap");
+        for (int i = 0; i < 60; i++) world.Step();
+        Verify.Near(Angle(), 0, .0001f, "door settles closed");
+        Target(true);
+        for (int i = 0; i < 60; i++) world.Step();
+        Verify.Near(Angle(), MathF.PI / 2, .0001f, "door settles at ninety degrees");
+        Verify.Check(world.NavigationDoors().Single().Open, "navigation waits until the leaf is open");
+        Verify.Check(world.Snapshot().Doors!.Single().Open && !world.HasMovingDoors, "settled target remains replicated without ongoing motion");
+        int batches = world.RebuiltBatches;
+        world.SetTerrain(chunks);
+        Verify.Check(world.RebuiltBatches == batches, "terrain refresh after hinge movement retains static building batches");
+        world.StageChanges(WorldChanges.Empty with { Revision = world.Changes.Revision + 1 });
+        while (!world.PrepareTerrainBatch(chunks)) { }
+        world.SetTerrain(chunks);
+        Verify.Check(world.DoorStates.Length == 0 && !world.InteractionBlocked(centre + normal * .2f, -normal, .4f), "removing a structure removes its hinge collider and motion state");
+    }
+    public static async Task DoorPersistence()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "StargateDoor-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            await using var repository = new WorldRepository(folder);
+            var saved = await repository.CreateAsync(new PlanetPlan(7319, "temperate", settlements: new SettlementSettings("wilderness", "auto")).Definition);
+            var foundation = BuildingRules.Edit(saved.Changes, new(Guid.NewGuid(), saved.Changes.Revision, "place", PieceKind.Prefab, Anchor: new(0,.5f,0), Prefab:"kit-stone-foundation"), (_,_)=>0, (_,_)=>true);
+            await repository.SaveAsync(foundation.State, saved.Changes.Revision);
+            var assembly = BuildingRules.Edit(foundation.State, new(Guid.NewGuid(), foundation.State.Revision, "place", PieceKind.Prefab, foundation.Piece!.Id, Prefab:"kit-assembled-door"), (_,_)=>0, (_,_)=>true);
+            await repository.SaveAsync(assembly.State, foundation.State.Revision);
+            var door = assembly.State.Pieces.Single(BuildingPrefabs.IsDoor);
+            var receipt = new BuildResult(Guid.NewGuid(), true, "Door target updated.", assembly.State.Revision);
+            await repository.SaveDoorAsync(saved.Id, door.Id, true, assembly.State.Revision, receipt);
+            var loaded = await repository.LoadAsync(saved.Id);
+            Verify.Check(loaded.Changes.Revision == assembly.State.Revision && loaded.Changes.Pieces.Single(p=>p.Id==door.Id).Open, "single-door save persists target without a structural revision");
+            Verify.Check(loaded.Changes.Pieces.Where(p=>p.Id!=door.Id).OrderBy(p=>p.Id).SequenceEqual(assembly.State.Pieces.Where(p=>p.Id!=door.Id).OrderBy(p=>p.Id)), "door save preserves all other building pieces");
+            Verify.Check(await repository.FindReceiptAsync(receipt.RequestId) == receipt, "door request receipt remains durable");
+        }
+        finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
+    }
     public static async Task Run()
     {
         Verify.Check(BuildingPrefabs.All.Count == 31 && BuildingPrefabs.All.Select(p => p.Id).Distinct().Count() == 31, "28 retained components and three complete assemblies");

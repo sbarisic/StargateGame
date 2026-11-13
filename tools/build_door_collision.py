@@ -22,13 +22,13 @@ def generate_doors(catalog, models):
     for p in catalog:
         if p['role'] != 'door': continue
         triangles = np.array(p['triangles'], dtype=float)
-        if p['id'] == 'kit-door-1-flat' and p.get('doorFitVersion') != 2:
-            # Seat the closed leaf behind the irregular jamb/lintel edges rather
-            # than leaving daylight around them. The assembly offset is -0.53 m.
+        if p['id'] == 'kit-door-1-flat' and p.get('doorFitVersion') != 3:
+            # Fit within the stone jamb, threshold and lowest lintel edge.
+            # The assembly offset is -0.53 m; retain 4-5 mm working clearance.
             lo = triangles.reshape(-1,3).min(0)
             hi = triangles.reshape(-1,3).max(0)
-            target_lo = np.array([-.122, 0., lo[2]])
-            target_hi = np.array([1.182, 2.30, hi[2]])
+            target_lo = np.array([-.020, .052, lo[2]])
+            target_hi = np.array([1.080, 2.129, hi[2]])
             scale = (target_hi-target_lo)/(hi-lo)
             triangles = target_lo + (triangles-lo)*scale
             model = json.loads((models/(p['id']+'.json')).read_text())
@@ -39,7 +39,11 @@ def generate_doors(catalog, models):
                 v[:,3:6]/=scale
                 v[:,3:6]/=np.maximum(np.linalg.norm(v[:,3:6],axis=1)[:,None],1e-12)
                 path.write_bytes(raw[:8]+v.astype('<f4').tobytes())
-            p['doorFitVersion']=2
+                if part.get('normal'):
+                    part['heightScaleLimit'] = .002
+                    part['heightScale'] = min(part.get('heightScale', .002), .002)
+            (models/(p['id']+'.json')).write_text(json.dumps(model,indent=2)+'\n')
+            p['doorFitVersion']=3
             p['triangles']=triangles.tolist()
             p['min']=triangles.reshape(-1,3).min(0).tolist()
             p['max']=triangles.reshape(-1,3).max(0).tolist()

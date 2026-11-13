@@ -139,7 +139,7 @@ static class EnvironmentChecks
         Verify.Check(Enumerable.Range(0, hybridSurface.Length).All(i => Math.Abs(hybridSurface[i].X + .015f - slopeChunk.Sample(tile.X * 8 + i % 33 * .25f, tile.Z * 8 + i / 33 * .25f)) < .00001), "hybrid grass roots follow slopes including negative world coordinates");
         var excludedSurface = HybridGrass.Surface(tile, chunk, planet, settings, [wholeTile], null, full, default);
         Verify.Check(excludedSurface.All(p => p.Y == 0 && p.W == 0), "hybrid fields retain hard building exclusions despite existing candidates");
-        Verify.Check(HybridGrass.Transition(1) == new Vector2(6, 10) && HybridGrass.Transition(0) == new Vector2(10, 14) && HybridGrass.Transition(2) == new Vector2(14, 18), "hybrid transition distances match all quality tiers");
+        Verify.Check(HybridGrass.Transition(1) == new Vector2(12, 20) && HybridGrass.Transition(0) == new Vector2(20, 28) && HybridGrass.Transition(2) == new Vector2(28, 36), "hybrid transition distances match all quality tiers");
         using (var cancelled = new CancellationTokenSource())
         {
             cancelled.Cancel(); bool stopped = false;

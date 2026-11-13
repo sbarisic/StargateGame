@@ -143,6 +143,7 @@ public sealed partial class WorldRepository : IAsyncDisposable
                     migration.Commit();
                 }
                 Execute(db, "CREATE TABLE IF NOT EXISTS cables(location TEXT PRIMARY KEY,revision INTEGER NOT NULL,json TEXT NOT NULL); CREATE TABLE IF NOT EXISTS npcs(location TEXT PRIMARY KEY,schema_version INTEGER NOT NULL,revision INTEGER NOT NULL,json TEXT NOT NULL); PRAGMA user_version=11;");
+                Execute(db, "CREATE TABLE IF NOT EXISTS weapon_ammo(item TEXT PRIMARY KEY REFERENCES weapon_items(id),magazine INTEGER NOT NULL,chamber INTEGER NOT NULL,reserve INTEGER NOT NULL);");
                 RecoverTransits(db);
                 UniverseId = Guid.Parse((string)Scalar(db, "SELECT value FROM metadata WHERE key='universe';")!);
                 ready.SetResult();
@@ -274,6 +275,18 @@ public sealed partial class WorldRepository : IAsyncDisposable
         return new(id, definition, state, Read<BodyState>(db, "crates", id));
     }
     public Task<BuildResult?> FindReceiptAsync(Guid request) => Run(db => Scalar(db, "SELECT result FROM receipts WHERE id=$id;", ("$id", request.ToString("D"))) is string json ? JsonSerializer.Deserialize<BuildResult>(json, Protocol.Json) : null);
+    public Task SaveDoorAsync(Guid location, Guid door, bool open, long structuralRevision, BuildResult receipt) => Run(db =>
+    {
+        using var tx = db.BeginTransaction();
+        string key = location.ToString("D"), id = door.ToString("D");
+        long revision = Convert.ToInt64(Scalar(db, "SELECT revision FROM locations WHERE id=$id;", ("$id", key)));
+        var json = Scalar(db, "SELECT json FROM pieces WHERE location=$location AND id=$id;", ("$location", key), ("$id", id)) as string;
+        var piece = json is null ? null : JsonSerializer.Deserialize<BuildingPiece>(json, Protocol.Json);
+        if (revision != structuralRevision || piece is null || !BuildingPrefabs.IsDoor(piece)) throw new InvalidOperationException("Door no longer belongs to this structural revision.");
+        Execute(db, "UPDATE pieces SET json=$json WHERE location=$location AND id=$id;", ("$location", key), ("$id", id), ("$json", JsonSerializer.Serialize(piece with { Open = open }, Protocol.Json)));
+        Execute(db, "INSERT INTO receipts VALUES($id,$location,$result);", ("$id", receipt.RequestId.ToString("D")), ("$location", key), ("$result", JsonSerializer.Serialize(receipt, Protocol.Json)));
+        tx.Commit(); return true;
+    });
     public Task SaveAsync(WorldChanges state, long expectedRevision, BuildResult? receipt = null) => SaveDestructionAsync(state, expectedRevision, [], receipt);
     public Task SaveDestructionAsync(WorldChanges state, long expectedRevision, Guid[] destroyedProps, BuildResult? receipt = null) => Run(db =>
     {

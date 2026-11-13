@@ -6,6 +6,9 @@ uniform vec3 uViewPosition, uCanopyMinimum, uCanopyMaximum;
 uniform mat4 uInverseViewProjection, uCanopyViewProjection, uTreeWorld, uTreeInverse;
 uniform vec3 uCanopyRoot;
 uniform sampler3D uCanopy, uCanopyNormals;
+uniform sampler2D uCanopySceneDepth;
+uniform int uDepthCulling,uHierarchicalSkip;
+uniform vec3 uCanopyLight;
 uniform float uCellSize, uDensityReferenceDistance, uDensityScale, uCanopyTime, uWindStrength;
 uniform float uPrimaryStepCells, uOpacityThreshold, uTransmissionStrength;
 uniform float uCanopyCoverage, uCanopyScale;
@@ -64,9 +67,10 @@ float canopyTransmission(vec3 position, vec3 toward, float count) {
     vec3 origin = position + toward * uCellSize;
     if (!canopyInterval(origin, toward, entry, exit)) return 1.0;
     float stepLength = (exit - entry) / count;
-    float mip = clamp(log2(max(stepLength / uCellSize, 1.0)), 0.0, 8.0);
+    float mip = clamp(log2(max(stepLength / uCellSize, 1.0)), 0.0, float(uCanopyLastMip));
     float opticalDepth = 0.0;
     for (int i = 0; i < 24; i++) {
+        if(i>=int(count))break;
         float start = float(i) * stepLength;
         if (start >= exit - entry) break;
         float segment = min(stepLength, exit - entry - start);
@@ -82,6 +86,7 @@ vec3 deformedNormal(vec3 normal, vec3 position) {
     normal.y -= dot(normal.xz, bendAmplitude() * derivative);
     return dot(normal, normal) > 1e-8 ? normalize(normal) : vec3(0, 1, 0);
 }
+#include "canopy_skip.glsl"
 void main() {
     vec4 farPoint = uInverseViewProjection * vec4(vUv * 2.0 - 1.0, 1, 1);
     vec3 worldRay = normalize(farPoint.xyz / farPoint.w - uViewPosition);
@@ -106,19 +111,36 @@ void main() {
     // of occupancy mip must not restart the sample pattern at the box face.
     float rayOrigin = dot(eye, ray);
     float nextPlane = (floor((distance + rayOrigin) / stepLength) + 1.0) * stepLength - rayOrigin;
+    float integrationEnd=end;
+    // Preserve the original sampling lattice/LOD before truncating at opaque geometry.
+    if(uDepthCulling!=0) {
+        float sceneDepth=texelFetch(uCanopySceneDepth,ivec2(gl_FragCoord.xy),0).r;
+        if(sceneDepth<1.0) {
+            vec4 surface=uInverseViewProjection*vec4(vUv*2.0-1.0,sceneDepth*2.0-1.0,1);
+            float surfaceDistance=dot(surface.xyz/surface.w-uViewPosition,worldRay);
+            end=min(end,surfaceDistance);
+            if(distance>=end)discard;
+        }
+    }
     vec3 position = vec3(0), uv = vec3(0);
     bool hit = false;
     for (int step = 0; step < 1536 && step < uMarchLimit && distance < end; step++) {
-        float segment = min(max(nextPlane - distance, 0.000001), end - distance);
+        float fullSegment=min(max(nextPlane-distance,0.000001),integrationEnd-distance);
+        float segment=min(fullSegment,end-distance);
         nextPlane += stepLength;
-        vec3 midpoint = eye + ray * (distance + segment * .5);
+        // The last clipped segment keeps its original quadrature point.
+        vec3 midpoint = eye + ray * (distance + fullSegment * .5);
         uv = canopyUv(midpoint);
         if (!insideCanopy(uv)) { distance += segment; continue; }
         // Zero in the conservative pyramid is empty. Do not discard low but
         // nonzero coverage, and bound skipping under the wind deformation.
         if (textureLod(uCanopy, uv, occupancyMip).a == 0.0) {
-            if (safeSkip >= segment) {
-                float extra = floor((safeSkip - segment) / stepLength) * stepLength;
+            float skipDistance=safeSkip;
+            // Cheap filtered occupancy rejects occupied regions first. Keep the existing
+            // conservative local step; amortize larger-node queries over eight steps.
+            if(uHierarchicalSkip!=0 && (step & 7)==0)skipDistance=max(skipDistance,canopyEmptyDistance(eye+ray*distance,ray,sampleMip));
+            if (skipDistance >= segment) {
+                float extra = floor((skipDistance - segment) / stepLength) * stepLength;
                 distance += min(end - distance, segment + extra);
                 nextPlane += extra;
                 continue;
@@ -149,10 +171,12 @@ void main() {
     // doing so turns the upper crown's normals downward when viewed from below.
     float diffuse = abs(dot(normal, uSunDirection));
     vec3 biasNormal = dot(normal, uSunDirection) < 0.0 ? -normal : normal;
-    float sunTransmission = canopyTransmission(position, mat3(uTreeInverse) * uSunDirection, uLightSteps);
+    vec3 towardSun=mat3(uTreeInverse)*uSunDirection;
+    float sunTransmission=canopyTransmission(position,towardSun,uCanopyLight.x);
+    if(uCanopyLight.z>0.0) sunTransmission=mix(sunTransmission,canopyTransmission(position,towardSun,uCanopyLight.y),uCanopyLight.z);
     vec3 albedo=decodeColor(leaf.rgb);
     albedo=mix(vec3(dot(albedo,vec3(.2126,.7152,.0722))),albedo,uLeafSaturation)*uLeafTint;
-    vec4 clip=uCanopyViewProjection*vec4(worldPosition,1);float depth=clip.z/clip.w*.5+.5;
+    vec4 clip=uCanopyViewProjection*vec4(worldPosition,1);float depth=clamp(clip.z/clip.w*.5+.5,0.0,1.0);
     vec3 geometric=dot(normal,-worldRay)<0.?-normal:normal;
     writeSurface(albedo,.92,normal,0.,0.,geometric,uTransmissionStrength,5.,vec3(0),sunTransmission,depth,depth);
 }

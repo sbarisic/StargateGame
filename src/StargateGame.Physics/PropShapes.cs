@@ -19,6 +19,12 @@ public sealed partial class PhysicsWorld
             // Jolt's compound centre of mass must not move the authored body origin.
             return new OffsetCenterOfMassShape(-shape.CenterOfMass, shape);
         }
+        if (prop.Kind is PropKind.ZpmHub or PropKind.Zpm)
+        {
+            using var settings = Native.Own(new ConvexHullShapeSettings(PropGeometry.For(prop).Vertices, .002f));
+            using var shape = Native.Own(settings.Create());
+            return new OffsetCenterOfMassShape(-shape.CenterOfMass, shape);
+        }
         if (!prop.IsBarrel) return new BoxShape(prop.HalfExtent);
         using var hull = Native.Own(new ConvexHullShapeSettings(PropGeometry.For(prop).Vertices, .005f));
         return hull.Create();

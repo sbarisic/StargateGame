@@ -8,9 +8,15 @@ using StargateGame.Shared;
 
 static class FixtureGateChecks
 {
-    public static async Task Run()
+    public static async Task Run(bool charactersOnly = false)
     {
-        await using var server = new GameServer(IPAddress.Loopback, 0, 8, fixture: "gate-pair", devPlanets: true, allowTestIdentities: true);
+        string save = Path.Combine(Path.GetTempPath(), "StargateCharacterTransit-" + Guid.NewGuid().ToString("N"));
+        try { await RunCore(charactersOnly, save); }
+        finally { if (Directory.Exists(save)) Directory.Delete(save, true); }
+    }
+    static async Task RunCore(bool charactersOnly, string save)
+    {
+        await using var server = new GameServer(IPAddress.Loopback, 0, 8, fixture: "gate-pair", devPlanets: true, allowTestIdentities: true, saveDirectory: save);
         server.Start();
         using var identity = new PlayerIdentity();
         using var a = new ClientSession(await GameConnection.ConnectAsync("127.0.0.1", server.Port, "Fixture tester", PhysicsWorld.PhysicsHash, PhysicsWorld.ContentHash, identity: identity));
@@ -82,6 +88,29 @@ static class FixtureGateChecks
         Verify.Check(Vector3.Distance(gateA.Position, gateB.Position) == 12 && gateA.Rotation == gateB.Rotation, "test gates side by side at the same elevation and facing");
         await Open("a", [2, 3, 4, 5, 6, 7]);
         Verify.Check(a.Gates[GraphicsFixture.EntityId(world, "gate-b")].Incoming, "arbitrary six-symbol dial from A reaches B");
+        if (charactersOnly)
+        {
+            await server.InspectPhysicsAsync(id, w => w.Apply(w.Snapshot() with { Players = w.Players.Select(p => p.Id == a.Local.Id ? p with { Position = new(-9,.03f,9), Velocity = default } : p).ToArray() }));
+            await Pump(250);
+            a.Npc(new(Guid.NewGuid(), "spawn", Point: new(-12,-.1f,12)));
+            await Until(() => !a.NpcPending, "NPC spawn acknowledged");
+            Verify.Check(a.LastNpcReply?.Accepted == true, "NPC created for gate transit: " + a.LastNpcReply?.Reason);
+            Guid npc = a.LastNpcReply!.Target;
+            // Cover the entire local exit-search envelope. The central launch
+            // still has to finish transit, instead of freezing or returning.
+            await server.InspectPhysicsAsync(id, w => w.AddStaticBox(frameB.Centre + frameB.Normal, new(4, 5, 4)));
+            await server.InspectPhysicsAsync(id, w => w.Apply(w.Snapshot() with { Npcs = w.NpcMotions.Select(n => n.Id == npc ? n with {
+                Position = frameA.Centre - Vector3.UnitY * .9f + frameA.Normal * 1.2f,
+                Velocity = -frameA.Normal * 6, WishVelocity = -frameA.Normal * 5, CommandTick = w.Tick } : n).ToArray() }));
+            await Until(() => a.LastSnapshot.Npcs?.Any(n => n.Id == npc && Math.Abs(n.Position.X-frameB.Centre.X)<4) == true, "NPC completes blocked-exit gate transit", 10);
+            Verify.Check(a.Npcs.Records.Count(n => n.Id == npc) <= 1, "NPC transfer preserves a single identity");
+            await server.InspectPhysicsAsync(id, w => w.Apply(w.Snapshot() with { Players = w.Players.Select(p => p.Id == a.Local.Id ? p with {
+                Position = new Vector3(gateA.Position.X, .05f, 2), Velocity = default, TransitFrozen = false } : p).ToArray() }));
+            await Pump(200);
+            await Pump(1300, 1);
+            await Until(() => Math.Abs(a.Local.Position.X-frameB.Centre.X)<4 && !a.TransitLocked && !a.Local.TransitFrozen, "player completes blocked-exit transit without ten-second wait", 8);
+            return;
+        }
         var crate = world.Props.Single(p => !p.IsBarrel);
         var barrel = world.Props.Single(p => p.IsBarrel);
         async Task Send(PropDefinition prop, GateFrame from, GateFrame to)

@@ -13,10 +13,15 @@ public sealed class GameTools(HarnessClient client)
     public static string BuildRoot { get; set; } = "";
     static string Build(string? root) => string.IsNullOrEmpty(root) ? BuildRoot : Path.GetFullPath(root);
     static CallToolResult Result(object value) => new() { IsError = value is TestResult r && r.Outcome is not ("passed" or "accepted"), StructuredContent = TestJson.Element(value), Content = [new TextContentBlock { Text = JsonSerializer.Serialize(value, TestJson.Options) }] };
+    static CallToolResult Error(Exception error)
+    {
+        var value = new { outcome = "failed", error = error.Message, code = error.GetType().Name };
+        return new() { IsError = true, StructuredContent = TestJson.Element(value), Content = [new TextContentBlock { Text = JsonSerializer.Serialize(value, TestJson.Options) }] };
+    }
     static async Task<CallToolResult> Guard(Func<Task<object>> run)
     {
         try { return Result(await run()); }
-        catch (Exception e) { return new() { IsError = true, Content = [new TextContentBlock { Text = JsonSerializer.Serialize(new { outcome = "failed", error = e.Message, code = e.GetType().Name }, TestJson.Options) }] }; }
+        catch (Exception e) { return Error(e); }
     }
     [McpServerTool(Name = "game_catalog"), Description("Discover scenarios, typed action schemas, recipes, prerequisites, and test groups. Does not build or launch the game.")]
     public CallToolResult Catalog() => Result(ActionCatalog.Discovery());
@@ -56,7 +61,7 @@ public sealed class GameTools(HarnessClient client)
             var metadata = TestJson.Read<JsonElement>(response.Data.GetProperty("metadata").GetString()!);
             return new() { StructuredContent = TestJson.Element(new { response, metadata }), Content = [new ImageContentBlock { Data = await File.ReadAllBytesAsync(path, cancellationToken), MimeType = "image/png" }, new TextContentBlock { Text = JsonSerializer.Serialize(new { response, metadata }, TestJson.Options) }] };
         }
-        catch (Exception e) { return new() { IsError = true, Content = [new TextContentBlock { Text = e.Message }] }; }
+        catch (Exception e) { return Error(e); }
     }
     [McpServerTool(Name = "game_recipe"), Description("Run a registered recipe or a JSON recipe in the attached session; export=true records a replay from the session trace. Long runs return an operation ID.")]
     public Task<CallToolResult> Recipe(string session, string name = "visual-check", bool export = false, CancellationToken cancellationToken = default)

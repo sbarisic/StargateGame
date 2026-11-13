@@ -76,7 +76,7 @@ sealed partial class GameApp
             result["nearby"] = new { total = nearby.Length, offset, limit, items = nearby.Skip(offset).Take(limit) };
             if (sections.Contains("gates")) result["gates"] = session.Gates.Values.ToArray();
             if (sections.Contains("inventory")) result["inventory"] = new { personal = session.Inventory, container = session.OpenWeaponContainer };
-            if (sections.Contains("buildings")) result["buildings"] = new { revision = session.Changes.Revision, total = session.Changes.Pieces.Length, items = session.Changes.Pieces.Skip(offset).Take(limit), structures = session.Changes.Structures.Skip(offset).Take(limit) };
+            if (sections.Contains("buildings")) result["buildings"] = new { revision = session.Changes.Revision, total = session.Changes.Pieces.Length, items = session.Changes.Pieces.Skip(offset).Take(limit), structures = session.Changes.Structures.Skip(offset).Take(limit), doors = session.Physics.DoorStates.Skip(offset).Take(limit) };
             if (sections.Contains("npcs")) result["npcs"] = new { records = session.Npcs.Records.Skip(offset).Take(limit), status = session.Npcs.Status.Skip(offset).Take(limit), motionSource = "rendered", motions = session.PresentedNpcs().Skip(offset).Take(limit), navigation = session.NpcDiagnostics };
             if (sections.Contains("physics")) result["physics"] = new { bodies = session.Physics.Bodies().Skip(offset).Take(limit), carries = session.Physics.Carries };
             if (r.Data.TryGetProperty("pickX", out _))
@@ -98,7 +98,7 @@ sealed partial class GameApp
             }
         }
         if (sections.Contains("ui")) result["ui"] = new { revision = TestUiRevision, controls = testUi.Values.ToArray(), pointer = UiMouse, inventoryOpen, buildPaletteOpen, spawnMenuOpen, paused, testingPanel };
-        if (sections.Contains("rendering")) result["rendering"] = new { quality = graphicsSettings.Quality, hour = scene?.TimeOfDay, gpuMs = scene?.CommonReady == true ? scene.RenderGpuMilliseconds : 0, cpuMs = scene?.RenderCpuMilliseconds };
+        if (sections.Contains("rendering")) result["rendering"] = new { rifle = scene?.RifleDiagnostics, viewmodel = scene?.ViewmodelDiagnostics, dhdFocus = new { active = LookingAtDhd, entity = dhdFocus?.Entity.Id, key = dhdHover }, navmesh = NavigationOverlayState(), canopy = scene?.CanopyDiagnostics, grass = scene?.GrassDiagnostics, quality = graphicsSettings.Quality, hour = scene?.TimeOfDay, gpuMs = scene?.CommonReady == true ? scene.RenderGpuMilliseconds : 0, cpuMs = scene?.RenderCpuMilliseconds };
         if (sections.Contains("diagnostics")) result["diagnostics"] = new { failure = startupFailure ?? session?.Failure, loading = StartupStatus, pendingMeshes = scene?.PendingMeshes, pendingCanopies = scene?.WorldCanopiesPending, deferred = scene?.DeferredReadiness };
         if (sections.Contains("full")) result["full"] = TestStatus();
         return result;

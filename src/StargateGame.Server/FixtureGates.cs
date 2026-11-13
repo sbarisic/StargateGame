@@ -219,7 +219,7 @@ public sealed partial class GameServer
                 runtime!.Definition = physics.World.Definition;
             }
         }
-        if (fixtureCloseRequested && fixtureFlights.Count == 0 && !physics.CurrentClips().Any(c => c.Mode == PropClipMode.Emergence) && connection.Phase != GatePhase.Closing)
+        if (fixtureCloseRequested && fixtureFlights.Count == 0 && npcFlights.Count == 0 && !physics.CurrentClips().Any(c => c.Mode == PropClipMode.Emergence) && connection.Phase != GatePhase.Closing)
         {
             // Withdraw incomplete insertions before restoring their full hulls.
             var clips = physics.CurrentClips();
@@ -279,14 +279,8 @@ public sealed partial class GameServer
                 fixtureFlights.Remove(f);
                 return;
             }
-            var exit = GateTravel.Exit(f.Source, f.Destination, player);
-            if (!physics.CanPlacePlayer(exit.Position, player.Id))
-            {
-                if (serverTick - f.Started < 600)
-                    return;
-                exit = f.SafePlayer!.Value;
-                FixtureNotice(f, TransitPhase.Cancelled, "Test gate exit blocked; returned safely.");
-            }
+            var exit = physics.ResolveCharacterExit(f.Destination, GateTravel.Exit(f.Source, f.Destination, player), out bool launched, player.Id);
+            Console.WriteLine($"FIXTURE character={player.Id} exit={(launched ? "centre-launch" : "clear")} position={exit.Position}");
             exit = exit with
             {
                 LastInput = physics.Player(player.Id).LastInput
@@ -348,6 +342,7 @@ public sealed partial class GameServer
         var bodies = physics.Bodies();
         var connection = fixtureConnection;
         physics.TravelGate = connection is not null && fixtureGates[connection.Source].Settled && !fixtureCloseRequested ? GateFrame.From(FixtureEntity(connection.Source)) : null;
+        ObserveNpcTravel(physics.TravelGate, connection is null ? null : GateFrame.From(FixtureEntity(connection.Destination)));
         if (connection is not null)
         {
             var source = GateFrame.From(FixtureEntity(connection.Source));

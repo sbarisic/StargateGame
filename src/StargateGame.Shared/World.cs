@@ -18,7 +18,7 @@ public sealed record StaticEntity(string Id, string Model, Vector3 Position)
 }
 public enum PropKind
 {
-    WoodenCrate, RedBarrel, BlackBarrel, Lantern
+    WoodenCrate, RedBarrel, BlackBarrel, Lantern, ZpmHub, Zpm
 }
 public enum GroundSurface
 {
@@ -37,13 +37,15 @@ public sealed record PropDefinition(int Id, Vector3 Position, Vector3 HalfExtent
         init;
     }
     [System.Text.Json.Serialization.JsonIgnore] public bool IsBarrel => Kind is PropKind.RedBarrel or PropKind.BlackBarrel;
-    [System.Text.Json.Serialization.JsonIgnore] public string Model => Kind switch { PropKind.Lantern => "wooden-lantern", PropKind.RedBarrel => "barrel-red", PropKind.BlackBarrel => "barrel-black", _ => "wooden-crate" };
-    [System.Text.Json.Serialization.JsonIgnore] public GroundSurface Surface => IsBarrel ? GroundSurface.Metal : GroundSurface.Wood;
-    [System.Text.Json.Serialization.JsonIgnore] public bool Valid => Enum.IsDefined(Kind) && HalfExtent == (Kind == PropKind.Lantern ? LanternAsset.HalfExtent : IsBarrel ? new Vector3(.363f, .592f, .363f) : new Vector3(.5f)) && Mass == (Kind == PropKind.Lantern ? 2 : IsBarrel ? 15 : 10);
+    [System.Text.Json.Serialization.JsonIgnore] public string Model => Kind switch { PropKind.ZpmHub => "zpm-hub", PropKind.Zpm => "zpm", PropKind.Lantern => "wooden-lantern", PropKind.RedBarrel => "barrel-red", PropKind.BlackBarrel => "barrel-black", _ => "wooden-crate" };
+    [System.Text.Json.Serialization.JsonIgnore] public GroundSurface Surface => IsBarrel || Kind is PropKind.ZpmHub or PropKind.Zpm ? GroundSurface.Metal : GroundSurface.Wood;
+    [System.Text.Json.Serialization.JsonIgnore] public bool Valid => Enum.IsDefined(Kind) && HalfExtent == (Kind switch { PropKind.ZpmHub => ZpmAsset.HubHalf, PropKind.Zpm => ZpmAsset.ModuleHalf, PropKind.Lantern => LanternAsset.HalfExtent, _ => IsBarrel ? new Vector3(.363f, .592f, .363f) : new Vector3(.5f) }) && Mass == (Kind switch { PropKind.ZpmHub => 80, PropKind.Zpm => 2, PropKind.Lantern => 2, _ => IsBarrel ? 15 : 10 });
     [System.Text.Json.Serialization.JsonIgnore] public bool CastsShadows => Kind != PropKind.Lantern;
-    [System.Text.Json.Serialization.JsonIgnore] public string Name => Kind == PropKind.Lantern ? "lantern" : IsBarrel ? "barrel" : "crate";
+    [System.Text.Json.Serialization.JsonIgnore] public string Name => Kind switch { PropKind.ZpmHub => "ZPM hub", PropKind.Zpm => "ZPM", PropKind.Lantern => "lantern", _ => IsBarrel ? "barrel" : "crate" };
     public static PropDefinition Lantern(int id, Vector3 position) => new(id, position, LanternAsset.HalfExtent, 2) { Kind = PropKind.Lantern };
     public static PropDefinition Barrel(int id, Vector3 position, bool black) => new(id, position, new(.363f, .592f, .363f), 15) { Kind = black ? PropKind.BlackBarrel : PropKind.RedBarrel };
+    public static PropDefinition ZpmHub(int id, Vector3 position) => new(id, position, ZpmAsset.HubHalf, 80) { Kind = PropKind.ZpmHub };
+    public static PropDefinition Zpm(int id, Vector3 position) => new(id, position, ZpmAsset.ModuleHalf, 2) { Kind = PropKind.Zpm };
 }
 public sealed record PlanetDefinition(string Id, string Name, int Seed, float HalfSize, Vector3[] Spawns, StaticEntity[] Entities)
 {

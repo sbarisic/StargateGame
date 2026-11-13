@@ -16,7 +16,7 @@ public readonly record struct PlayerState(int Id, string Name, Vector3 Position,
     bool Crouched = false, float AirSpeedLimit = 0);
 public readonly record struct BodyState(int Id, Vector3 Position, Quaternion Rotation, Vector3 LinearVelocity, Vector3 AngularVelocity, bool Sleeping);
 public readonly record struct AppliedCommand(int PlayerId, PlayerInput Input, int MissingTicks);
-public sealed record PhysicsSnapshot(long Tick, long Epoch, PlayerState[] Players, BodyState[] Bodies, AppliedCommand[] Commands, PropDefinition[]? Registry = null, PropClip[]? Clips = null, GateFrame? TravelGate = null, CarryState[]? Carries = null, PropEntrySupport[]? EntrySupports = null, NpcMotion[]? Npcs = null);
+public sealed record PhysicsSnapshot(long Tick, long Epoch, PlayerState[] Players, BodyState[] Bodies, AppliedCommand[] Commands, PropDefinition[]? Registry = null, PropClip[]? Clips = null, GateFrame? TravelGate = null, CarryState[]? Carries = null, PropEntrySupport[]? EntrySupports = null, NpcMotion[]? Npcs = null, DoorMotion[]? Doors = null);
 
 public static class Movement
 {
@@ -31,6 +31,12 @@ public static class Movement
     // Two 10 kg crates resist about 216 N at the world's .6 friction / 18 m/s²
     // gravity. Leave headroom for continuous pushing instead of stick/slip.
     public const float PushStrength = 300;
+    // Virtual characters are kinematic riders. Jolt's character mass adds an
+    // explicit gravity impulse to the support before the rigid-body solve; an
+    // 80 kg rider kicks a 10 kg crate downward at 2.4 m/s every tick and bounces.
+    // Keep support weightless; side pushing still uses PushStrength and the
+    // character's own gravity/landing remain in the shared movement controller.
+    public const float CharacterSupportMass = 0;
     public static Vector3 DesiredVelocity(PlayerInput input, bool crouched = false)
     {
         Vector2 move = new(input.Strafe, input.Forward);

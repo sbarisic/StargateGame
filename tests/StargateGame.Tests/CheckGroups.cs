@@ -10,12 +10,16 @@ static class CheckGroups
             case "movement": MovementPresentationChecks.Run(); PhysicsChecks.Run(); await LatencyScenario.Run(); break;
             case "tactical-movement": TacticalMovementChecks.Run(); MovementPresentationChecks.Run(); break;
             case "fixture-gates": await FixtureGateChecks.Run(); break;
+            case "character-transit": await CharacterTransitChecks.Run(); break;
             case "travel": TravelChecks.Run(); await TravelChecks.Persistence(); await TravelChecks.IdentityNetwork(); break;
             case "travel-network": await GalaxyChecks.Network(Path.GetFullPath("artifacts/galaxy/galaxy.bin"), delayed, false, true, args.Contains("--cold"), args.Contains("--blocked"), args.Contains("--player-push")); break;
             case "galaxy": await GalaxyChecks.Run(true, delayed, args.Contains("--expiry")); break;
             case "persistence": await PersistenceChecks.Run(); break;
             case "building": await BuildingChecks.Run(); break;
             case "prefab": await PrefabChecks.Run(); break;
+            case "doors": PrefabChecks.HingedDoor(); await PrefabChecks.DoorPersistence(); break;
+            case "zpm-props": ZpmPropChecks.Run(); break;
+            case "rifle": await RifleChecks.Run(); break;
             case "settlements": SettlementChecks.Run(false); await SettlementChecks.Integration(); break;
             case "furnishings": FurnishingChecks.Run(); FurnishingChecks.Physics(); await FurnishingChecks.Persistence(); break;
             case "weapons": await WeaponChecks.Run(); break;
@@ -34,6 +38,7 @@ static class CheckGroups
             case "rocks": RockChecks.Run(); break;
             case "worldgen": await WorldGenChecks.Run(); await RiverChecks.Run(); await TerrainDeliveryChecks.Run(); break;
             case "network": await NetworkChecks.Run(); break;
+            case "grass-rendering": GrassRenderingChecks.Run(); break;
             case "canopy-lod": CanopyLodChecks.Run(); break;
             case "planet-debug": await PlanetDebugChecks.Run(); break;
             case "emergence": await EmergenceChecks.Run(); break;
@@ -56,6 +61,7 @@ static class CheckGroups
             case "settlement-network": await SettlementChecks.Network(delayed); break;
             case "prefab-network": await BuildingChecks.Network(delayed, true); break;
             case "gate-build": await BuildingChecks.Network(gateZone: true); break;
+            case "prop-support": PropSupportChecks.Run(); break;
             case "meadow-props": MeadowPropChecks.Run(); await MeadowPropChecks.Network(); break;
             case "address-book-network": await AddressBookChecks.Network(); break;
             default: throw new ArgumentException("Unknown test group: " + group);

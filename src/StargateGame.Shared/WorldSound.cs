@@ -3,9 +3,9 @@ namespace StargateGame.Shared;
 
 public enum WorldSoundKind
 {
-    Impact, Scrape, Place, Remove, Scenery, Door, GateArrival
+    Impact, Scrape, Place, Remove, Scenery, Door, GateArrival, RifleFire, RifleReload, RifleDry, RifleImpact
 }
-public readonly record struct WorldSoundEvent(long Id, long Tick, WorldSoundKind Kind, int BodyId, Vector3 Position, float Strength);
+public readonly record struct WorldSoundEvent(long Id, long Tick, WorldSoundKind Kind, int BodyId, Vector3 Position, float Strength, int SourcePlayer = 0);
 
 // Audio is cosmetic. Neither event history nor playback belongs in saved physics.
 public sealed class SoundEventHistory

@@ -28,16 +28,31 @@ command can extrapolate for six ticks, then becomes neutral. Render interpolatio
 uses a separate history and never supplies collision positions.
 
 Lifecycle and standing orders use the `npcs` stream, with revision/effective tick;
-movement uses normal physics baselines. NPC edits do not increment the physics
-epoch or transfer terrain. Rendering shares skeletal assets and character LODs,
+movement uses normal physics baselines. Ordinary NPC edits do not increment the
+physics epoch; gate capture and arrival do. Rendering shares skeletal assets and character LODs,
 with separate animation clocks and consistent poses for deferred/shadow passes.
 
 `NpcStorage` stores location-owned records in the `npcs` table. Active tasks,
 paths, perception and memory are reconstructed after loading. Follow becomes
 Hold after a disconnect, departure or server restart. Idle locations suspend AI;
 distant agents stop requesting movement and remain at their last safe position
-when collision coverage unloads. NPCs cannot travel through gates or be grabbed
-or used as cable anchors.
+when collision coverage unloads. NPCs can enter a sending gate and arrive at its
+receiver after the normal transit delay. Players and NPCs share a bounded search
+around the mapped exit. If all candidates are occupied, the character is released
+from the aperture centre at 12 m/s forward and 4 m/s upward. This fallback clears
+transit instead of waiting ten seconds for the same blocked position.
+
+Same-world transfers retain identity and follow orders. Cross-world transfers
+move both location save records in one SQLite transaction and reset orders to
+Hold at the destination. Missing destination readiness or capacity returns the
+NPC to its source; an occupied exit uses the launch fallback. NPCs cannot be
+grabbed or used as cable anchors.
+
+`Test.ps1 check -Group character-transit` checks capsule entry, clear/alternate/
+blocked exits, crouched fallback height, atomic NPC ownership and real player/NPC
+transit in the existing Sandbox gate fixture. The blocked-exit network check and
+a rendered Sandbox player round trip passed. Cross-world NPC transfer has storage
+coverage but has not had a rendered end-to-end playtest.
 
 ## Navigation and reactions
 
@@ -82,6 +97,24 @@ Sound positions include uncertainty and do not track their source afterward.
 Danger lasts five seconds after its latest observation; hostile memories last
 ten seconds and ordinary memories five. After flight, a short search resumes the
 standing order. Self-generated contact stimuli are ignored.
+
+## Navigation overlay
+
+In Local Testing, press **Ctrl+F3**, or open **F6** and click **Navmesh**, to
+show the server's navigation polygon edges through grass and scenery. Green marks ready tiles; orange
+marks pending or dirty tiles. Door links show green when open and orange when
+closed. The HUD reports ready tiles and edge count. Press the shortcut again
+to hide the overlay.
+
+The overlay requests nearby tiles around the player even without NPCs and
+refreshes once per second. It uses the soldier navigation profile and committed
+collision geometry. It does not bake navigation around an independent inspection
+camera. Switching worlds clears old geometry; turning it off stops requests.
+Only local developer-authorized connections can request this diagnostic.
+
+AI tools can use a `settings` action with `{"navmesh":true}` (or `false`).
+Observe the `rendering` section for tile states, snapshot tick and edge count;
+wait for `navmesh.ready` before capturing a fully built nearby mesh.
 
 ## Harness and coverage
 

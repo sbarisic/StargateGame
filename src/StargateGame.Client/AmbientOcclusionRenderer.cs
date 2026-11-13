@@ -120,7 +120,7 @@ sealed partial class SceneRenderer
         using var shadow = shadows.CurrentFrame.Bind(p, 9);
         using var gate = gateShadowAtlas?.DepthStencilAttachment.Bind(15);
         using var hand = weapon ? viewmodelShadow?.DepthStencilAttachment.Bind(29) : null;
-        Lighting(p); GateLightingUniforms(p); PointLightingUniforms(p);
+        Lighting(p); GateLightingUniforms(p); PointLightingUniforms(p, weapon);
         using var propShadow = propShadowAtlas?.DepthStencilAttachment.Bind(23);
         p.SetUniform("uPointOnly", 0);
         p.SetUniform("uFogDeferred", 0);

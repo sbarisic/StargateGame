@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../src/StargateGame.Client/AnimationPose.cs" Link="AnimationPose.cs" />
+    <Compile Include="../../src/StargateGame.Client/GrassRendering.cs" Link="GrassRendering.cs" />
     <Compile Include="../../src/StargateGame.Client/CanopyLod.cs" Link="CanopyLod.cs" />
     <Compile Include="../../src/StargateGame.Client/ClientPlanetDebug.cs" Link="ClientPlanetDebug.cs" />
     <Compile Include="../../src/StargateGame.Client/CanopyMipSelection.cs" Link="CanopyMipSelection.cs" />
@@ -12,6 +14,7 @@
     <Compile Include="../../src/StargateGame.Client/AddressBookState.cs" Link="AddressBookState.cs" />
     <Compile Include="../../src/StargateGame.Client/AudioOcclusion.cs" Link="AudioOcclusion.cs" />
     <Compile Include="../../src/StargateGame.Client/ClientAudio.cs" Link="ClientAudio.cs" />
+    <Compile Include="../../src/StargateGame.Client/RifleReloadAudio.cs" Link="RifleReloadAudio.cs" />
     <Compile Include="../../src/StargateGame.Client/DeviceIdentity.cs" Link="DeviceIdentity.cs" />
     <Compile Include="../../src/StargateGame.Client/ClientTravel.cs" Link="ClientTravel.cs" />
     <Compile Include="../../src/StargateGame.Client/ClientSession.cs" Link="ClientSession.cs" />

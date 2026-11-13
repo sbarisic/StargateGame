@@ -14,6 +14,7 @@ sealed partial class SceneRenderer
         get;
         set;
     } = new();
+    public double? EnvironmentTimeOverride {get;set;}
     readonly WeatherClock weatherClock = new();
     public WeatherFrame AudioWeather => weatherFrame;
     WeatherFrame weatherFrame;
@@ -72,7 +73,7 @@ sealed partial class SceneRenderer
     {
         ShelterUpdates = 0;
         WeatherCpuMilliseconds = 0;
-        double clock = weatherClock.Update(frame.LocationId, frame.SimulationTime, time);
+        double clock = EnvironmentTimeOverride ?? weatherClock.Update(frame.LocationId, frame.SimulationTime, time);
         weatherFrame = WeatherFrame.Sample(World.Definition.Preset, World.Definition.Seed, clock, ActiveWeather);
         weatherCloudOffset = Vector2.Normalize(new(1, .38f)) * (float)(WeatherFrame.WindTravel(World.Definition.Seed, clock, ActiveWeather) * .004);
         dustFrame = DustWeather ? DesertDust.Sample(World.Definition.Seed, clock, DebugWeather is PlanetWeather.DesertDust || ActiveWeather != WinterWeather.Off && WeatherSettings.DesertDustEnabled) : default;

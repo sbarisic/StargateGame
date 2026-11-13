@@ -22,6 +22,18 @@ sealed partial class SceneRenderer
     ShaderProgram? hybridGrassShader, hybridMeshShader;
     Mesh3D? grassVolumeQuad;
     readonly List<(GrassTile Key, GrassResident Tile, float Distance)> visibleGrassTiles = [];
+    // Enabled after the paired Sandbox performance and visual checks.
+    public bool GrassDepthCulling { get; set; } = true;
+    public bool GrassShaderReuse { get; set; } = true;
+    public bool GrassScreenLod { get; set; } = true;
+    public float GrassVolumeDensity { get; set; } = .8f;
+    public int[] GrassLodCounts { get; } = new int[4];
+    readonly float[] grassPatchData = new float[64];
+    public bool GrassCaptureReady => !GroundCoverSettings.Enabled || !GroundCoverSettings.Hybrid || (grassVolumes is not null && hybridGrassShader is not null && hybridMeshShader is not null && GrassPending == 0 && visibleGrassTiles.All(t=>coverClock.Elapsed.TotalSeconds-t.Tile.Born>=.4));
+    public object GrassDiagnostics => new { depthCulling=GrassDepthCulling, shaderReuse=GrassShaderReuse, screenLod=GrassScreenLod, volumeDensity=GrassVolumeDensity,
+        conservativeDepthSupported=CanopyConservativeDepthSupported, conservativeDepthActive=GrassDepthCulling&&CanopyConservativeDepthSupported,
+        ready=GrassCaptureReady, patches=GrassVolumePatches, meshTriangles=GrassTriangles, lods=GrassLodCounts, pending=GrassPending,
+        growing=visibleGrassTiles.Count(t=>coverClock.Elapsed.TotalSeconds-t.Tile.Born<.4), width=opaqueTarget?.Width,height=opaqueTarget?.Height };
     public int GrassVolumePatches { get; private set; }
     public long GrassVolumeBytes { get; private set; }
     public string GrassRendererStatus => GroundCoverSettings.Hybrid ? grassVolumes is null ? "Hybrid / loading (mesh fallback)" : "Hybrid" : "Mesh";
@@ -38,7 +50,7 @@ sealed partial class SceneRenderer
             string descriptor = "vegetation/grass-volume/grass.json";
             result[descriptor] = ReadRuntimeAsset(descriptor);
             using var doc = JsonDocument.Parse(result[descriptor]);
-            if (doc.RootElement.GetProperty("version").GetInt32() != 2) throw new InvalidDataException("Unsupported grass volume version.");
+            if (doc.RootElement.GetProperty("version").GetInt32() != 3) throw new InvalidDataException("Grass blade roots missing; rebuild grass assets.");
             foreach (var dependency in doc.RootElement.GetProperty("dependencies").EnumerateArray())
             {
                 startupStop.Token.ThrowIfCancellationRequested();
@@ -82,12 +94,14 @@ sealed partial class SceneRenderer
             }
             byte[] mesh = Get(entry.GetProperty("mesh").GetString()!); int count = BitConverter.ToInt32(mesh);
             if (count <= 0 || count > 100000 || mesh.Length != count * 32 + 4) throw new InvalidDataException("Invalid grass mesh.");
-            Vector3[] positions = new Vector3[count], normals = new Vector3[count]; Vector2[] uv = new Vector2[count];
+            byte[] roots = Get(entry.GetProperty("roots").GetString()!);
+            if (roots.Length != count * 8) throw new InvalidDataException("Invalid grass blade roots.");
+            Vector3[] positions = new Vector3[count], normals = new Vector3[count]; Vector4[] uv = new Vector4[count];
             using (var reader = new BinaryReader(new MemoryStream(mesh, 4, mesh.Length - 4)))
                 for (int i = 0; i < count; i++)
-                { positions[i] = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()); normals[i] = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()); uv[i] = new(reader.ReadSingle(), reader.ReadSingle()); }
+                { positions[i] = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()); normals[i] = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()); uv[i] = new(reader.ReadSingle(), reader.ReadSingle(), BitConverter.ToSingle(roots, i * 8), BitConverter.ToSingle(roots, i * 8 + 4)); }
             volume.Mesh = Own(graphics.CreateMesh3D()); volume.Mesh.SetVertices(positions); volume.Mesh.SetNormals(normals); volume.Mesh.SetUVs(uv); volume.Vertices = count;
-            bytes += mesh.Length; yield return true;
+            bytes += mesh.Length + roots.Length; yield return true;
         }
         grassVolumeQuad = Own(graphics.CreateMesh3D());
         grassVolumeQuad.SetVertices([new(-1,-1,0),new(1,-1,0),new(1,1,0),new(-1,-1,0),new(1,1,0),new(-1,1,0)]);
@@ -100,17 +114,23 @@ sealed partial class SceneRenderer
         grassBladeColor ??= LoadTerrainTexture("grass-blades.png", "vegetation");
         var transition = HybridGrass.Transition((int)Settings.Quality);
         var (range, density) = GroundCoverSettings.EffectiveBudget((int)Settings.Quality);
+        var viewProjection = camera.View * camera.Projection;
         void Configure(ShaderProgram shader)
         {
             Lighting(shader); GateLightingUniforms(shader); MeadowUniforms(shader);
             shader.SetUniform("uSurface", 4); shader.SetUniform("uGrassColor", 1); shader.SetUniform("uGrassNormal", 2);
             shader.SetUniform("uSceneDepth", 6); shader.SetUniform("uTransition", transition); shader.SetUniform("uRange", (float)range);
             shader.SetUniform("uDensity", density / 24f); shader.SetUniform("uViewPosition", camera.Position);
-            shader.SetUniform("uGrassViewProjection", camera.View * camera.Projection); shader.SetUniform("uInverseViewProjection", inverse);
+            shader.SetUniform("uGrassViewProjection", viewProjection); shader.SetUniform("uInverseViewProjection", inverse);
             shader.SetUniform("uViewport", new Vector2(opaqueTarget!.Width, opaqueTarget.Height)); shader.SetUniform("uShadowSurfaceBias", .01f);
             shader.SetUniform("uGrassGroundLayer", Math.Max(0, Array.FindIndex(terrainGrass, value => value > 0)));
         }
         Configure(hybridGrassShader); Configure(hybridMeshShader);
+        hybridGrassShader.SetUniform("uGrassDepthCulling", GrassDepthCulling ? 1 : 0);
+        hybridGrassShader.SetUniform("uGrassConservativeDepth", GrassDepthCulling && CanopyConservativeDepthSupported ? 1 : 0);
+        hybridGrassShader.SetUniform("uGrassShaderReuse", GrassShaderReuse ? 1 : 0);
+        hybridGrassShader.SetUniform("uGrassScreenLod", GrassScreenLod ? 1 : 0);
+        hybridGrassShader.SetUniform("uGrassVolumeDensity", GrassVolumeDensity);
         using var terrain = BindTerrainPbr(hybridGrassShader);
         using var meshTerrain = BindTerrainPbr(hybridMeshShader);
         using var surfaceFieldBinding = BindSurface();
@@ -132,6 +152,11 @@ sealed partial class SceneRenderer
         visibleGrassTiles.Sort((a, b) => a.Distance.CompareTo(b.Distance));
         uint salt = GroundCover.PlanetSalt(World.Definition);
         float now = (float)coverClock.Elapsed.TotalSeconds;
+        // Separate query scopes; retain the existing per-tile instance draws.
+        for (int phase = 0; phase < 2; phase++)
+        {
+        bool meshPhase = phase == 0;
+        using var timing = gpuTimer.Measure(pass, meshPhase ? "grass-mesh" : "grass-volume");
         foreach (var (key, tile, distance) in visibleGrassTiles)
         {
             // Height varies continuously in the surface field, not at tile edges.
@@ -145,18 +170,34 @@ sealed partial class SceneRenderer
                 program.SetUniform("uGrassExtent", volume.Extent); program.SetUniform("uGrassTip", volume.Tip);
                 program.SetUniform("uGrowth", Math.Clamp((now - tile.Born) / .4f, 0, 1));
             }
-            if (distance - 6 < transition.Y)
+            if (meshPhase && distance - 6 < transition.Y)
             {
                 TileUniforms(hybridMeshShader);
                 pass.DrawMeshInstances(volume.Mesh, 16, grassBladeColor, hybridMeshShader); DrawCalls++;
                 GrassTriangles += volume.Vertices / 3 * 16; GrassDetailedTiles++;
             }
-            if (distance + 6 > transition.X)
+            if (!meshPhase && distance + 6 > transition.X)
             {
                 TileUniforms(hybridGrassShader);
+                for (int patch = 0; patch < 16; patch++)
+                {
+                    var origin = new Vector2(key.X * 8 + patch % 4 * 2, key.Z * 8 + patch / 4 * 2);
+                    float patchDistance = Vector2.Distance(origin + Vector2.One, eye);
+                    float mip = GrassRendering.LegacyMip(patchDistance), proxy = -1;
+                    var bounds = (Min:new Vector3(origin.X-.3f,tile.Bounds.Min.Y,origin.Y-.3f), Max:new Vector3(origin.X+2.3f,tile.Bounds.Max.Y+volume.Extent,origin.Y+2.3f));
+                    if ((GrassDepthCulling || GrassScreenLod) && tile.PatchRanges is { } ranges)
+                        bounds = GrassRendering.Bounds(origin,ranges[patch],volume.Extent,tile.Bounds.Min.Y,tile.Bounds.Max.Y+volume.Extent);
+                    if (GrassScreenLod) mip=GrassRendering.SelectMip(GrassRendering.ProjectedSize(bounds.Min,bounds.Max,camera.Position,viewProjection,new(opaqueTarget!.Width,opaqueTarget.Height)),patchDistance,transition.Y);
+                    if (GrassDepthCulling && CanopyConservativeDepthSupported) proxy=CanopyDepthBounds.Nearest(bounds.Min,bounds.Max,camera.Position,viewProjection);
+                    grassPatchData[patch*4]=bounds.Min.Y; grassPatchData[patch*4+1]=bounds.Max.Y;
+                    grassPatchData[patch*4+2]=proxy; grassPatchData[patch*4+3]=mip;
+                    GrassLodCounts[Math.Clamp((int)mip,0,3)]++;
+                }
+                hybridGrassShader.SetUniform("uGrassPatchData",grassPatchData);
                 pass.DrawMeshInstances(grassVolumeQuad!, 16, white, hybridGrassShader); DrawCalls++;
                 GrassVolumePatches += 16; GrassFarTiles++;
             }
+        }
         }
         return true;
     }

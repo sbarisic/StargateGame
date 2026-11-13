@@ -33,6 +33,24 @@ static class CanopyLodChecks
         Verify.Check(size > far && Math.Abs(CanopyLod.ProjectedHeight(new(-1,-1,-11), new(1,1,-9), Vector3.Zero, projection, 2160) - 2 * size) < .001f, "projection respects bounds, distance and viewport");
         Verify.Check(float.IsPositiveInfinity(CanopyLod.ProjectedHeight(new(-1), new(1), Vector3.Zero, projection, 1080)), "camera inside canopy retains detail");
         Verify.Check(float.IsPositiveInfinity(CanopyLod.ProjectedHeight(new(-1,-1,-1), new(1,1,-.02f), Vector3.Zero, projection, 1080)), "near-plane crossing retains detail");
+        Verify.Check(CanopyLightLod.Select(512,true)==new CanopyLightLod(24,24,0),"near light quality unchanged");
+        Verify.Check(CanopyLightLod.Select(160,true).First==12&&CanopyLightLod.Select(64,true).First==8&&CanopyLightLod.Select(20,true).First==6,"distant light budgets");
+        Verify.Check(CanopyLightLod.Select(20,false).First==24&&CanopyLightLod.Select(float.PositiveInfinity,true).First==24,"light baseline and inside crown");
+        float previous=24;
+        for(float pixels=400;pixels>=1;pixels-=.1f) {
+            var light=CanopyLightLod.Select(pixels,true);float cost=light.First+(light.Second-light.First)*light.Blend;
+            if(cost>previous+.0001f||previous-cost>.05f)throw new Exception("Light transition discontinuity");previous=cost;
+        }
+        Verify.Check(true,"smooth monotonic light blend across thresholds");
+        Verify.Check(CanopyDepthBounds.Nearest(new(-1),new(1),Vector3.Zero,projection)==-1,"inside proxy uses near depth");
+        Verify.Check(CanopyDepthBounds.Nearest(new(-1,-1,-1),new(1,1,.1f),Vector3.Zero,projection)==-1,"crossing proxy uses near depth");
+        var low=new Vector3(-2,-3,-15);var high=new Vector3(3,4,-8);
+        float nearest=CanopyDepthBounds.Nearest(low,high,Vector3.Zero,projection);
+        for(int i=0;i<=10;i++)for(int j=0;j<=10;j++)for(int k=0;k<=10;k++) {
+            var v=Vector4.Transform(new Vector4(low+(high-low)*new Vector3(i,j,k)/10,1),projection);
+            if(nearest>v.Z/v.W)throw new Exception("Nonconservative depth bound");
+        }
+        Verify.Check(true,"proxy depth never exceeds any enclosed hit");
         Console.WriteLine($"CANOPY LOD {Verify.Count} CHECKS PASSED");
     }
 }

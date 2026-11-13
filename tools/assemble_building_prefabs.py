@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from build_wall_caps import generate_caps
 from build_door_collision import generate_doors
+from fit_building_openings import fit_openings
 from build_stair_reference import generate_reference
 MODELS = ROOT / "assets/models"
 BUILD = ROOT / "assets/building"
@@ -64,6 +65,7 @@ catalog = [
     if p["id"] not in recipes
 ]
 lookup = {p["id"]: p for p in catalog}
+fit_openings(catalog, MODELS)
 sources = {}
 
 

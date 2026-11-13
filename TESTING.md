@@ -5,6 +5,19 @@ input handoff, operation cancellation, replay, and session retention.
 
 Use `scripts/Test.ps1` for builds, scenarios, recipes, and focused checks. The menu and CLI use the versioned catalog in `src/StargateGame.Testing/Contracts.cs`. Defaults are Windows x64, Release, seed 7319, one client, performance graphics, and isolated temporary state.
 
+Sandbox's `canopy-performance` recipe compares baseline, depth rejection,
+hierarchical empty skipping, lighting LOD and all three together at 1920x1080.
+Use `check -Group canopy-lod` for focused projection and dense-reference traversal
+checks (Python, NumPy and SciPy required). See [TREE_PROTOTYPE.md](TREE_PROTOTYPE.md)
+for settings, timing definitions, measured defaults and visual validation limits.
+The recipe records measurements and captures; it does not certify visual correctness.
+
+Use Sandbox's `grass-performance` recipe for the corresponding grass comparison,
+and `check -Group grass-rendering` for projection, bounds, integration and grass
+asset checks. The settings `grassDepthCulling`, `grassShaderReuse` and
+`grassScreenLod` independently control the optimizations. See
+[HYBRID_GRASS_WEAPONS.md](HYBRID_GRASS_WEAPONS.md) for measurements and limitations.
+
 ## Manual testing
 
 The latest corner/foundation/stair update is untested. Asset generation was run,
@@ -142,6 +155,7 @@ Run it with `./scripts/Test.ps1 run -Scenario sandbox -Recipe recipe.json`.
 | `weapon` | Production inventory/container action, optional `item` and `container` GUIDs. |
 | `settings` | Allowlisted rendering controls from `list.renderingSettings`: time, quality, weather, grass, clouds, volumetrics, reflections, mist, parallax, lighting, horizon previews and diagnostic fixtures. |
 | `gate-preview` | Frozen render-only `phase` and phase-relative `seconds`; `off` restores live state. Does not dial a gate. |
+| `capture` | Optional `when` uses the same condition object as `wait`, checked on the captured frame; useful for brief muzzle flashes. `immediate` bypasses asset readiness, not this condition. |
 | `audio-record` | `name` starts WAV capture; `stop:true` finalizes it. Cue counters accompany state. |
 | `sample` | Bounded 0.1–60 second GPU timing sample; result contains frame count, p95, and maximum. |
 | `capture` | A filename in the selected client's artifact directory; screenshot and adjacent JSON state snapshot. |
@@ -215,10 +229,57 @@ These measure whole recipes; inspect timestamped events for startup/reset subste
 Broad packet loss, travel commit-stage crashes, and multiplayer soak matrices are deferred. Rings/ZPM gameplay is not implemented.
 
 
-### Door and demolition manual acceptance (protocol 25)
+### Character gate exits
 
-Implementation does not run these checks. Rebuild matching client/server before
-checking both sides of doors, genuine player/crate blockers and the logged
+`./scripts/Test.ps1 check -Group character-transit` runs focused player/NPC gate
+checks in the existing Sandbox fixture, including a fully obstructed receiver.
+`./scripts/Test.ps1 run -Scenario sandbox -Recipe gate-roundtrip` exercises actual
+player movement and rendered arrival in both directions. Characters search 24
+nearby capsule placements, then launch from the receiving aperture centre at
+12 m/s forward and 4 m/s upward if none is clear. Normal mapped exits retain
+momentum. Entry accepts a capsule entering the aperture without requiring its
+entire projected height to fit; movement outside the rim or away from the gate
+does not trigger travel. Rebuild matching client/server binaries before testing.
+
+### Hinged doors (protocol 35)
+
+Doors retain their mesh and rotate about the authored hinge from 0 to 90 degrees
+in 0.8 seconds. E changes the target; reversing mid-swing preserves the current
+angle. A kinematic collider follows the leaf. Players, NPCs and props can stop
+motion; it resumes when they clear the swing. These are controlled hinges, not
+free-swinging physics props. Fixed frames and walls do not veto the authored arc.
+
+Motion angles and open/closed targets are replicated in physics snapshots and
+included in prediction checkpoints. Door interaction changes the existing hinge
+target directly: no terrain transfer, collision recook, structural revision,
+physics epoch change, or building mesh reconstruction. Persistent worlds update
+only the door's database row and request receipt asynchronously; simulation keeps
+running. NPC door use follows the same path. Saves retain the open/closed target;
+reloading starts at that endpoint.
+Use matching client/server builds. Harness status exposes `doors` (angle in
+radians and blocked state); focused building observations include the same data.
+Run `./scripts/Test.ps1 check -Group doors` for motion, collision, obstruction,
+reversal, replication, single-door persistence and cleanup checks. The focused
+group passed 26 checks. A two-client Sandbox open/close run kept revision 0,
+physics epoch 5 and five rebuilt batches unchanged on both clients, with no
+pending transition and both clients playable. `sandbox-check` waits for actual leaf
+angles on both clients instead of only checking the requested open state.
+
+### Door and demolition manual acceptance
+
+Kit doors and window casements fit inside their surrounding frames with a small
+working clearance. `python tools/test_building_openings.py` checks the leaf
+against the stone silhouette, window trim clearances, wall cutout and joinery
+relief. The thin bars use at most 2 mm of material depth to stay in front of glass.
+`tools/assemble_building_prefabs.py` applies the versioned fit; after changing it,
+re-export houses with `tools/import_settlements.py --houses-only`, regenerate house
+LODs with `tools/build_settlement_lods.py --houses-only` in Blender, then prepare
+matching client/server builds. `artifacts/grass-review/openings-recipe.json`
+checks normal E-key opening/closing and captures the fitted door and window.
+
+The hinged-door change was checked in a two-client Sandbox session using normal
+E-key input for opening and closing, with closed/intermediate/open captures.
+Continue manual checks from both sides of doors, with player/crate blockers and the logged
 blocker identity. Confirm frames and fixed world geometry never block the swing,
 while walls still block interaction through them. Compare looking toward/away from doors using the aggregate
 `BUILD query` diagnostics. Browse all palette pages and confirm the six hidden
@@ -256,11 +317,52 @@ buildings, functional doors, furnishings and interior resets. Restart/reset
 Sandbox with matching client/server builds to generate revision 9. No builds,
 tests or playtests were run; material generation is part of implementation.
 
+## Rifle firing and reloading
+
+LMB fires the equipped rifle at a server-limited 450 rounds/minute; RMB aims and
+R reloads. The HUD separates magazine and chamber counts (`29+1 / 120`). The rifle
+starts with 30 loaded rounds and 120 reserve rounds. A partial reload preserves
+the chambered round and fills the magazine to 30, for a maximum of 30+1. An empty
+reload loads 30 rounds total, then feeds one into the chamber. Unused magazine
+rounds remain available; reloads never create ammunition.
+
+The existing 2.733-second reload animation owns the weapon until completion.
+Firing, aiming, holstering, equipment transfers, Q/B tools and the physics gun
+cannot cancel it. Ammo changes at the server deadline. Movement is still allowed.
+The server validates sequence, equipment, ammo, aim and an independent fire
+cooldown. Magazine, chamber and reserve state follow the item through storage and
+are saved in persistent worlds.
+
+Shots use authoritative-position hitscan against current collision, stop at the
+first surface, and apply an impulse to dynamic props. Shot events drive muzzle
+flashes, impact sparks and brief shadowed point lights, including viewmodel
+lighting. Soft HDR muzzle plumes and a hot core replace the flat star. The local
+light follows the animated muzzle socket (3.5 cm into the gas plume), including
+aim, recoil and bob. It fades over 55 ms with a 4 m range. World objects, the rifle
+and hands cast shadows when rendering shadows are enabled. The point-shadow
+atlas is retained between shots instead of being allocated for each flash.
+A short, bounded diffuse bounce approximation fills the shooter's rifle and
+hands during the flash. It applies only to the local viewmodel; direct muzzle
+lighting still uses shadows, and world lighting receives no extra fill light.
+The local muzzle flash tests against viewmodel depth, including the
+barrel, sights and hands. Your own fire, reload and dry-fire sounds are 2D, without
+distance attenuation, orientation panning or Doppler. Other players' weapon
+sounds and bullet impacts remain spatial. This does not add
+a player/NPC health or damage system.
+
+Run `./scripts/Test.ps1 check -Group rifle` for ammo, persistence and two-client
+checks. The rendered `artifacts/grass-review/rifle-menu-recipe.json` exercises
+real input, interrupted-reload attempts, a full magazine, audio and Q selection.
+Rebuild audio with `python tools/import_rifle_audio.py`; the local SGN recording
+retains its source rights and reload/mechanical effects are generated by that
+script. Both client and server must use protocol 38.
+
 ## Sandbox hold-Q spawn menu
 
 Hold Q in live Sandbox to open the prop picker and release the cursor. Select the
-rendered Box or Barrel thumbnail, then click a visible world surface outside the
-panel. Release Q to close and resume mouse-look. Escape closes until Q is released.
+rendered prop or NPC thumbnail to select it, then click a visible world surface
+outside the panel to spawn it. Selecting a thumbnail never spawns an entity.
+Release Q to close and resume mouse-look. Escape closes until Q is released.
 The menu suppresses movement, firing, building and pickup input while open and is
 unavailable during pause, travel or other modal panels. Spawn requests use the
 rendered camera's cursor ray; the server repeats the ray against live collision
@@ -268,18 +370,46 @@ within 40 m, checks camera proximity/visibility and free prop volume, and insert
 an upright dynamic prop through the existing replicated registry. Existing limits
 of five requests per second and 64 live props apply. Failures appear in the menu.
 
-Generate the two thumbnails with Blender background
+Generate the Box and Barrel thumbnails with Blender background
 `tools/assemble_building_prefabs.py -- --spawn-icons --refresh-icons`.
-Both PNGs were generated from the actual prop meshes and materials. The new
-`spawn-prop` build action requires matching protocol-26 client/server builds.
-No builds, tests or playtests were run.
+The thumbnails use the actual prop meshes and materials.
 
+The Q menu also includes **ZPM Hub** (empty, 80 kg) and **ZPM** (one module,
+2 kg). These are independent dynamic props with shared convex picking/collision,
+normal physics-gun handling and replicated registry identities. The authored hub
+collision fills its sockets and recesses; insertion, power generation and charging
+are not implemented. The loaded technology-station display remains render-only.
+Client and server need matching builds (currently **protocol 38**).
+
+Reimport with `python tools/import_zpm_props.py` (numpy, Pillow, scipy), and render
+their icons with `blender --background --python tools/render_zpm_thumbnails.py`.
+The importer also generates `ZpmAsset.cs` collision geometry from the source assets.
+Run `./scripts/Test.ps1 check -Group zpm-props` for focused registry, collision,
+settling and replication checks. UI automation targets `spawn/zpm-hub/Prop` and
+`spawn/zpm/Prop` while Q is held, followed by a separate world click.
+
+Validated with 13 focused checks and a two-client Sandbox run: actual Q-menu
+spawning, physics-gun grab/move/release of each prop, replicated holds/releases,
+and rendered thumbnails/models. Evidence: `artifacts/grass-review/zpm-summary.json`.
+
+
+### Standing on props
+
+Player and NPC controllers use weightless kinematic support. Their gravity and
+side-pushing remain active, but standing on a prop does not repeatedly apply an
+80 kg downward impulse to it. Props retain normal rigid-body simulation and
+carry riders when they move.
+
+Run `./scripts/Test.ps1 check -Group prop-support` for centred/off-centre crate
+stability, moving support, jumping off and side-pushing. In Sandbox, stand on the
+crate at the pickup station and look down while stationary; the crate and camera
+should remain steady. Client and server must use matching updated builds.
 
 ### Sandbox physics gun and Q-menu clicks
 
-Hold Q and click the rendered Box or Barrel thumbnail to spawn immediately at
-the last cursor position over the world (initially the crosshair). Clicking the
-world while Q is held spawns another selected prop. A nearby surface is required.
+Hold Q and click a rendered prop thumbnail to select it. Click the world outside
+the menu while Q is held to spawn the selected prop at that surface. Further world
+clicks spawn more of the selected item. A nearby surface is required.
 
 Press G in Sandbox to switch between the rifle and the supplied Chrome ray gun.
 Hold left mouse to grab a dynamic prop within 100 metres; aim to move it, use the
@@ -288,7 +418,7 @@ right mouse to drop it. The hold uses a strong critically damped force controlle
 terrain, stargates, and other fixed geometry cannot be grabbed. Opening Q or a
 modal screen releases the prop.
 
-Client and server must both use protocol 28. Generate the raygun assets with
+Client and server must use matching builds. Generate the raygun assets with
 `blender --background --python tools/import_physics_gun.py`, then publish the
 asset overlay or cook the release pack. The model is Scenario's Chrome ray gun,
 CC-BY-4.0; full attribution is retained in
@@ -422,6 +552,71 @@ Refresh shader assets through the development overlay before using the matching
 client build. No protocol, save-schema or native-physics change is needed.
 Builds, tests, profiling and playtesting were left to the developer.
 
+## Clouds and sun
+
+The solar disc is evaluated at screen resolution before cloud compositing. Its
+original 0.53-degree diameter was smaller than a texel of the scattering atlas;
+the screen-space edge now remains visible and receives cloud attenuation.
+The visible disc is deliberately enlarged to about 3.7 degrees (seven times its
+original diameter), matching the requested appearance without increasing scene
+lighting energy or changing shadow softness.
+Atmospheric transmission controls its colour, and the existing sky scattering
+provides the background. A smooth circumsolar aureole matches the enlarged disc:
+a bright inner lobe blends into a broad, faint halo. It warms and broadens toward
+the horizon, uses transmitted sunlight, fades out at night, and is attenuated by
+clouds together with the disc. This is an artistic extension to the scattering
+atlas; it does not increase the scene's sunlight energy or change exposure.
+
+Soft sun rays use 64 fixed angular samples of cloud transmission within about 29
+degrees of the sun. Clear/overcast regions with no transmission contrast produce
+no streaks; night disables them. This is a sky-scattering approximation, not a
+new volumetric beam simulation through world geometry. The normal depth pass
+occludes the sky rays behind geometry; existing shadowed fog remains responsible
+for shafts in the world. Reflections use the same directional sky function.
+
+Cloud density uses rotated gradient-noise scales, rounded three-dimensional
+coverage and filtered edge erosion. Broad weather regions group clouds around
+larger clear gaps. Blending fixed spatial scales varies body sizes continuously;
+layer thickness also varies, and a low-density fringe softens cloud edges.
+Temperate/desert coverage controls are .44/.28 (density-field parameters, not
+percentages of visible sky); snowy weather retains .85. Downward rays also
+intersect the layer for inspection from above, and ground-level sky haze fades
+with camera altitude instead of hiding the layer.
+Four sunlight samples use shorter segments
+near each sample to resolve illuminated edges. Incoming sunlight uses the
+existing atmosphere tables at cloud altitude, allowing high clouds to retain
+sunset light. A single aerial-perspective evaluation per cloud ray adds distance
+haze. Multiple scattering remains an artistic approximation; distant and
+low-angle clouds remain soft at the bounded march resolution.
+
+Clouds retain the night-sky ambient fill and smooth day/night underside blend.
+The fog-specific night suppression does not apply to clouds. Scene exposure,
+atlas sizes and march sample counts are unchanged; these changes do add shader
+work and have not had a controlled performance comparison.
+
+References: [Atmospheric Light Scattering](https://www.science-and-fiction.org/rendering/als.html)
+and [Followup to Atmospheric Scattering](https://www.thetenthplanet.de/archives/4519)
+(the latter read from the supplied page source). These informed lighting and
+distance attenuation; the implementation reuses the bundled Bruneton tables.
+Sandbox validation used `artifacts/grass-review/cloud-sun-recipe.json`: clear and
+clouded sun, noon, sunset and midnight at 1280x800, Performance quality, manual
+EV 0. All captures were inspected and the owned session stopped cleanly.
+The distribution revision was also inspected from the ground and above the
+layer at noon and sunset with `artifacts/grass-review/cloud-distribution-recipe.json`.
+Small horizon clouds still lose detail at the current march/atlas resolution.
+The enlarged disc and cloud-shaped rays are exercised by
+`artifacts/grass-review/sun-rays-recipe.json` (clear/clouded noon, sunset and
+night) and `sun-rays-angles-recipe.json` (14:00/16:00 cloud edges). The initial
+16-sample ray filter showed repeated bands; the final filter uses 64 fixed
+samples and reduced intensity. These are visual checks, not a GPU benchmark.
+The final cached Sandbox run completed with empty client/server error logs and
+clean process shutdown. Earlier cold-start attempts disconnected before captures;
+that startup issue remains separate from the visual validation.
+The aureole revision was inspected at 16:00 with clouds on/off, at midnight,
+and at 17:30 above the village using `sun-aureole-recipe.json` and
+`sun-aureole-sunset-recipe.json` in the same artifact directory. The warm runs
+completed and stopped cleanly; two initial shader-startup runs disconnected.
+
 ## Lantern lighting
 
 The `lantern-lighting` Sandbox recipe spawns three Wooden Lantern props, fixes
@@ -431,3 +626,41 @@ for capture readiness. See [LANTERNS.md](LANTERNS.md) for regeneration and manua
 acceptance. Status reports `pointLights.count`, `shadowFaceUpdates`, `targetBytes`,
 `shadowMs` and `lightingMs`; the `shadows` setting controls global shadow casting.
 This recipe has not been run as part of the lantern implementation.
+
+### Recorded rifle audio
+
+`python tools/import_rifle_audio.py` imports two CC0 military-pack shots and four
+reload mechanics. It preserves the existing dry-fire and impact files/settings.
+The original inputs stay untouched; provenance records source hashes, exact cuts,
+gain and licence. Donor cuts require listening review: audio-input audition was
+unavailable during implementation. `artifacts/audio-import/rifle/reload-preview.wav`
+is a 2.73-second listening preview using the runtime marker timings.
+
+Reload cues use the viewmodel's presented tick: magazine removal at 0.40 s,
+seating at 1.18 s, charging pull at 1.80 s and release at 2.10 s. New late reload
+states skip past markers; frame delays seek into still-active cues. Duplicate
+states and rejected commands do not restart the sequence. Local cues are 2D;
+remote cues follow the presented actor and retain normal distance/occlusion rules.
+
+Run the following when ready to validate (not executed during implementation):
+
+```powershell
+./scripts/Test.ps1 check -Group rifle,audio-events
+./scripts/Test.ps1 run -Scenario sandbox -Recipe rifle-audio -Clients 2
+```
+
+The Sandbox recipe uses held firing/reload input, compares accepted ammunition
+consumption with local/remote shot counts, checks the four reload events and their
+seek offsets, then checks that full-magazine reload input stays silent. It records
+`rifle-local.wav`, `rifle-observer.wav`, four viewmodel PNGs and `rifle-audio.json`.
+Status exposes `rifle.reloadAudio` (bounded to 128 played events) and
+`rifle.reloadMarkers`. PNG capture follows marker playback, so use the event ticks
+for exact timing rather than interpreting screenshot request latency as sound lag.
+For continuous audiovisual review, use the existing `scripts/Record-Audio.ps1`
+and fire/reload in its Sandbox session; its recorder-start latency is documented
+in the generated sync note. No new game command-line options are needed.
+
+Check shot tails during automatic fire, reload mechanics against hand/magazine
+motion, remote panning while moving, and cancellation on disconnect/travel.
+Firing and reload PCM were generated; builds, test execution and listening review
+remain with the developer.

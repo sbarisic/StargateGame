@@ -15,6 +15,7 @@ sealed partial class GameApp
         pickupHint = "";
         if (session is null)
             return;
+        if (session.Reloading) { carryingConsumed=true; return; }
         if (!input.IsMouseButtonDown(MouseButton.Left))
             carryMouseGuard = false;
         if (NpcInput(input)) return;

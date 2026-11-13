@@ -60,7 +60,7 @@ public sealed class Operations : IAsyncDisposable
         }
         catch (Exception error)
         {
-            state = error is OperationCanceledException ? e.ExplicitCancel || stop.IsCancellationRequested ? "cancelled" : "timed-out" : "failed";
+            state = error is TimeoutException ? "timed-out" : error is OperationCanceledException ? e.ExplicitCancel || stop.IsCancellationRequested ? "cancelled" : "timed-out" : "failed";
             result = TestResult.Fail(e.Request, error) with { ErrorCode = state };
         }
         finally

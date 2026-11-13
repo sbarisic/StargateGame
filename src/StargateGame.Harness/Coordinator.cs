@@ -10,6 +10,7 @@ sealed class Coordinator(LaunchOptions launch) : IAsyncDisposable
     readonly OwnedProcesses owned = new();
     readonly Operations operations = new();
     readonly AsyncLocal<Guid?> recipeOperation = new();
+    readonly AsyncLocal<List<TestRequest>?> recipeCommands = new();
     readonly object traceLock = new();
     readonly List<(string Pipe, Process? Process)> clients = [];
     readonly CancellationTokenSource stop = new();
@@ -175,12 +176,14 @@ sealed class Coordinator(LaunchOptions launch) : IAsyncDisposable
     {
         if (r.Client < 1 || r.Client > clients.Count) throw new ArgumentException("Invalid client index.");
         string pipe = clients[r.Client - 1].Pipe;
+        if (HasClientOperation(r.Action)) recipeCommands.Value?.Add(r);
         var result = await LocalPipe.Send(pipe, r, token);
         if (result.Outcome == "pending")
         {
             var done = await Poll(pipe, s => s.Data.TryGetProperty("operation", out var op) && op.ValueKind == JsonValueKind.Object && op.GetProperty("request").GetGuid() == r.Id && op.GetProperty("outcome").GetString() != "pending", r.TimeoutSeconds, token);
             result = done.Data.GetProperty("operation").Deserialize<TestResult>(TestJson.Options)!;
         }
+        if (result.ErrorCode == "timed-out") throw new TimeoutException(result.Error);
         result.EnsureSuccess(); return result;
     }
     async Task<TestResult> Dispatch(TestRequest r, CancellationToken token)
@@ -213,10 +216,12 @@ sealed class Coordinator(LaunchOptions launch) : IAsyncDisposable
         ActionCatalog.Validate(r);
         return await operations.Submit(r with { Async = true }, Execute, request => ReleaseInput(request), token);
     }
+    static bool HasClientOperation(TestAction action) => action is TestAction.Move or TestAction.Input or TestAction.Capture or TestAction.Sample
+        or TestAction.UiReview or TestAction.MovementReview or TestAction.Relocate or TestAction.Dial or TestAction.Carry or TestAction.Build or TestAction.Weapon or TestAction.Npc;
     async Task ReleaseInput(TestRequest r, bool force = false)
     {
         if (!force && r.Action == TestAction.Input && r.Flag("hold")) return;
-        if (r.Action is not (TestAction.Move or TestAction.Input or TestAction.Capture or TestAction.Sample or TestAction.Recipe)) return;
+        if (!HasClientOperation(r.Action) && r.Action != TestAction.Recipe) return;
         if (r.Client < 1 || r.Client > clients.Count) return;
         (await LocalPipe.Send(clients[r.Client - 1].Pipe, Request(TestAction.Cancel, new { id = r.Id }, r.Client, 2))).EnsureSuccess();
     }
@@ -267,8 +272,25 @@ sealed class Coordinator(LaunchOptions launch) : IAsyncDisposable
                     for (int i = 1; i <= clients.Count; i++) await ConnectClient(i, token);
                     state = "ready"; Save(); result = TestResult.Ok(r, Manifest); break;
                 case TestAction.Recipe:
-                    recipeOperation.Value = r.Id;
-                    try { await Recipes.Run(Manifest, r.Text("name"), token, r.Controller, Execute); } finally { recipeOperation.Value = null; }
+                    var previousRecipe = recipeOperation.Value;
+                    var previousCommands = recipeCommands.Value;
+                    var commands = new List<TestRequest>();
+                    recipeOperation.Value = previousRecipe ?? r.Id;
+                    recipeCommands.Value = commands;
+                    Exception? executionError = null;
+                    try { await Recipes.Run(Manifest, r.Text("name"), token, r.Controller, Execute); }
+                    catch (Exception e) { executionError = e; throw; }
+                    finally
+                    {
+                        recipeOperation.Value = previousRecipe; recipeCommands.Value = previousCommands;
+                        var cleanupErrors = new List<Exception>();
+                        // Recipe steps have their own IDs and may target any client. Cancelling
+                        // only the parent recipe ID cannot release their input or pending work.
+                        foreach (var command in commands)
+                            try { await ReleaseInput(command, force: true); } catch (Exception e) { cleanupErrors.Add(e); }
+                        if (cleanupErrors.Count > 0)
+                            throw new AggregateException("Recipe cleanup failed; already-applied gameplay effects remain.", executionError is null ? cleanupErrors : new[] { executionError }.Concat(cleanupErrors));
+                    }
                     result = TestResult.Ok(r, new { execution = "completed", recipe = r.Text("name") });
                     TestJson.Write(Path.Combine(launch.Root, "result.json"), new { outcome = "completed", recipe = r.Text("name"), verification = RecipeCatalog.All.FirstOrDefault(d => d.Id == r.Text("name"))?.Verification ?? "execution", session = launch.Session, generation }); break;
                 case TestAction.Window: result = TestResult.Ok(r, await TestWindow.Apply(Manifest.ClientPids[r.Client - 1], r.Text("state"), token)); break;

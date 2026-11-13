@@ -93,7 +93,7 @@ public sealed partial class PhysicsWorld
             List<(uint Layer, CollisionInput Input)> result = [];
             foreach (uint layer in new[] { StaticLayer, StairPropLayer, StairPlayerLayer })
             {
-                var triangles = captured.Where(p => StairGeometry.IsStair(p) ? layer != StaticLayer : layer == StaticLayer)
+                var triangles = captured.Where(p => !BuildingPrefabs.IsDoor(p)).Where(p => StairGeometry.IsStair(p) ? layer != StaticLayer : layer == StaticLayer)
                     .SelectMany(p =>
                     {
                         var mesh = layer == StairPlayerLayer

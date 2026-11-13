@@ -48,6 +48,7 @@ def install(download=False):
             if name is None: continue
             if path.stem == "kit-stone-foundation": name = "stone_brick"
             metres,relief=SETS[name]
+            relief=min(relief, part.get('heightScaleLimit', relief))
             # Keep the authored grain/tile orientation on beams, door panels and
             # curved roofing. Masonry uses the existing metre-scaled projection.
             if name not in ('wood060', 'roofing_tiles_007'):

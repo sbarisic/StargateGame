@@ -24,6 +24,7 @@ sealed partial class GameApp
     StargateGame.Audio.AudioSettings? previousAudio;
     string ManualPreferences => Path.Combine(StargateGame.Shared.UserData.Root, "Testing", "last-scenario.json");
     UiRect TestingPanel => new((UiWidth - 680) / 2, Math.Max(12, (UiHeight - 570) / 2), 680, 570);
+    UiRect TestNavigationButton => new(TestingPanel.X + 456, TestingPanel.Y + 20, 200, 38);
     UiRect TestButton(int row, int column = 0) => new(TestingPanel.X + 24 + column * 320, TestingPanel.Y + 80 + row * 46, 310, 38);
     bool LocalBusy => localWork is { IsCompleted: false };
     void PollLocalTesting()
@@ -122,6 +123,7 @@ sealed partial class GameApp
             if (TestButton(6, 1).Contains(UiMouse)) { testingPanel = false; OpenGenerator(); }
             if (TestButton(7).Contains(UiMouse)) { menuScenario = menuScenario with { Hour = (menuScenario.Hour + 6) % 24 }; LocalCommand(TestAction.Settings, new { hour = menuScenario.Hour }); }
             if (TestButton(7, 1).Contains(UiMouse)) { graphicsSettings = graphicsSettings.Next(); scene?.SetGraphics(graphicsSettings); }
+            if (TestNavigationButton.Contains(UiMouse) && session.Developer) session.SetNavigationOverlay(!session.NavigationOverlay);
             if (TestButton(8).Contains(UiMouse)) { testingPanel = false; SetPause(false); }
             if (TestButton(8, 1).Contains(UiMouse)) { Disconnect("Local test closed."); DisposeLocalTesting(); testingPanel = false; testingPage = "home"; }
             return true;
@@ -189,6 +191,7 @@ sealed partial class GameApp
                 Button(pass, TestButton(5), "Reset Scenario"); Button(pass, TestButton(5, 1), "Add second client");
                 Button(pass, TestButton(6), "Capture"); Button(pass, TestButton(6, 1), "Planet settings / F4");
                 Button(pass, TestButton(7), "Time: " + menuScenario.Hour); Button(pass, TestButton(7, 1), "Graphics quality");
+                Button(pass, TestNavigationButton, "Navmesh: " + (session?.NavigationOverlay == true ? "ON" : "OFF"), testId: "testing/navmesh");
                 Button(pass, TestButton(8), "Resume"); Button(pass, TestButton(8, 1), "Stop and return");
             }
         }

@@ -16,21 +16,20 @@ public sealed partial class GameServer
         float fraction=physics.NpcObstacleFraction(a.Record.Id,position,projected,(body,axis,t)=>hits.Add(new{body,axis,t}));
         return (object)new{a.Record.Id,position,a.Corner,waypoint,a.Intent,a.Retries,a.WaitingDoor,surface,projected,fraction,hits};
     }).ToArray();
-    void SendNpcDebug(Session session,NpcLocation l,Vector3 eye)
+    void SendNpcDebug(Session session,NpcLocation l,Vector3 eye,bool navigationOnly=false)
     {
-        var tiles=l.Navigation.Inspect();var lines=new List<NpcDebugLine>();
+        var tiles=l.Navigation.Inspect().Where(t=>Vector2.DistanceSquared(new(eye.X,eye.Z),new((t.X+.5f)*l.Navigation.TileSize,(t.Z+.5f)*l.Navigation.TileSize))<=80*80).ToArray();var lines=new List<NpcDebugLine>();
         void Line(Vector3 a,Vector3 b,Vector3 color)=>lines.Add(new(a,b,color));
         foreach(var t in tiles)
         {
-            var c=new Vector3((t.X+.5f)*l.Navigation.TileSize,eye.Y,(t.Z+.5f)*l.Navigation.TileSize);
-            if(Vector3.DistanceSquared(eye,c)>80*80)continue;
             var color=t.State=="Ready"?new Vector3(0,.8f,.3f):new Vector3(1,.4f,0);
             for(int i=0;i+1<t.Edges.Length;i+=2)Line(t.Edges[i]+Vector3.UnitY*.04f,t.Edges[i+1]+Vector3.UnitY*.04f,color);
             float size=l.Navigation.TileSize;var a=new Vector3(t.X*size,eye.Y-1.5f,t.Z*size);
             Line(a,a+Vector3.UnitX*size,color);Line(a,a+Vector3.UnitZ*size,color);
+            Line(a+Vector3.UnitX*size,a+new Vector3(size,0,size),color);Line(a+Vector3.UnitZ*size,a+new Vector3(size,0,size),color);
         }
         foreach(var door in physics.NavigationDoors())Line(door.A+Vector3.UnitY*.3f,door.B+Vector3.UnitY*.3f,door.Open?new(0,1,0):new(1,.5f,0));
-        foreach(var a in l.Actors.Values)
+        if(!navigationOnly) foreach(var a in l.Actors.Values)
         {
             var p=a.Record.Position;var eyeNpc=p+Vector3.UnitY*1.6f;
             for(int i=1;i<a.Path.Length;i++)Line(a.Path[i-1]+Vector3.UnitY*.15f,a.Path[i]+Vector3.UnitY*.15f,new(0,1,1));
@@ -46,9 +45,9 @@ public sealed partial class GameServer
             if(a.WaitingDoor!=Guid.Empty&&CurrentChanges.Pieces.FirstOrDefault(p=>p.Id==a.WaitingDoor) is {} door)
             {var s=CurrentChanges.Structures.Single(s=>s.Id==door.StructureId);Line(p,Vector3.Transform(Vector3.Zero,DoorGeometry.Root(s,door)),new(1,.5f,0));}
         }
-        // Bounded fragments avoid the normal gameplay frame-size limit. Harness-only.
+        // Bounded fragments avoid the normal gameplay frame-size limit. Local developers only.
         int count=Math.Max(1,(lines.Count+199)/200);
-        for(int i=0;i<count;i++)session.Peer.Send(new(){Kind="npc-debug",LocationId=l.Id,NpcDebug=new(physics.Tick,i,count,l.Navigation.CellSize,
+        for(int i=0;i<count;i++)session.Peer.Send(new(){Kind=navigationOnly?"navigation-debug":"npc-debug",LocationId=l.Id,NpcDebug=new(physics.Tick,i,count,l.Navigation.CellSize,
             i==0?tiles.Select(t=>new NpcTileMetric(t.X,t.Z,t.Revision,t.State,t.Milliseconds,t.Bytes)).ToArray():[],lines.Skip(i*200).Take(200).ToArray())});
     }
 }

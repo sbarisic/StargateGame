@@ -133,7 +133,7 @@ public static class BuildingGeometry
         {
             Box(0, 0, -.045f, 1.08f, 2.28f, .09f);
             var pivot = new Vector3(0, 0, -.045f);
-            var hinge = Matrix4x4.CreateTranslation(-pivot) * Matrix4x4.CreateRotationY(p.Open ? MathF.PI / 2 : 0) * Matrix4x4.CreateTranslation(pivot + new Vector3(.96f, 0, 0));
+            var hinge = Matrix4x4.CreateTranslation(-pivot) * Matrix4x4.CreateRotationY(p.DoorAngle ?? (p.Open ? MathF.PI / 2 : 0)) * Matrix4x4.CreateTranslation(pivot + new Vector3(.96f, 0, 0));
             list = list.Select(t => new BuildTriangle(Vector3.Transform(t.A, hinge), Vector3.Transform(t.B, hinge), Vector3.Transform(t.C, hinge))).ToList();
         }
         else if (p.Kind == PieceKind.Stairs)

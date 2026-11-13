@@ -44,7 +44,7 @@ sealed partial class ClientSession
         }
         BuildPending = true;
         LastBuildResult = null;
-        BuildStatus = command.Action == "remove" ? "Demolishing..." : "Requesting world change...";
+        BuildStatus = command.Action == "door" ? "Using door..." : command.Action == "remove" ? "Demolishing..." : "Requesting world change...";
         connection.Peer.Send(new()
         {
             Kind = "build",

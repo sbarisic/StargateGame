@@ -9,6 +9,22 @@ sealed partial class ClientSession
     string npcAction="";
     public void ClearNpcFeedback(){if(!NpcPending)LastNpcReply=null;}
     public bool NpcPending=>npcRequest!=Guid.Empty;
+    public bool NavigationOverlay {get;private set;}
+    public NpcDebugSnapshot? NavigationDiagnostics {get;private set;}
+    public NpcDebugLine[] NavigationLines {get;private set;}=[];
+    readonly List<NpcDebugLine> navigationReceiving=[];
+    int navigationPart;
+    NpcTileMetric[] navigationTiles=[];
+    double nextNavigationPoll;
+    public void SetNavigationOverlay(bool enabled)
+    {
+        if(enabled&&!Developer)throw new InvalidOperationException("Navigation overlay requires local developer authority.");
+        NavigationOverlay=enabled;ClearNavigationOverlay();
+    }
+    void ClearNavigationOverlay()
+    {
+        NavigationDiagnostics=null;NavigationLines=[];navigationReceiving.Clear();navigationTiles=[];navigationPart=0;nextNavigationPoll=0;
+    }
     public NpcDebugSnapshot? NpcDiagnostics {get;private set;}
     public NpcDebugLine[] NpcDebugLines {get;private set;}=[];
     readonly List<NpcDebugLine> npcDebugReceiving=[];
@@ -25,18 +41,33 @@ sealed partial class ClientSession
     void PollNpcs()
     {
         if(npcLocation!=World.Definition.LocationId)
-        {npcLocation=World.Definition.LocationId;Npcs=new(-1,0,[],[]);npcFrames.Clear();npcRequest=Guid.Empty;nextNpcPoll=0;LastNpcReply=null;LastSpawnedNpc=Guid.Empty;npcAction="";NpcDebugLines=[];NpcDiagnostics=null;npcDebugReceiving.Clear();}
+        {npcLocation=World.Definition.LocationId;Npcs=new(-1,0,[],[]);npcFrames.Clear();npcRequest=Guid.Empty;nextNpcPoll=0;LastNpcReply=null;LastSpawnedNpc=Guid.Empty;npcAction="";NpcDebugLines=[];NpcDiagnostics=null;npcDebugReceiving.Clear();ClearNavigationOverlay();}
+        if(NavigationOverlay&&Developer&&!TransitLocked&&Now>=nextNavigationPoll)
+        {
+            nextNavigationPoll=Now+1;
+            connection.Peer.Send(new(){Kind="navigation-debug",LocationId=npcLocation});
+        }
         if(NpcPending&&Now>npcDeadline){LastNpcReply=new(npcRequest,false,"NPC request timed out; refresh before retrying.");npcRequest=Guid.Empty;}
         if(Now<nextNpcPoll)return;nextNpcPoll=Now+2;
         connection.Peer.Send(new(){Kind="npc-state",LocationId=npcLocation});
     }
     bool HandleNpcs(Message m)
     {
-        if(m.Kind is not ("npcs" or "npc-result" or "npc-debug"))return false;
+        if(m.Kind is not ("npcs" or "npc-result" or "npc-debug" or "navigation-debug"))return false;
         if(m.LocationId!=World.Definition.LocationId)return true;
         if(m.NpcDebug is {} debug)
         {
             if(debug.Lines is null||debug.Lines.Length>200||debug.Count is <1 or >4096||debug.Part<0||debug.Part>=debug.Count)throw new InvalidDataException("Invalid NPC diagnostics.");
+            if(m.Kind=="navigation-debug")
+            {
+                if(!NavigationOverlay)return true;
+                if(debug.Part==0){navigationReceiving.Clear();navigationPart=0;navigationTiles=debug.Tiles;}
+                else if(navigationPart==0)return true; // Enabled while an older snapshot was in flight.
+                if(debug.Part!=navigationPart++)throw new InvalidDataException("Navigation diagnostics fragment order.");
+                navigationReceiving.AddRange(debug.Lines);
+                if(navigationPart==debug.Count){NavigationLines=navigationReceiving.ToArray();NavigationDiagnostics=debug with {Tiles=navigationTiles,Lines=[]};}
+                return true;
+            }
             if(debug.Part==0){npcDebugReceiving.Clear();npcDebugPart=0;NpcDiagnostics=debug;}
             if(debug.Part!=npcDebugPart++)throw new InvalidDataException("NPC diagnostics fragment order.");
             npcDebugReceiving.AddRange(debug.Lines);

@@ -5,6 +5,97 @@ Normal worlds now use the volume canopy path by default (`--trees volume`).
 planting positions, scales, collision meshes, terrain and saves are unchanged.
 The historical inspection work below remains available in `graphics-lab`.
 
+
+## Canopy visibility and lighting controls
+
+The harness `settings` action accepts three independent booleans, also reported
+in rendering observations and capture metadata:
+
+| Setting | Default | Behavior |
+| --- | --- | --- |
+| `canopyDepthCulling` | true | Copy opaque depth, reject hidden crowns and clip rays at opaque surfaces. |
+| `canopyLightLod` | false | Blend fixed 24/12/8/6-sample sunlight estimates with distance. |
+| `canopyHierarchicalSkip` | false | Extend local empty steps with bounded coarse-to-fine occupancy queries. |
+
+Disable all three for the performance comparison baseline. It retains balanced
+visibility LOD; it is **not** the full-detail `CanopyLodBaseline` inspection mode.
+Placement, collision, shadow proxies, palettes and ambient lighting are unchanged.
+No new volume textures, bakes, impostors or batching are required.
+
+Opaque geometry finishes before canopy rendering. The existing depth scratch target
+receives a copy; canopies never sample their active depth attachment. Sampling
+planes, spacing and visibility mips use the original ray interval, including the
+quadrature position of the last clipped segment. Wind-expanded bounds supply a
+conservative nearest depth for front-to-back draws. Only the canopy shader declares
+`depth_greater`, on OpenGL 4.2 or `GL_ARB_conservative_depth`; near-plane crossings
+and camera-inside views use near depth. Actual leaf depth and discard remain enabled,
+without forced early fragment tests. Unsupported hardware retains explicit clipping
+and ordinary depth writes. Diagnostics report capability and active use. See the
+[Khronos contract](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_conservative_depth.txt).
+
+Light LOD uses crown height at the actual render-target resolution, with thresholds
+256/112/40 pixels and total 15% transition bands. Transitions evaluate two fixed
+quadratures and blend transmission; outside them only one estimate runs. Nearby
+crowns retain 24 samples. Lighting mips are clamped to the resident chain.
+`lightCounts` reports primary 24/12/8/6 draw counts followed by the number of
+blended draws. Small distant shading differences are intentional.
+
+Hierarchy uses integer fetches from the existing maximum-occupancy pyramid. Only
+exact zero permits skipping. The empty node interior excludes filtering footprints
+of both density mips; a wind-derivative bound limits advancement. At most three
+levels are probed, once per eight integration steps after the cheap empty test.
+Failure to prove a larger empty interval falls back to ordinary traversal. Skips
+preserve integration-plane alignment; exhausting queries never truncates the ray.
+
+### Reproducible comparison
+
+```powershell
+./scripts/Test.ps1 check -Group canopy-lod
+./scripts/Test.ps1 run -Scenario sandbox -Recipe canopy-performance
+```
+
+The recipe reuses the forest bookmark and prepared build/cache. It fixes 1920x1080,
+Performance quality, noon, weather off and wind animation time. Harness clients use
+VSync off. Each mode waits for capture readiness, warms for five seconds, then samples
+eight seconds. Baseline and combined captures occur outside timing windows.
+`canopy-performance.json` records completed GPU-query samples as median/p95/max for
+canopy, depth copy, their sum, GPU pass total, render CPU, frame interval, draws and
+visibility LOD counts. GPU pass total sums instrumented passes; it is not presentation
+latency. Missing/in-flight query frames are not replaced by stale values. Captures
+are evidence, not a visual assertion pass.
+
+Measured on AMD Radeon RX 9070 XT (driver 32.0.23017.1001), 2026-11-13, 92 canopy draws:
+
+| Mode | Canopy + copy median / p95 (ms) | GPU pass median (ms) | Frame median (ms) |
+| --- | --- | --- | --- |
+| Baseline | 2.55 / 2.60 | 20.69 | 20.83 |
+| Depth only | 1.72 / 1.91 | 19.94 | 20.11 |
+| Hierarchy only | 2.70 / 2.90 | 20.89 | 21.09 |
+| Lighting only | 2.41 / 2.59 | 20.66 | 20.85 |
+| All three | 1.93 / 2.13 | 20.07 | 20.24 |
+
+Depth copy was approximately 0.009 ms. A confirming pair measured depth-only at
+1.733 ms versus depth plus light LOD at 1.738 ms. Depth rejection is enabled by
+default (about 33% less canopy work and 3.5% less frame time here). Hierarchy is a
+net cost in this forest; light LOD adds no repeatable benefit once depth rejection
+is active. Both remain opt-in. These are scene-specific results, not an FPS promise.
+
+A second view exercised 16 two-estimate transitions among 111 crowns (54 using
+24-sample primary estimates, 57 using 12). Canopy plus copy measured 1.576/1.625 ms
+median/p95 with 24 samples versus 1.562/1.697 ms with light LOD. The small median
+difference was within noise and the transition-mode p95 was higher; this also
+supports leaving light LOD opt-in.
+
+Validation covered 20 projection/LOD/depth checks and 1,152 dense-reference rays
+through empty, sparse, thin and boundary volumes, fractional mips, reduced resident
+chains and wind, with no false-empty skips or missed hits. Canopy asset checks
+passed. Paired near, inside, below and low-sun captures retained silhouettes and
+near lighting (99th-percentile channel difference zero); branches occluded leaves
+correctly. Bounded movement with live wind completed. Static captures and CPU checks
+do not certify temporal stability on all drivers. The unsupported-hardware path
+has not been exercised on a GPU lacking conservative depth. Extreme close-up volume
+contours remain as before.
+
 ## Normal-world integration
 
 `assets/vegetation/world-canopies.json` maps all ten leafy render variants to

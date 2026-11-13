@@ -70,11 +70,11 @@ public sealed record RecipeDefinition(string Name, RecipeStep[] Steps, ScenarioO
 public static class ScenarioCatalog
 {
     public const int Version = 1;
-    public static readonly string[] RenderSettings = ["ao", "aoView", "exposure", "exposureEv", "hour", "quality", "weather", "shadows", "clouds", "volumetrics", "reflections", "groundMist", "grass", "grassDensity", "parallax", "gateLighting", "waves", "visualTime", "orbit", "traverse", "meadowMaterial", "horizon", "horizonProps", "horizonPlayers", "horizonOcclusion", "shadowFixture", "propMode", "waveCheck", "landscapeCheck", "stress", "weatherFixture", "roof", "weatherCheck"];
+    public static readonly string[] RenderSettings = ["ao", "aoView", "exposure", "exposureEv", "hour", "quality", "weather", "shadows", "clouds", "volumetrics", "reflections", "groundMist", "grass", "grassDensity", "parallax", "gateLighting", "waves", "visualTime", "orbit", "traverse", "meadowMaterial", "horizon", "horizonProps", "horizonPlayers", "horizonOcclusion", "shadowFixture", "propMode", "waveCheck", "landscapeCheck", "stress", "weatherFixture", "roof", "weatherCheck", "navmesh", "grassDepthCulling", "grassShaderReuse", "grassScreenLod", "grassVolumeDensity", "canopyDepthCulling", "canopyLightLod", "canopyHierarchicalSkip", "renderWidth", "renderHeight"];
     public static readonly ScenarioDefinition[] Scenarios = [
         new("sandbox", "Sandbox", "Two gates, physics, equipment and furnished inspection stations.",
             ["player", "gate-pair", "dhd", "props", "movement", "equipment", "interior", "forest", "water", "technology"],
-            ["npc-follow-buildings", "npc-navigation", "npc-lifecycle", "visual-check", "lantern-lighting", "deferred-ao-compare", "gate-roundtrip", "lifecycle", "audio", "environment", "gate-effects", "sandbox-check", "horizon-lifecycle", "ui-live", "movement-visual"]),
+            ["grass-performance", "canopy-performance", "npc-follow-buildings", "npc-navigation", "npc-lifecycle", "visual-check", "lantern-lighting", "deferred-ao-compare", "gate-roundtrip", "lifecycle", "audio", "rifle-audio", "environment", "gate-effects", "sandbox-check", "horizon-lifecycle", "ui-live", "movement-visual"]),
         new("planet-explorer", "Planet Explorer", "Generated biomes, regional landscapes and settlements.",
             ["player", "gate", "wide", "grass", "forest", "river", "cliff", "lake", "underwater", "settlement", "settlement-interior", "region"],
             ["visual-check", "environment", "lifecycle"]),

@@ -9,7 +9,7 @@ public static class RecipeCatalog
 {
     public static RecipeDescriptor[] All => ScenarioCatalog.Scenarios.SelectMany(s => s.Recipes).Distinct()
         .Select(id => new RecipeDescriptor(id, ScenarioCatalog.Scenarios.Where(s => s.Recipes.Contains(id)).Select(s => s.Id).ToArray(),
-            id is "visual-check" or "environment" or "gate-effects" or "lantern-lighting" or "deferred-ao-compare" ? "evidence-only" : "assertions",
+            id is "grass-performance" or "canopy-performance" or "visual-check" or "environment" or "gate-effects" or "lantern-lighting" or "deferred-ao-compare" ? "evidence-only" : "assertions",
             ["playable", "rendered-client"], TestJson.Element(new { type = "object", properties = new { }, additionalProperties = false }))).ToArray();
 }
 
@@ -41,8 +41,8 @@ public static class ActionCatalog
         TestAction.Aim => Schema("target:vector entity:string"),
         TestAction.Move => Schema("seconds:number forward:number strafe:number yaw:number pitch:number jump:boolean crouch:boolean walk:boolean", "seconds"),
         TestAction.Input => Schema("seconds:number hold:boolean keys:strings buttons:strings x:number y:number dx:number dy:number scroll:number text:string controlId:string uiRevision:string", "seconds"),
-        TestAction.Capture => Schema("name:string includeUi:boolean retain:boolean immediate:boolean"),
-        TestAction.Settings => Schema(string.Join(' ', ScenarioCatalog.RenderSettings.Select(n => n + ":" + (n switch { "ao" or "aoView" or "exposure" or "quality" or "weather" or "meadowMaterial" or "propMode" => "string", "hour" or "exposureEv" => "number", "grassDensity" => "integer", "visualTime" => "nullable-number", _ => "boolean" })))),
+        TestAction.Capture => Schema("name:string includeUi:boolean retain:boolean immediate:boolean when:object"),
+        TestAction.Settings => Schema(string.Join(' ', ScenarioCatalog.RenderSettings.Select(n => n + ":" + (n switch { "ao" or "aoView" or "exposure" or "quality" or "weather" or "meadowMaterial" or "propMode" => "string", "hour" or "exposureEv" or "grassVolumeDensity" => "number", "grassDensity" or "renderWidth" or "renderHeight" => "integer", "visualTime" => "nullable-number", _ => "boolean" })))),
         TestAction.Teleport => Schema("station:string position:vector yaw:number pitch:number"),
         TestAction.SetupProp => Schema("item:string position:vector", "item", "position"),
         TestAction.ResetStation => Schema("station:string", "station"),
@@ -112,5 +112,5 @@ public static class ActionCatalog
     static bool TryGetInt64Safe(this JsonElement value) => value.ValueKind == JsonValueKind.Number && (value.TryGetInt64(out _) || value.TryGetUInt64(out _));
     public static object Discovery() => new { version = 2, scenarios = ScenarioCatalog.Scenarios, presets = ScenarioCatalog.Presets,
         advancedPresets = ScenarioCatalog.AdvancedPresets, defaults = new ScenarioOptions(), actions = All, recipes = RecipeCatalog.All,
-        groups = CheckCatalog.Groups, renderingSettings = ScenarioCatalog.RenderSettings, capabilities = new { platform = "Windows x64", typedLocalControl = true, arbitraryCode = false, maxClients = 8, ringsGameplay = false, zpmGameplay = false } };
+        groups = CheckCatalog.Groups, renderingSettings = ScenarioCatalog.RenderSettings, capabilities = new { platform = "Windows x64", typedLocalControl = true, arbitraryCode = false, maxClients = 8, ringsGameplay = false, zpmGameplay = false, zpmPhysicsProps = true } };
 }

@@ -219,6 +219,7 @@ public sealed partial class GameServer : IAsyncDisposable
     }
     void TickLocation()
     {
+        PollDoorSaves();
         if (!context.CollisionReady)
             return;
         // Keep both endpoints active after ownership commits. Without this the
@@ -402,6 +403,7 @@ public sealed partial class GameServer : IAsyncDisposable
             return Reject(session, "Too many pending movement inputs.");
         session.LastSequence = input.Sequence;
         session.LastTarget = input.TargetTick;
+        if(Reloading(session))input=input with { Carry=CarryAction.None, PropRotation=System.Numerics.Vector2.Zero };
         bool previousGeometry = message.Epoch == session.PreviousGeometryEpoch &&
             session.GeometryLocation == physics.World.Definition.LocationId &&
             physics.Epoch == session.PreviousGeometryEpoch + 1 && NextTick <= session.GeometryInputDeadline;

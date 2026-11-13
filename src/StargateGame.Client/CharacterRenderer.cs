@@ -21,6 +21,8 @@ sealed partial class SceneRenderer
     readonly Dictionary<int, ActorAnimation> actorAnimation = [];
     readonly Dictionary<int,Guid> npcAnimationOwners=[];
     readonly Matrix4x4[] riflePose = new Matrix4x4[128];
+    readonly AnimationTransition rifleTransition = new();
+    public object ViewmodelDiagnostics => new { drawn = viewmodelDrawn, clip = rifleTransition.Clip, blend = rifleTransition.Blend };
     public IReadOnlyDictionary<int, CharacterPresentation> CharacterStates
     {
         get;
@@ -66,6 +68,9 @@ sealed partial class SceneRenderer
     Matrix4x4 viewmodelShadowMatrix;
     ShaderProgram? viewmodelComposite;
     bool viewmodelDrawn;
+    bool riflePoseReady;
+    Camera? rifleViewCamera;
+    Matrix4x4 rifleWorldTransform;
     public bool InspectionCamera { get; set; }
     float aimBlend;
     double lastCharacterTime;
@@ -106,7 +111,10 @@ sealed partial class SceneRenderer
                 foreach(var shared in CharacterDefinitions.All.Where(d=>d.Model==definition.Model))characterAssets[shared.Id]=asset;
             }
             else
+            {
+                asset.AlignLocomotionOrigins();
                 rifle = asset;
+            }
             preparingCharacter = null;
             yield return true;
         }
@@ -219,23 +227,23 @@ sealed partial class SceneRenderer
             }
         }
     }
-    void DrawViewmodel(RenderFrame frame, Camera camera, SceneFrame snapshot, float time)
+    void PrepareViewmodelPose(Camera camera, SceneFrame snapshot, float time)
     {
-        viewmodelDrawn = false;
-        if (InspectionCamera || CableToolEquipped) return;
-        if (PhysicsGunEquipped && !HideWeapon) { DrawPhysicsGun(frame, camera); return; }
+        riflePoseReady = false;
+        if (InspectionCamera || CableToolEquipped || PhysicsGunEquipped) return;
         if (rifle is null || HideWeapon)
             return;
         var state = CharacterStates.GetValueOrDefault(snapshot.Local.Id) ?? new(snapshot.Local.Id, 0, true, false, "idle", 0);
         double age = Math.Max(0, (GateVisualTick - state.StartTick) / 60);
         if (!state.Equipped && (state.Action != "holster" || age > rifle.Duration("holster")))
             return;
+        if (time - lastCharacterTime > .25 || time < lastCharacterTime) rifleTransition.Reset();
         float dt = (float)Math.Clamp(time - lastCharacterTime, 0, .1);
         lastCharacterTime = time;
         aimBlend += ((state.Aiming ? 1 : 0) - aimBlend) * Math.Min(1, dt * 14);
         string clip = state.Action;
         bool loop = false;
-        if (clip == "idle" || age >= rifle.Duration(clip))
+        if (clip == "idle" || clip != "reload" && age >= rifle.Duration(clip) || clip == "reload" && state.ReloadUntil == 0 && age >= rifle.Duration(clip))
         {
             var relative = snapshot.Local.Velocity - (snapshot.Local.Grounded ? snapshot.Local.GroundVelocity : Vector3.Zero);
             float horizontalSpeed = new Vector2(relative.X, relative.Z).Length();
@@ -250,7 +258,9 @@ sealed partial class SceneRenderer
             clip = HandInspectionPose; age = InspectionTime ?? .35; loop = false;
             aimBlend = clip == "aim" ? 1 : 0;
         }
-        rifle.Sample(clip, age, riflePose, loop);
+        bool inspect = HandInspectionPose.Length > 0;
+        if (inspect) rifleTransition.Reset();
+        rifle.Sample(clip, age, riflePose, loop, inspect ? null : rifleTransition, dt);
         PrepareViewmodelTarget();
         var viewCamera = new Camera { Position = camera.Position };
         viewCamera.LookAt(camera.Position + camera.WorldForwardNormal);
@@ -260,6 +270,18 @@ sealed partial class SceneRenderer
         float speed = new Vector2(snapshot.Local.Velocity.X, snapshot.Local.Velocity.Z).Length();
         float bob = MathF.Sin(time * (snapshot.Local.Crouched ? 6 : 9)) * Math.Min(speed, Movement.RunSpeed) * (snapshot.Local.Crouched ? .0005f : .001f);
         var transform = Matrix4x4.CreateTranslation(0, bob - (LowerWeapon ? .22f : 0), 0) * cameraWorld;
+        rifleViewCamera = viewCamera;
+        rifleWorldTransform = transform;
+        riflePoseReady = true;
+    }
+    void DrawViewmodel(RenderFrame frame, Camera camera, SceneFrame snapshot, float time)
+    {
+        viewmodelDrawn = false;
+        if (InspectionCamera || CableToolEquipped) return;
+        if (PhysicsGunEquipped && !HideWeapon) { DrawPhysicsGun(frame, camera); return; }
+        if (!riflePoseReady) return;
+        var viewCamera = rifleViewCamera!;
+        var transform = rifleWorldTransform;
         if (ShadowsEnabled && !HandShadowBaseline)
             DrawViewmodelShadow(frame, camera, snapshot, transform);
         using (var pass = frame.BeginPass(viewmodelGbuffer!, new RenderPassDescriptor { View = new(viewCamera), State = OpaqueState, ColorLoadAction = RenderLoadAction.Clear, ClearColor = new Color(0, 0, 0, 0), DepthLoadAction = RenderLoadAction.Clear }))
@@ -288,6 +310,7 @@ sealed partial class SceneRenderer
         }
         LightViewmodel(frame, viewCamera);
         CompositeViewmodel(frame, camera);
+        DrawRifleMuzzle(frame, viewCamera, transform);
     }
 
     void DisposeViewmodelTargets()

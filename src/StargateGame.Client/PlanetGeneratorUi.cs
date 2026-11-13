@@ -18,7 +18,7 @@ sealed partial class GameApp
     UiRect GeneratorRow(int visible) => new(GeneratorPanel.X + 20, GeneratorPanel.Y + 120 + visible * 34, GeneratorPanel.W - 40, 30);
     UiRect GeneratorAction(int i) => new(GeneratorPanel.X + 20 + i % 3 * (GeneratorPanel.W - 40) / 3,
         GeneratorPanel.Bottom - 158 + i / 3 * 40, (GeneratorPanel.W - 52) / 3, 34);
-    UiRect GeneratorPauseButton => new(Layout.Pause.X + 436, Layout.Pause.Bottom - 76, 380, 34);
+    UiRect GeneratorPauseButton => Layout.PauseSecondaryAction(2);
     void OpenGenerator()
     {
         planetPanel = true; generatorTab = true; generatorLoaded = false; generatorError = "";

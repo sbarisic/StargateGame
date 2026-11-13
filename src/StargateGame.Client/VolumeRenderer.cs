@@ -129,12 +129,20 @@ sealed partial class SceneRenderer
             (cloudVolume, cloudHistory) = (cloudHistory, cloudVolume);
             cloudShadow ??= AtmosphereTarget(shadow, shadow);
             cloudVolumeShader.SetUniform("uLight", 2);
+            cloudVolumeShader.SetUniform("uTrans", 3);
+            cloudVolumeShader.SetUniform("uRay", 4);
+            cloudVolumeShader.SetUniform("uMie", 5);
+            cloudVolumeShader.SetUniform("uSkyRadianceScale", AtmosphereIllumination.SkyRadianceScale(environmentFrame.SunDirection.Y, World.Definition.Preset));
+            cloudVolumeShader.SetUniform("uAerosol", aerosol);
             cloudVolumeShader.SetUniform("uEye", camera.Position);
             cloudVolumeShader.SetUniform("uSteps", quality == GraphicsQuality.Low ? 40 : quality == GraphicsQuality.High ? 88 : 64);
             cloudVolumeShader.SetUniform("uJitter", FreezeVisuals ? .5f : (float)((frameNumber * .61803398875) % 1));
             CloudUniforms(cloudVolumeShader);
             CloudUniforms(cloudShadowShader);
             using (atmosphereLight!.ColorAttachments[0].Bind(2))
+            using (atmosphereTrans!.ColorAttachments[0].Bind(3))
+            using (atmosphereScatter!.ColorAttachments[0].Bind(4))
+            using (atmosphereSingle!.ColorAttachments[1].Bind(5))
             using (var pass = frame.BeginPass(cloudCurrent, new RenderPassDescriptor { View = view, State = ScreenState, ColorLoadAction = RenderLoadAction.Clear }))
             using (gpuTimer.Measure(pass, "cloud"))
                 Mesh(pass, screen, white, cloudVolumeShader);

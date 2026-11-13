@@ -9,7 +9,7 @@ sealed partial class GameApp
 {
     ToneMappingSettings toneMappingSettings = ToneMappingSettings.Load();
     bool exposureMenu;
-    UiRect ExposureSettingsButton => new(Layout.Pause.X + 436, Layout.Pause.Y + 466, 400, 34);
+    UiRect ExposureSettingsButton => Layout.PauseSecondaryAction(0);
     UiRect ExposureAction(int row) => new(Layout.Pause.X + 32, Layout.Pause.Y + 118 + row * 62, 520, 44);
     UiRect ExposureStep(bool increase) => new(Layout.Pause.X + (increase ? 464 : 384), Layout.Pause.Y + 180, 72, 44);
 

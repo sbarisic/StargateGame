@@ -44,6 +44,8 @@ static class CheckRunner
             else if (group == "ui") commands.Add(("dotnet", [HarnessFiles.Binary(build, "StargateGame.Ui.Tests")]));
             else if (group == "harness") commands.Add(("dotnet", [HarnessFiles.Binary(build, "StargateGame.Harness.Tests")]));
             else commands.Add(("dotnet", [HarnessFiles.Binary(build, "StargateGame.Tests"), "--group", group, ..modifiers]));
+            if(group=="canopy-lod")commands.Add(("python",[Path.Combine(root,"tools/test_canopy_traversal.py")]));
+            if(group=="grass-rendering")commands.Add(("python",[Path.Combine(root,"tools/test_grass_volume.py")]));
             int exit = 0; int index = 0;
             foreach (var command in commands)
             {

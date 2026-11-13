@@ -13,14 +13,17 @@ vec4 grassSurface(vec2 p){return texture(uSurface,(clamp((p-uTile.xy)/8.,0.,1.)*
 vec3 grassGroundNormal(vec2 p){float dx=grassSurface(p+vec2(.25,0)).x-grassSurface(p-vec2(.25,0)).x;float dz=grassSurface(p+vec2(0,.25)).x-grassSurface(p-vec2(0,.25)).x;return normalize(vec3(-dx,.5,-dz));}
 vec2 grassBend(vec2 root,float h){return uMeadowWind*meadowSway(root)*.24*h*h/(uGrassTip*max(.1,grassSurface(root).z));}
 float grassTransition(vec2 p){return smoothstep(uTransition.x,uTransition.y,distance(p,uViewPosition.xz));}
-bool grassKept(vec2 p){
- vec4 surface=grassSurface(p);
+bool grassAllowed(vec2 p){
  ivec2 cell=ivec2(floor(clamp((p-uTile.xy)*4.,0.,31.)));
  // Hard exclusions remain empty throughout the interpolated terrain cell.
  float allowed=min(min(texelFetch(uSurface,cell,0).a,texelFetch(uSurface,cell+ivec2(1,0),0).a),min(texelFetch(uSurface,cell+ivec2(0,1),0).a,texelFetch(uSurface,cell+ivec2(1),0).a));
- float rangeFade=1.-smoothstep(uRange*.85,uRange,distance(p,uViewPosition.xz));
- return allowed>.5&&surface.y>.02&&grassHash(p+vec2(119.7,14.3))<surface.y*rangeFade*uGrowth*uDensity;
+ return allowed>.5;
 }
+bool grassKeptSample(vec2 p,vec4 surface){
+ float rangeFade=1.-smoothstep(uRange*.85,uRange,distance(p,uViewPosition.xz));
+ return grassAllowed(p)&&surface.y>.02&&grassHash(p+vec2(119.7,14.3))<surface.y*rangeFade*uGrowth*uDensity;
+}
+bool grassKept(vec2 p){return grassKeptSample(p,grassSurface(p));}
 vec3 grassAlbedo(vec3 world,vec3 albedo,float stem){
  albedo=mix(vec3(dot(albedo,vec3(.2126,.7152,.0722))),albedo,.65)*vec3(1.03,1.,.85);
  int layer=uGrassGroundLayer;

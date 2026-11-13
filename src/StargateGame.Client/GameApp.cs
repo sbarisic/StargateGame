@@ -482,7 +482,9 @@ sealed partial class GameApp
             }
             if (input.WasKeyPressed(Key.F3))
             {
-                if (input.IsKeyDown(Key.LeftShift))
+                if (input.IsKeyDown(Key.LeftControl) && session.Developer)
+                    session.SetNavigationOverlay(!session.NavigationOverlay);
+                else if (input.IsKeyDown(Key.LeftShift))
                     debugCollision = !debugCollision;
                 else
                     debugPhysics = !debugPhysics;
@@ -694,6 +696,7 @@ sealed partial class GameApp
         TestCamera();
         if (Smoke && session is not null)
             VisualChecks.Camera(camera, session, ForestInspectionView(now - connectedAt), ForestCameraTime(now - connectedAt), args.Contains("--orbit"), args.Contains("--environment-traverse"), scene?.TimeOfDay);
+        UpdateDhdFocus(camera.Position, camera.WorldForwardNormal);
         if (session is not null)
         {
             if (!uiInputConsumed && !uiMouseGuard)
@@ -730,6 +733,7 @@ sealed partial class GameApp
             if (testShadowFixture) changes = VisualChecks.GateShadowFixture(changes, session.World.Definition.Entities.First(e => e.Model == "stargate"), false);
             if (testWeatherFixture && scene is not null) changes = VisualChecks.WeatherFixture(changes, session.World.Definition.Entities.First(e => e.Model == "stargate"), scene.WeatherFixtureRoof);
             scene?.UpdateBuildings(changes);
+            scene?.UpdateDoorVisuals(session.Physics.PresentedDoorStates(session.PresentationTick));
         }
         if (session is not null)
         {
@@ -742,9 +746,11 @@ sealed partial class GameApp
         if (scene is not null && session is not null)
         {
             scene.CharacterStates = session.Characters;
-            scene.LowerWeapon = buildMode || dhdHover >= 0 || session.Carrying;
+            scene.RifleTime=now;
+            while(session.RifleShots.TryDequeue(out var shot))scene.RifleShot(shot,now);
+            scene.LowerWeapon = !session.Reloading && (buildMode || session.Carrying);
             scene.InspectionCharacters = Arguments.Number(args, "--characters", 1, 0, 8);
-            scene.HideWeapon = Arguments.Get(args,"--view","player").StartsWith("region:",StringComparison.Ordinal) || args.Contains("--tree-forest-tour") || Arguments.Get(args, "--view", "player").StartsWith("tree-forest-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("horizon-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("character-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("settlement", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("tree-prototype", StringComparison.Ordinal);
+            scene.HideWeapon = !session.Reloading && LookingAtDhd || Arguments.Get(args,"--view","player").StartsWith("region:",StringComparison.Ordinal) || args.Contains("--tree-forest-tour") || Arguments.Get(args, "--view", "player").StartsWith("tree-forest-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("horizon-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("character-", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("settlement", StringComparison.Ordinal) || Arguments.Get(args, "--view", "player").StartsWith("tree-prototype", StringComparison.Ordinal);
             scene.InspectionAnimation = labClip >= 0 ? labClips[labClip] : Arguments.Get(args, "--animation", "") is { Length: > 0 } clip ? clip : null;
             scene.InspectionTime = (double?)testVisualTime ?? labAnimationTime ?? (double.TryParse(Arguments.Get(args, "--animation-time", ""), System.Globalization.CultureInfo.InvariantCulture, out var clipTime) ? clipTime : null);
             var hintSymbols = addressBook.Selection(BookUniverse)?.Symbols ?? [];
@@ -813,6 +819,7 @@ sealed partial class GameApp
             scene.TreeForest = args.Contains("--tree-forest");
             scene.TreeForestSeed = Arguments.Number(args, "--tree-forest-seed", 7319, 0, int.MaxValue);
             scene.TreeSpecies = Arguments.Get(args, "--tree-species", "broadleaf");
+            scene.EnvironmentTimeOverride=testVisualTime;
             scene.CanopyLodBaseline = Arguments.Get(args, "--canopy-lod", "balanced") switch { "baseline" => true, "balanced" => false, _ => throw new ArgumentException("--canopy-lod expects balanced or baseline.") };
             scene.TreeSettings = scene.TreeSettings with { WindStrength = Arguments.Get(args, "--tree-wind", "on") == "off" ? 0 : .12f };
             scene.HandShadowBaseline = Smoke && args.Contains("--hand-shadow-baseline");
@@ -822,7 +829,7 @@ sealed partial class GameApp
             scene.ExposureTransitHold = session.TransitWhite > 0;
             scene.ExposureDiagnosticsEnabled = debugPhysics || exposureMenu;
             ApplyTestPreview();
-            scene.RenderScene(frame, camera, snapshot, visualTime, (args.Contains("--settlement-overlay") ? SettlementInspection.Lines(session.World.Definition) : []).Concat(scene.NpcToolLines).Concat(NpcDebugLines()));
+            scene.RenderScene(frame, camera, snapshot, visualTime, (args.Contains("--settlement-overlay") ? SettlementInspection.Lines(session.World.Definition) : []).Concat(scene.NpcToolLines).Concat(NpcDebugLines()), session.NavigationOverlay ? NavigationDebugLines() : null);
             if (benchmark && debugCollision && now - connectedAt > benchmarkWarmup)
                 collisionOverlayTimes.Add(scene.DebugLineCpuMilliseconds);
             if (audio is not null)
@@ -880,6 +887,8 @@ sealed partial class GameApp
                             Text(pass, screen.X - 25, screen.Y, remote.Name, 15, new Color(255, 225, 155));
                         }
                     }
+                    if(session.NavigationOverlay)
+                        Text(pass,24,UiHeight-98,$"Navmesh / CTRL+F3: {session.NavigationDiagnostics?.Tiles.Count(t=>t.State=="Ready") ?? 0} ready tiles / {session.NavigationLines.Length} edges | green: ready  orange: pending/dirty",14,UiTheme.Cyan);
                     if (debugCollision)
                         Text(pass, 24, UiHeight - 78, session.Physics.DebugGeometryIncomplete ? "Collision overlay: preparing nearby geometry" : "Collision overlay: ready", 14);
 

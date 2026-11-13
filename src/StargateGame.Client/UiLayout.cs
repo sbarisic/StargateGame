@@ -34,6 +34,7 @@ sealed class UiLayout(float width, float height)
     public UiRect Join => new(Connection.X + 24, Connection.Y + 332, 492, 44);
     public UiRect Pause => new((Width - 860) / 2, (Height - 600) / 2, 860, 600);
     public UiRect PauseAction(int index) => new(Pause.X + 24, Pause.Y + 76 + index * 52, 374, 42);
+    public UiRect PauseSecondaryAction(int index) => new(Pause.X + 436, Pause.Y + 432 + index * 44, 400, 34);
     public UiRect Inventory => new((Width - Math.Min(900, Width - 40)) / 2, (Height - 540) / 2, Math.Min(900, Width - 40), 540);
     public UiRect WeaponSlot(bool shared, int slot)
     {

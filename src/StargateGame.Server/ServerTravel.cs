@@ -85,8 +85,8 @@ public sealed partial class GameServer
         }
     }
     double exitSearchMilliseconds;
-    bool TravelBusy(LocationContext c) => c.Gate?.Phase == GatePhase.Opening || hazards.TryGetValue(c, out var hazard) && hazard.Pending || travels.Values.Any(t => t.Source == c || t.Destination == c) || propDestructions.Any(d => d.Context == c) || emergingProps.Values.Any(e => e.Location == c);
-    bool UnattendedPhysicsActive(LocationContext c) => fixtureConnection is not null || links.Values.Any(l => l.Source == c || l.Destination == c) || c.Physics.NeedsPropSimulation || c.Physics.NpcMotions.Any(n=>c.Physics.HasTerrain(n.Position,2)&&(!n.Grounded||n.Velocity.LengthSquared()>.01f));
+    bool TravelBusy(LocationContext c) => npcFlights.Values.Any(f => f.Source == c || f.Destination == c) || c.Gate?.Phase == GatePhase.Opening || hazards.TryGetValue(c, out var hazard) && hazard.Pending || travels.Values.Any(t => t.Source == c || t.Destination == c) || propDestructions.Any(d => d.Context == c) || emergingProps.Values.Any(e => e.Location == c);
+    bool UnattendedPhysicsActive(LocationContext c) => c.Physics.HasMovingDoors || fixtureConnection is not null || links.Values.Any(l => l.Source == c || l.Destination == c) || c.Physics.NeedsPropSimulation || c.Physics.NpcMotions.Any(n=>c.Physics.HasTerrain(n.Position,2)&&(!n.Grounded||n.Velocity.LengthSquared()>.01f));
     void Notice(PendingTravel t, TransitPhase phase, string? reason = null)
     {
         Console.WriteLine($"TRANSIT id={t.Id} item={t.Prop?.PersistentId} connection={t.Link.Id} source={t.Record.Source} destination={t.Record.Destination} phase={phase} sourceEpoch={t.Source.Physics.Epoch} reason={reason}");
@@ -140,6 +140,7 @@ public sealed partial class GameServer
         bool available = link is not null && context.Transition?.Data.Switch != true && context.Edit is null;
         GateFrame? gate = link is null ? null : Frame(context);
         physics.TravelGate = gate;
+        ObserveNpcTravel(available ? gate : null, link?.Destination is { } npcTarget ? Frame(npcTarget) : null, link);
         var endpoint = links.Values.FirstOrDefault(l => (l.Source == context || l.Destination == context) && context.Gate?.Settled == true && l.Closing == 0 && !l.CloseRequested);
         bool propsAvailable = endpoint is not null && context.Transition?.Data.Switch != true && context.Edit is null;
         foreach (var player in physics.Players.ToArray())
@@ -159,7 +160,7 @@ public sealed partial class GameServer
                 TransitFrozen = false
             };
             if (!physics.CanPlacePlayer(safe.Position, player.Id))
-                continue;
+                safe = physics.ResolveCharacterExit(gate!.Value, safe, out _, player.Id);
             CancelTravelSourcePreparation();
             SavePlayer(session);
             var t = new PendingTravel { Link = link!, Session = session, Source = context, Destination = link!.Destination!, Player = player, Started = serverTick };
@@ -301,6 +302,7 @@ public sealed partial class GameServer
     }
     void TickTravel()
     {
+        TickNpcTravel();
         TickEmergences();
         foreach (var destruction in propDestructions.Where(d => d.Save.IsCompleted).ToArray())
         {
@@ -441,12 +443,16 @@ public sealed partial class GameServer
                 t.Failure = "Receiving gate exit is obstructed.";
                 continue;
             }
-            bool reserved = propDestructions.Any(d => d.Context == target) || travels.Values.Any(o => o != t && (o.Destination == target && o.Commit is not null || o.Source == target && o.Prop is not null && !o.Removed));
+            bool reserved = npcFlights.Values.Any(f => f.Destination == target && f.Commit is not null) || propDestructions.Any(d => d.Context == target) || travels.Values.Any(o => o != t && (o.Destination == target && o.Commit is not null || o.Source == target && o.Prop is not null && !o.Removed));
             bool clear = false;
             if (!reserved)
             {
                 if (t.Player is not null)
-                    clear = target.Physics.CanPlacePlayer(position, crouched: t.Player.Value.Crouched);
+                {
+                    t.ExitPlayer = target.Physics.ResolveCharacterExit(Frame(target), t.ExitPlayer!.Value, out bool launched);
+                    Console.WriteLine($"TRANSIT character={t.Player.Value.Id} exit={(launched ? "centre-launch" : "clear")} position={t.ExitPlayer.Value.Position}");
+                    clear = true;
+                }
                 else
                 {
                     if (exitSearchMilliseconds >= 1 || Stopwatch.GetTimestamp() < t.NextExitProbe)

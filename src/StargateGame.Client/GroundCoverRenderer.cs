@@ -16,7 +16,7 @@ sealed partial class SceneRenderer
         get;
         set;
     } = new();
-    sealed record GrassResident(Texture? Records, int Count, int Texels, float[] Ranks, AxisAlignedBoundingBox Bounds, float Born, float MaximumRank, Texture? Surface = null) : IDisposable
+    sealed record GrassResident(Texture? Records, int Count, int Texels, float[] Ranks, AxisAlignedBoundingBox Bounds, float Born, float MaximumRank, Texture? Surface = null, Vector4[]? PatchRanges = null) : IDisposable
     {
         public void Dispose() { Records?.Dispose(); Surface?.Dispose(); }
     }
@@ -95,6 +95,7 @@ sealed partial class SceneRenderer
         coverWorldState = null;
         coverBuildings = [];
         grassRevision++;
+        Array.Clear(GrassLodCounts);
         GrassTriangles = 0;
         GrassUploadBytes = 0;
         meadowJobs.Clear();
@@ -276,7 +277,7 @@ sealed partial class SceneRenderer
                     old.Dispose();
                 }
                 float[] ranks = records is null ? [] : Enumerable.Range(0, data.Count).Select(i => data.Records[i * 6 + 1].Y).ToArray();
-                grassTiles[tile] = new(records, data.Count, data.Records.Length, ranks, new(data.Min, data.Max), born, job.MaximumRank, surface);
+                grassTiles[tile] = new(records, data.Count, data.Records.Length, ranks, new(data.Min, data.Max), born, job.MaximumRank, surface, data.Surface is null ? null : GrassRendering.PatchRanges(data.Surface));
                 published++;
             }
             catch
@@ -344,6 +345,7 @@ sealed partial class SceneRenderer
 
     void DrawGroundCover(RenderPass pass, ViewFrustum frustum, Camera camera, Matrix4x4 inverse)
     {
+        Array.Clear(GrassLodCounts);
         GrassTriangles = 0;
         GrassDetailedTiles = 0;
         GrassSimpleTiles = 0;
@@ -353,6 +355,7 @@ sealed partial class SceneRenderer
         if (grassTiles.Count == 0)
             return;
         if (DrawHybridGrass(pass, camera, inverse, frustum)) return;
+        using var meshTiming = gpuTimer.Measure(pass, "grass-mesh");
         grassShader ??= RequestOptionalProgram("grass.vert", "grass.frag");
         if (grassShader is null) return;
         grassBladeColor ??= LoadTerrainTexture("grass-blades.png", "vegetation");

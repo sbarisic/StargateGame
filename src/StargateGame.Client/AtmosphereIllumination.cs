@@ -32,7 +32,7 @@ static class AtmosphereIllumination
         var sunlight = Vector3.One * SunGain(sunHeight);
         return preset == "temperate" ? Vector3.Lerp(sunlight, new Vector3(1.45f, 1.38f, 1.26f), Smooth(.05f, .35f, sunHeight)) : sunlight;
     }
-    public static float CloudCoverage(string preset) => preset == "icy" ? .85f : preset == "desert" ? .32f : .48f;
+    public static float CloudCoverage(string preset) => preset == "icy" ? .85f : preset == "desert" ? .28f : .44f;
     public static float SkyRadianceScale(float sunHeight, string preset) => preset == "temperate" ? float.Lerp(3f, 1.4f, Smooth(.05f, .35f, sunHeight)) : 3f;
     public static float SkyIrradianceScale(float sunHeight, string preset) => preset == "temperate" ? float.Lerp(5f, 3f, Smooth(.05f, .35f, sunHeight)) : 5f;
 }

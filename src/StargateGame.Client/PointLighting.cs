@@ -5,24 +5,25 @@ using StargateGame.Shared;
 namespace StargateGame.Client;
 
 // Renderer-owned, derived from the presented owner pose. Never persisted separately.
-sealed record PointLight(Guid Owner, Vector3 Position, Vector3 Color, float Intensity, float Range, float SourceRadius, bool Shadows);
+sealed record PointLight(Guid Owner, Vector3 Position, Vector3 Color, float Intensity, float Range, float SourceRadius, bool Shadows, int SourcePlayer = 0);
 
 sealed partial class SceneRenderer
 {
+    const int MaximumPointLights = 16, MaximumPointFaces = MaximumPointLights * 6;
     readonly List<PointLight> propLights = [];
     RenderTarget? propShadowAtlas;
     ShaderProgram? propDepthShader;
-    readonly Matrix4x4[] propLightMatrices = new Matrix4x4[48];
-    readonly ViewFrustum[] propLightFrusta = new ViewFrustum[48];
-    readonly RenderView[] propLightViews = new RenderView[48];
-    readonly bool[] propStaticDirty = Enumerable.Repeat(true, 48).ToArray();
-    readonly ShadowActor[]?[] propActorState = new ShadowActor[48][];
-    readonly double[] propAnimationTime = new double[48];
-    readonly bool[] propHadCables = new bool[48];
-    readonly double[] propCableTime = new double[48];
-    int propFaceResolution;
+    readonly Matrix4x4[] propLightMatrices = new Matrix4x4[MaximumPointFaces];
+    readonly ViewFrustum[] propLightFrusta = new ViewFrustum[MaximumPointFaces];
+    readonly RenderView[] propLightViews = new RenderView[MaximumPointFaces];
+    readonly bool[] propStaticDirty = Enumerable.Repeat(true, MaximumPointFaces).ToArray();
+    readonly ShadowActor[]?[] propActorState = new ShadowActor[MaximumPointFaces][];
+    readonly double[] propAnimationTime = new double[MaximumPointFaces];
+    readonly bool[] propHadCables = new bool[MaximumPointFaces];
+    readonly double[] propCableTime = new double[MaximumPointFaces];
+    int propFaceResolution, propShadowSlots;
     bool pointShadowPass;
-    readonly double[] propWindTime = Enumerable.Repeat(double.NaN, 48).ToArray();
+    readonly double[] propWindTime = Enumerable.Repeat(double.NaN, MaximumPointFaces).ToArray();
     SceneFrame? lanternFrame;
     bool lanternEmissionVisible;
     PropClip[] pointShadowClips = [];
@@ -42,6 +43,7 @@ sealed partial class SceneRenderer
     }
     void DisposePointLights()
     {
+        rifleEffects.Clear(); rifleLights.Clear(); propShadowSlots = 0;
         propShadowAtlas?.Dispose(); propShadowAtlas = null; propLights.Clear(); lanternFrame = null; lanternEmissionVisible = false; pointShadowClips = [];
         Array.Fill(propStaticDirty, true); Array.Clear(propActorState); Array.Fill(propAnimationTime, double.NaN);
     }
@@ -72,13 +74,19 @@ sealed partial class SceneRenderer
             selected.Add(new(definition.PersistentId, position, new(1, .55f, .25f), 4, 5, .04f, true));
         }
         if (selected.Count > LanternAsset.LocationLimit) throw new InvalidOperationException("Lantern renderer capacity exceeded (8 per location).");
+        selected.AddRange(rifleLights);
         int resolution = Settings.Quality switch { GraphicsQuality.Low => 128, GraphicsQuality.High => 512, _ => 256 };
         for (int light = 0; light < selected.Count; light++)
-            if (light >= propLights.Count || propLights[light] != selected[light])
+            if (light >= propLights.Count || propLights[light].Position != selected[light].Position ||
+                propLights[light].Range != selected[light].Range || propLights[light].Owner != selected[light].Owner ||
+                propLights[light].SourcePlayer != selected[light].SourcePlayer)
                 for (int face = light * 6; face < light * 6 + 6; face++) { propStaticDirty[face] = true; propActorState[face] = null; }
-        if (resolution != propFaceResolution || propLights.Count != selected.Count || selected.Count == 0 || !ShadowsEnabled)
+        // Keep the high-water capacity between short flashes. Static/dynamic
+        // face offsets use capacity too, so lantern caches never shift on fire.
+        if (resolution != propFaceResolution || selected.Count > propShadowSlots || !ShadowsEnabled)
         {
             propShadowAtlas?.Dispose(); propShadowAtlas = null; propFaceResolution = resolution;
+            propShadowSlots = Math.Max(propShadowSlots, selected.Count);
             Array.Fill(propStaticDirty, true); Array.Clear(propActorState);
         }
         propLights.Clear(); propLights.AddRange(selected);
@@ -86,7 +94,7 @@ sealed partial class SceneRenderer
         int tile = resolution + GateGuard * 2;
         if (propShadowAtlas is null)
         {
-            propShadowAtlas = graphics.CreateRenderTarget(new(tile * GateAtlasColumns, tile * propLights.Count, [], TextureFormat.Depth32Float));
+            propShadowAtlas = graphics.CreateRenderTarget(new(tile * GateAtlasColumns, tile * propShadowSlots, [], TextureFormat.Depth32Float));
             propShadowAtlas.DepthStencilAttachment.SetSampling(new(TextureFilter.Nearest, TextureFilter.Nearest, TextureWrap.ClampToEdge, TextureWrap.ClampToEdge));
         }
         propDepthShader ??= LoadProgram("point_depth.vert", "depth.frag");
@@ -112,7 +120,7 @@ sealed partial class SceneRenderer
             bool animated = actors.Any(a => a.Kind == 0);
             bool hasCables = cableVisuals.Values.Any(c => c.Visible && face.Intersects(c.Bounds));
             var current = actors.ToArray();
-            if (propActorState[i] is not { } old || !old.SequenceEqual(current) || animated && propAnimationTime[i] != snapshot.SimulationTime || propHadCables[i] != hasCables || hasCables && propCableTime[i] != cableLastTime)
+            if (propActorState[i] is not { } old || !old.SequenceEqual(current) || (animated || light.SourcePlayer == snapshot.Local.Id && riflePoseReady) && propAnimationTime[i] != snapshot.SimulationTime || propHadCables[i] != hasCables || hasCables && propCableTime[i] != cableLastTime)
             {
                 DrawPropShadowFace(frame, i, true, snapshot, time); propActorState[i] = current; propAnimationTime[i] = snapshot.SimulationTime; propHadCables[i] = hasCables; propCableTime[i] = cableLastTime;
             }
@@ -120,13 +128,23 @@ sealed partial class SceneRenderer
     }
     void DrawPropShadowFace(RenderFrame frame, int face, bool dynamic, SceneFrame snapshot, float time)
     {
-        int tile = propFaceResolution + GateGuard * 2, index = face + (dynamic ? propLights.Count * 6 : 0), x = index % GateAtlasColumns * tile, y = index / GateAtlasColumns * tile;
+        int tile = propFaceResolution + GateGuard * 2, index = face + (dynamic ? propShadowSlots * 6 : 0), x = index % GateAtlasColumns * tile, y = index / GateAtlasColumns * tile;
         var state = OpaqueState with { ColorWriteMask = ColorWriteMask.None, ScissorRectangle = new(new Vector3(x,y,0),new Vector3(x+tile,y+tile,1)), DepthBiasSlope = 1.2f, DepthBiasConstant = 1 };
         using var pass = frame.BeginPass(propShadowAtlas!, new RenderPassDescriptor { View = propLightViews[face], State = state, Time = time });
         using var timer = gpuTimer.Measure(pass, "point-shadow");
         pass.Clear(Color.Black, false, true, false);
-        propDepthShader!.SetUniform("uTile", new Vector4(1f/GateAtlasColumns,1f/propLights.Count,(x+tile*.5f)*2/propShadowAtlas!.Width-1,(y+tile*.5f)*2/propShadowAtlas.Height-1));
-        if (dynamic) { DrawActors(pass, propDepthShader, propLightFrusta[face], snapshot, true); DrawCables(pass, propDepthShader, propLightFrusta[face], true); }
+        propDepthShader!.SetUniform("uTile", new Vector4(1f/GateAtlasColumns,1f/propShadowSlots,(x+tile*.5f)*2/propShadowAtlas!.Width-1,(y+tile*.5f)*2/propShadowAtlas.Height-1));
+        if (dynamic)
+        {
+            bool muzzle = propLights[face / 6].SourcePlayer == snapshot.Local.Id && riflePoseReady;
+            DrawActors(pass, propDepthShader, propLightFrusta[face], snapshot, true, excludeLocal: muzzle);
+            DrawCables(pass, propDepthShader, propLightFrusta[face], true);
+            if (muzzle)
+            {
+                using var model = pass.PushModel(rifleWorldTransform);
+                DrawSkin(pass, propDepthShader, rifle!, riflePose, 1, true);
+            }
+        }
         else
         {
             pointShadowPass = true;
@@ -135,10 +153,13 @@ sealed partial class SceneRenderer
         }
         PointShadowUpdates++;
     }
-    void PointLightingUniforms(ShaderProgram p)
+    void PointLightingUniforms(ShaderProgram p, bool viewmodel = false)
     {
+        // Approximate the flash's local diffuse bounce only on the shooter's
+        // viewmodel. The actual light stays at the muzzle and retains shadows.
+        p.SetUniform("uPropMuzzleSpillMask", viewmodel ? propLights.Select((l,i) => l.SourcePlayer != 0 && l.SourcePlayer == rifleLocal ? 1 << i : 0).Aggregate(0,(a,b)=>a|b) : 0);
         p.SetUniform("uPropShadowMask", propLights.Select((l,i) => l.Shadows ? 1 << i : 0).Aggregate(0,(a,b)=>a|b));
-        p.SetUniform("uPropLightCount", propLights.Count); p.SetUniform("uPropShadowAtlas", 23);
+        p.SetUniform("uPropLightCount", propLights.Count); p.SetUniform("uPropShadowCount", propShadowSlots); p.SetUniform("uPropShadowAtlas", 23);
         p.SetUniform("uPropShadows", ShadowsEnabled && propShadowAtlas is not null ? 1 : 0);
         if (propShadowAtlas is not null)
         {

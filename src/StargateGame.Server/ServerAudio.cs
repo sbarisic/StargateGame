@@ -6,10 +6,10 @@ namespace StargateGame.Server;
 public sealed partial class GameServer
 {
     long nextSoundId;
-    void EmitSound(WorldSoundKind kind, Vector3 position, float strength = 1, int body = 0,Guid sourceNpc=default)
+    void EmitSound(WorldSoundKind kind, Vector3 position, float strength = 1, int body = 0,Guid sourceNpc=default, int sourcePlayer = 0)
     {
         if(kind==WorldSoundKind.Impact)HearNpcs(position,false,strength:strength,sourceNpc:sourceNpc);
-        var sound = new WorldSoundEvent(++nextSoundId, physics.Tick, kind, body, position, Math.Clamp(strength, 0, 1));
+        var sound = new WorldSoundEvent(++nextSoundId, physics.Tick, kind, body, position, Math.Clamp(strength, 0, 1), sourcePlayer);
         foreach (var s in sessions.Where(s => s.PlayerId != 0 && s.RejectAt == 0))
             if (Vector3.DistanceSquared(physics.Player(s.PlayerId).Position, position) < 100 * 100)
                 s.Peer.TrySendCosmetic(new()

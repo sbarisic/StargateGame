@@ -6,7 +6,7 @@ namespace StargateGame.Client;
 static class HybridGrass
 {
     public const int SurfaceSize = 33;
-    public static Vector2 Transition(int quality) => quality switch { 1 => new(6, 10), 2 => new(14, 18), _ => new(10, 14) };
+    public static Vector2 Transition(int quality) => quality switch { 1 => new(12, 20), 2 => new(28, 36), _ => new(20, 28) };
     internal static float[] FootprintCoverage(GrassTile tile, IReadOnlyList<GrassTuft> tufts, CancellationToken token)
     {
         float[] coverage = new float[SurfaceSize * SurfaceSize];

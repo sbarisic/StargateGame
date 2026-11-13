@@ -7,6 +7,7 @@ namespace StargateGame.Shared;
 
 public sealed record Message
 {
+    public RifleShot? Shot { get; init; }
     public NpcDebugSnapshot? NpcDebug {get;init;}
     public NpcCommand? NpcCommand { get; init; }
     public NpcSnapshot? Npcs { get; init; }
@@ -276,7 +277,7 @@ public sealed record Message
 
 public static class Protocol
 {
-    public const int Version = 33, MaxFrameBytes = 65536;
+    public const int Version = 38, MaxFrameBytes = 65536;
     public static readonly JsonSerializerOptions Json = new() { IncludeFields = true, MaxDepth = 16 };
     public static async Task WriteAsync(Stream stream, Message message, CancellationToken token = default)
     {

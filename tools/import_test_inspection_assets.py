@@ -16,7 +16,7 @@ SOURCES = {
 }
 
 
-def import_model(name, source):
+def import_model(name, source, body_centred=False):
     raw = source.read_bytes()
     magic, version, length = struct.unpack_from("<4sII", raw)
     assert magic == b"glTF" and version == 2 and length == len(raw)
@@ -31,6 +31,9 @@ def import_model(name, source):
         for child in node.get('children', []): visit(child, scene.world[i])
     for i in scene.doc['scenes'][scene.doc.get('scene', 0)]['nodes']: visit(i, np.eye(4))
     parts = centre(scene.parts()); entries = []; textures = {}
+    if body_centred:
+        lo, hi = bounds(parts)
+        for vertices, _ in parts: vertices[:, 1] -= hi[1] / 2
     def texture(index, channel, factor):
         key = (index, channel, tuple(factor))
         if key in textures: return textures[key]
@@ -60,7 +63,7 @@ def import_model(name, source):
         entries.append(part)
     (OUT/(name+'.json')).write_text(json.dumps(dict(version=1,parts=entries),indent=2)+'\n')
     lo, hi = bounds(parts)
-    return dict(model=name,source=str(source.relative_to(ROOT)),sha256=hashlib.sha256(raw).hexdigest(),min=lo.tolist(),max=hi.tolist(),renderOnly=True)
+    return dict(model=name,source=str(source.relative_to(ROOT)),sha256=hashlib.sha256(raw).hexdigest(),min=lo.tolist(),max=hi.tolist(),renderOnly=not body_centred)
 
 
 if __name__ == '__main__':

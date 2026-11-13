@@ -48,12 +48,14 @@ public static class GateTravel
             return false;
         var a = gate.Local(previous + Vector3.UnitY * height * .5f);
         var b = gate.Local(current + Vector3.UnitY * height * .5f);
-        float plane = Movement.Radius - .02f;
-        if (a.Z <= plane || b.Z > plane)
+        // Trigger at the leading capsule surface, before the gate rim can stop
+        // the controller. Also recover an inward-moving actor already touching it.
+        float plane = Movement.Radius + .06f;
+        if (b.Z >= a.Z - .00001f || b.Z > plane || a.Z < -Movement.Radius)
             return false;
-        var p = Vector3.Lerp(a, b, (a.Z - plane) / (a.Z - b.Z));
-        float y = Math.Abs(p.Y) + height * .5f - Movement.Radius;
-        return MathF.Sqrt(p.X * p.X + y * y) + Movement.Radius <= gate.Radius - .015f;
+        var p = Vector3.Lerp(a, b, Math.Clamp((a.Z - plane) / (a.Z - b.Z), 0, 1));
+        float y = Math.Max(0, Math.Abs(p.Y) - (height * .5f - Movement.Radius));
+        return p.X * p.X + y * y <= MathF.Pow(gate.Radius - .015f, 2);
     }
     public static (float Min, float Max, bool Fits) Extents(GateFrame gate, BodyState body, PropDefinition definition)
     {

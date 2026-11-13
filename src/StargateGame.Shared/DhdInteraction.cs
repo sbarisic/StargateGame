@@ -84,8 +84,14 @@ public static partial class DhdInteraction
         return true;
     }
     public static DhdHit? Pick(StaticEntity entity, Vector3 eye, Vector3 direction, float reach = 3)
+        => PickConsole(entity, eye, direction, reach) is { Key: >= 0 } hit ? hit : null;
+
+    /// <summary>Nearest console surface, including the rim, body and gaps between keys.</summary>
+    public static DhdHit? PickConsole(StaticEntity entity, Vector3 eye, Vector3 direction, float reach = 3)
     {
-        if (!float.IsFinite(direction.LengthSquared()) || Math.Abs(direction.LengthSquared() - 1) > .01f)
+        if (!float.IsFinite(direction.LengthSquared()) || Math.Abs(direction.LengthSquared() - 1) > .01f
+            || !float.IsFinite(eye.LengthSquared()) || !float.IsFinite(entity.Scale) || entity.Scale <= 0
+            || !float.IsFinite(reach) || reach <= 0)
             return null;
         var originalDirection = direction;
         var inverse = Quaternion.Conjugate(entity.Rotation);
@@ -94,7 +100,7 @@ public static partial class DhdInteraction
         float closest = reach / entity.Scale;
         Surface? selected = null;
         PickNode(tree.Value, origin, direction, ref closest, ref selected);
-        return selected is { } hit && hit.Key >= 0 ? new(hit.Key, closest * entity.Scale, eye + originalDirection * closest * entity.Scale) : null;
+        return selected is { } hit ? new(hit.Key, closest * entity.Scale, eye + originalDirection * closest * entity.Scale) : null;
     }
     public static float? Ray(Vector3 o, Vector3 d, Vector3 a, Vector3 b, Vector3 c)
     {

@@ -16,6 +16,7 @@ def main():
     parser.add_argument('--rendered', action='store_true')
     parser.add_argument('--replay-only', action='store_true')
     parser.add_argument('--ownership-only', action='store_true')
+    parser.add_argument('--control-only', action='store_true')
     parser.add_argument('--output', default='artifacts/ai-harness-review/result.json')
     args = parser.parse_args()
     output = Path(args.output).resolve()
@@ -101,6 +102,57 @@ def main():
             metrics['session'] = session
             metrics['coldLaunchSeconds'] = time.monotonic() - started
             print('Sandbox ready:', session, flush=True)
+            if args.control_only:
+                issues = []
+                for name in ['game_observe', 'game_capture']:
+                    invalid = rpc('tools/call', {'name': name, 'arguments': {'session': 'invalid'}})
+                    if not invalid.get('isError') or not invalid.get('structuredContent'):
+                        issues.append(name + ' errors lack structuredContent')
+                action('add-client', {})
+                recipe_path = Path(manifest['root']) / 'control-regression.json'
+                def start_recipe(steps):
+                    recipe_path.write_text(json.dumps({'name': 'control-regression', 'steps': steps}), encoding='utf-8')
+                    return value('game_recipe', {'session': session, 'name': str(recipe_path)})['request']
+                def finish(operation):
+                    while True:
+                        result = value('game_operation', {'session': session, 'id': operation, 'waitSeconds': 10})['data']
+                        if result['state'] not in ('queued', 'running'):
+                            return result
+                def input_active():
+                    return value('game_observe', {'session': session, 'targetClient': 2})['data']['observation']['control']['syntheticInputActive']
+                held_step = {'action': 'input', 'client': 2, 'data': {'seconds': 20, 'keys': ['Q'], 'hold': True}}
+                operation = start_recipe([held_step, {'action': 'wait', 'client': 2, 'timeoutSeconds': 1, 'data': {'path': 'neverExists', 'present': True}}])
+                timed_out = finish(operation)
+                if timed_out['state'] != 'timed-out':
+                    issues.append('Recipe timeout reported as ' + timed_out['state'])
+                if input_active():
+                    issues.append('Failed recipe left client 2 input held')
+                action('input', {'seconds': 0}, client=2)
+                operation = start_recipe([{'action': 'input', 'client': 2, 'data': {'seconds': 20, 'keys': ['Q']}}])
+                deadline = time.monotonic() + 10
+                while not input_active():
+                    assert time.monotonic() < deadline, 'Recipe input did not start'
+                value('game_operation', {'session': session, 'id': operation, 'cancel': True})
+                cancelled = finish(operation)
+                assert cancelled['state'] == 'cancelled', cancelled
+                if input_active():
+                    issues.append('Cancelled recipe left client 2 input held')
+                # Cancel the client operation by ending the session if it is still pending.
+                if input_active():
+                    value('game_detach', {'session': session})
+                else:
+                    completed = finish(start_recipe([held_step]))
+                    assert completed['state'] == 'completed', completed
+                    if input_active():
+                        issues.append('Completed recipe left client 2 input held')
+                    client_timeout = finish(start_recipe([{'action': 'input', 'client': 2, 'timeoutSeconds': 1, 'data': {'seconds': 20, 'keys': ['Q']}}]))
+                    if client_timeout['state'] != 'timed-out' or input_active():
+                        issues.append('Client-side step timeout did not finalize cleanly: ' + client_timeout['state'])
+                metrics['issues'] = issues
+                assert not issues, issues
+                metrics['outcome'] = 'passed'
+                print('Recipe timeout, cancellation, completion cleanup and structured errors passed', flush=True)
+                return
             if args.ownership_only:
                 held = action('input', {'seconds': 25, 'keys': ['Q'], 'hold': True})
                 assert observe()['control']['syntheticInputActive']
@@ -197,6 +249,10 @@ def main():
                 if time.monotonic() > deadline:
                     raise TimeoutError('Spawn menu not visible')
             action('input', {'seconds': .2, 'keys': ['Q'], 'controlId': lantern['id'], 'uiRevision': ui['revision']})
+            # Selecting a tile does not spawn. Use a separate click in the world.
+            assert not any(p['kind'] == 'wooden-lantern' for p in observe()['nearby']['items'])
+            action('input', {'seconds': .1, 'keys': ['Q'], 'x': .6, 'y': .55})
+            action('input', {'seconds': .2, 'keys': ['Q'], 'buttons': ['Left'], 'x': .6, 'y': .55})
             deadline = time.monotonic() + 10
             while not any(p['kind'] == 'wooden-lantern' for p in observe()['nearby']['items']):
                 if time.monotonic() > deadline:

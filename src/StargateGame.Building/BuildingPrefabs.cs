@@ -97,7 +97,7 @@ public static class BuildingPrefabs
     public static Matrix4x4 Transform(StructureRecord s, BuildingPiece p)
     {
         var pivot=p.Kind==PieceKind.Prefab && IsDoor(p) && Get(p.Prefab).DoorPivot is { } point ? V(point) : Vector3.Zero;
-        var swing=p.Open && IsDoor(p) ? Matrix4x4.CreateTranslation(-pivot)*Matrix4x4.CreateRotationY(MathF.PI/2)*Matrix4x4.CreateTranslation(pivot) : Matrix4x4.Identity;
+        var swing=IsDoor(p) ? Matrix4x4.CreateTranslation(-pivot)*Matrix4x4.CreateRotationY(p.DoorAngle ?? (p.Open ? MathF.PI/2 : 0))*Matrix4x4.CreateTranslation(pivot) : Matrix4x4.Identity;
         return swing*Matrix4x4.CreateRotationY(-p.Rotation*MathF.PI/6)*Matrix4x4.CreateTranslation(p.Offset)*BuildingGeometry.Transform(s);
     }
     public static BuildTriangle[] Mesh(StructureRecord s, BuildingPiece p)

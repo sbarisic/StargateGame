@@ -5,6 +5,7 @@ using System.Text.Json;
 using FishGfx;
 using FishGfx.Graphics;
 using FishGfx.Graphics.Drawables;
+using Pose = StargateGame.Client.AnimationPose;
 
 namespace StargateGame.Client;
 
@@ -12,16 +13,6 @@ namespace StargateGame.Client;
 sealed class SkeletalAsset : IDisposable
 {
     public sealed record Part(Mesh3D Mesh, Texture Albedo, Texture? Normal, Texture? MetallicRoughness, float Lod, string Name);
-    internal readonly record struct Pose(Vector3 Scale, Quaternion Rotation, Vector3 Translation)
-    {
-        public static Pose From(Matrix4x4 m)
-        {
-            if (!Matrix4x4.Decompose(m, out var s, out var q, out var t))
-                throw new InvalidDataException("Invalid skeletal transform.");
-            return new(s, q, t);
-        }
-        public Matrix4x4 Blend(Pose b, float t) => Matrix4x4.CreateScale(Vector3.Lerp(Scale, b.Scale, t)) * Matrix4x4.CreateFromQuaternion(Quaternion.Slerp(Rotation, b.Rotation, t)) * Matrix4x4.CreateTranslation(Vector3.Lerp(Translation, b.Translation, t));
-    }
     internal sealed record Clip(float Duration, int Frames, Pose[] Poses);
     readonly Dictionary<string, Clip> clips = [];
     readonly Dictionary<string, Texture> textures = [];
@@ -152,6 +143,15 @@ sealed class SkeletalAsset : IDisposable
         return new(Bones, Parents, inverseBind, parts, clips);
     }
     public float Duration(string name) => clips.TryGetValue(name, out var clip) ? clip.Duration : 1;
+    public void AlignLocomotionOrigins()
+    {
+        int anchor = Array.IndexOf(Bones, "Main");
+        if (anchor < 0 || Parents[anchor] >= 0 || !clips.TryGetValue("idle", out var idle))
+            throw new InvalidDataException("Rifle locomotion requires its Main root and idle clip.");
+        foreach (string name in new[] { "walk", "run" })
+            if (clips.TryGetValue(name, out var clip))
+                Pose.AlignOrigins(clip.Poses, Parents, anchor, idle.Poses[anchor].Translation);
+    }
     static void SmoothArmNormals(Vector3[] positions, Vector3[] normals, Vector4[] joints, Vector4[] weights, uint[] indices)
     {
         // UV splits may duplicate a skin vertex, but its normal should remain
@@ -206,9 +206,9 @@ sealed class SkeletalAsset : IDisposable
     {
         return new(v[0], v[4], v[8], v[12], v[1], v[5], v[9], v[13], v[2], v[6], v[10], v[14], v[3], v[7], v[11], v[15]);
     }
-    public void Sample(string name, double seconds, Span<Matrix4x4> output, bool loop = true)
-        => SampleBlend(name, seconds, null, 0, 1, output, loop);
-    public void SampleBlend(string name, double seconds, string? previous, double previousSeconds, float blend, Span<Matrix4x4> output, bool loop = true)
+    public void Sample(string name, double seconds, Span<Matrix4x4> output, bool loop = true, AnimationTransition? transition = null, float dt = 0)
+        => SampleBlend(name, seconds, null, 0, 1, output, loop, transition, dt);
+    public void SampleBlend(string name, double seconds, string? previous, double previousSeconds, float blend, Span<Matrix4x4> output, bool loop = true, AnimationTransition? transition = null, float dt = 0)
     {
         var clip = clips.GetValueOrDefault(name) ?? clips["idle"];
         float t = loop ? (float)(seconds % clip.Duration) / clip.Duration : Math.Clamp((float)seconds / clip.Duration, 0, 1);
@@ -217,15 +217,22 @@ sealed class SkeletalAsset : IDisposable
         Clip? old = previous is not null ? clips.GetValueOrDefault(previous) : null;
         float oldT = old is null ? 0 : (float)(Math.Max(0, previousSeconds) % old.Duration) / old.Duration * (old.Frames - 1);
         int oldA = (int)oldT, oldB = old is null ? 0 : Math.Min(oldA + 1, old.Frames - 1);
+        Span<Pose> locals = stackalloc Pose[Bones.Length];
+        for (int i = 0; i < Bones.Length; i++)
+        {
+            var local = clip.Poses[a * Bones.Length + i].Lerp(clip.Poses[b * Bones.Length + i], t - a);
+            if (old is not null && blend < 1)
+            {
+                var previousLocal = old.Poses[oldA * Bones.Length + i].Lerp(old.Poses[oldB * Bones.Length + i], oldT - oldA);
+                local = previousLocal.Lerp(local, Math.Clamp(blend, 0, 1));
+            }
+            locals[i] = local;
+        }
+        transition?.Apply(name, locals, dt);
         Span<Matrix4x4> global = stackalloc Matrix4x4[128];
         for (int i = 0; i < Bones.Length; i++)
         {
-            var local = clip.Poses[a * Bones.Length + i].Blend(clip.Poses[b * Bones.Length + i], t - a);
-            if (old is not null && blend < 1)
-            {
-                var previousLocal = old.Poses[oldA * Bones.Length + i].Blend(old.Poses[oldB * Bones.Length + i], oldT - oldA);
-                local = Pose.From(previousLocal).Blend(Pose.From(local), Math.Clamp(blend, 0, 1));
-            }
+            var local = locals[i].Matrix;
             global[i] = Parents[i] < 0 ? local : local * global[Parents[i]];
             output[i] = inverseBind[i] * global[i];
         }

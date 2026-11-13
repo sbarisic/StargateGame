@@ -29,7 +29,7 @@ public sealed partial class PhysicsWorld
                     Vector3.Transform(a,root),Vector3.Transform(b,root),(hi.X-lo.X)*.5f,false);
                 navigationDoors[door.Id]=cached=(closed,structure,link);
             }
-            result.Add(cached.Link with{Open=door.Open});
+            result.Add(cached.Link with{Open=door.Open && (!hingedDoors.TryGetValue(door.Id,out var moving) || moving.Angle >= MathF.PI / 2 - .01f)});
         }
         foreach(var id in navigationDoors.Keys.Except(result.Select(d=>d.Id)).ToArray())navigationDoors.Remove(id);
         return result.ToArray();

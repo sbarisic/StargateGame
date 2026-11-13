@@ -5,6 +5,18 @@ namespace StargateGame.Client;
 sealed partial class GameApp
 {
     bool npcDebug;
+    object NavigationOverlayState()=>new {
+        enabled=session?.NavigationOverlay==true,
+        tick=session?.NavigationDiagnostics?.Tick,
+        ready=session?.NavigationDiagnostics is {Tiles.Length:>0} nav && nav.Tiles.All(t=>t.State=="Ready"),
+        tiles=session?.NavigationDiagnostics?.Tiles,
+        edges=session?.NavigationLines.Length??0
+    };
+    IEnumerable<DebugLine> NavigationDebugLines()
+    {
+        if(session?.NavigationOverlay!=true||session.TransitLocked)yield break;
+        foreach(var line in session.NavigationLines)yield return new(line.A,line.B,line.Color);
+    }
     IEnumerable<DebugLine> NpcDebugLines()
     {
         if(!npcDebug||session is null)yield break;

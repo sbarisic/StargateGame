@@ -28,11 +28,23 @@ public sealed partial class WorldRepository
             revision = r.GetInt64(0); equipped = r.IsDBNull(1) ? null : Guid.Parse(r.GetString(1));
         }
         WeaponItem?[] slots = new WeaponItem?[capacity];
-        using (var cmd = Command(db, "SELECT slot,id,catalog FROM weapon_items WHERE owner=$owner ORDER BY slot", ("$owner", owner)))
+        using (var cmd = Command(db, "SELECT w.slot,w.id,w.catalog,COALESCE(a.magazine,29),COALESCE(a.chamber,1),COALESCE(a.reserve,120) FROM weapon_items w LEFT JOIN weapon_ammo a ON a.item=w.id WHERE owner=$owner ORDER BY slot", ("$owner", owner)))
         using (var r = cmd.ExecuteReader())
-            while (r.Read()) slots[r.GetInt32(0)] = new(Guid.Parse(r.GetString(1)), r.GetString(2));
+            while (r.Read()) slots[r.GetInt32(0)] = new(Guid.Parse(r.GetString(1)), r.GetString(2), r.GetInt32(3), r.GetInt32(4)!=0, r.GetInt32(5));
         return new(revision, slots, equipped);
     }
+    public Task<bool> SaveAmmoAsync(Guid player, WeaponInventory inventory, WeaponItem item) => Run(db =>
+    {
+        if (!Rifle.Valid(item)) throw new InvalidDataException("Invalid rifle ammunition.");
+        using var tx = db.BeginTransaction();
+        string owner = PersonalOwner(player);
+        if ((string?)Scalar(db,"SELECT owner FROM weapon_items WHERE id=$id",("$id",item.Id.ToString("D"))) != owner)
+            throw new InvalidOperationException("Ammunition owner changed.");
+        Execute(db,"INSERT INTO weapon_ammo VALUES($id,$m,$c,$r) ON CONFLICT(item) DO UPDATE SET magazine=$m,chamber=$c,reserve=$r",
+            ("$id",item.Id.ToString("D")),("$m",item.Magazine),("$c",item.Chambered?1:0),("$r",item.Reserve));
+        Execute(db,"UPDATE weapon_owners SET revision=$r WHERE owner=$o",("$r",inventory.Revision),("$o",owner));
+        tx.Commit(); return true;
+    });
     public Task<WeaponInventory> EnsureWeaponsAsync(Guid player, bool equipped) => Run(db =>
     {
         using var tx = db.BeginTransaction();

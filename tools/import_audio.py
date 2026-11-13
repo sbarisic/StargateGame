@@ -266,3 +266,5 @@ print(f"Imported {len(provenance)} recordings / {len(cues)} cues into {out}")
 import import_steps
 
 import_steps.main()
+
+run(["python", str(ROOT / "tools/import_rifle_audio.py")])

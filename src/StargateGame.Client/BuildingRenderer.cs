@@ -20,6 +20,9 @@ sealed partial class SceneRenderer
     readonly Dictionary<ChunkCoordinate, (BuildingPiece[] Pieces, Mesh3D Mesh, AxisAlignedBoundingBox Bounds)> buildingMeshes = [];
     readonly HashSet<(string, ulong)> removedScenery = [];
     readonly List<(string Model, Matrix4x4 Transform, AxisAlignedBoundingBox Bounds)> buildingPrefabs = [];
+    readonly Dictionary<int, BuildingPiece> prefabDoors = [];
+    readonly List<(Guid Id, Mesh3D Mesh, AxisAlignedBoundingBox Bounds, Vector3 Pivot)> legacyDoors = [];
+    readonly Dictionary<Guid, float> doorAngles = [];
     Mesh3D? buildPreview;
     ShaderProgram? previewShader;
     Vector3 previewColor;
@@ -27,6 +30,15 @@ sealed partial class SceneRenderer
     {
         if (ReferenceEquals(changes, buildingState) && (!buildingModelsPending || buildingModelCount == models.Count))
             return;
+        // Hinge targets do not change the structural revision or any mesh.
+        if (!buildingModelsPending && changes.LocationId == buildingState.LocationId && changes.Revision == buildingState.Revision &&
+            ReferenceEquals(changes.Structures, buildingState.Structures) && ReferenceEquals(changes.Removed, buildingState.Removed) && changes.Pieces.Length == buildingState.Pieces.Length)
+        {
+            buildingState = changes;
+            var pieces = changes.Pieces.ToDictionary(p => p.Id);
+            foreach (var index in prefabDoors.Keys.ToArray()) prefabDoors[index] = pieces[prefabDoors[index].Id];
+            return;
+        }
         bool ready = true;
         var baseTriangles = BuildingBaseCourses.Mesh(changes);
         if (baseTriangles.Length > 0) ready &= RequestModel("kit-stone-foundation");
@@ -51,6 +63,7 @@ sealed partial class SceneRenderer
         foreach (var r in changes.Removed)
             removedScenery.Add((r.Category, r.Id));
         buildingPrefabs.Clear();
+        prefabDoors.Clear();
         foreach (var p in changes.Pieces.Where(p => p.Kind == PieceKind.Prefab).Concat(BuildingCorners.Pieces(changes)))
         {
             if (BuildingBaseCourses.ReplacesOwner(changes,p.Id)) continue;
@@ -65,9 +78,19 @@ sealed partial class SceneRenderer
             var transform = BuildingPrefabs.Transform(s, p);
             var b = modelBounds[p.Prefab];
             var bounds = AxisAlignedBoundingBox.FromPoints(Enumerable.Range(0, 8).Select(i => Vector3.Transform(new Vector3((i & 1) == 0 ? b.Min.X : b.Max.X, (i & 2) == 0 ? b.Min.Y : b.Max.Y, (i & 4) == 0 ? b.Min.Z : b.Max.Z), transform)));
+            if (BuildingPrefabs.IsDoor(p)) prefabDoors[buildingPrefabs.Count] = p;
             buildingPrefabs.Add((p.Prefab, transform, bounds));
         }
-        var groups = changes.Pieces.Where(p => p.Kind != PieceKind.Prefab).GroupBy(p => BuildingGeometry.Chunks(BuildingGeometry.Bounds(BuildingGeometry.Mesh(changes, p))).Order().First()).ToDictionary(g => g.Key, g => g.OrderBy(p => p.Id).ToArray());
+        foreach (var d in legacyDoors) d.Mesh.Dispose();
+        legacyDoors.Clear();
+        foreach (var p in changes.Pieces.Where(p => p.Kind == PieceKind.Door))
+        {
+            var triangles = BuildingGeometry.Mesh(changes, p with { Open = false, DoorAngle = null });
+            var structure = changes.Structures.Single(s => s.Id == p.StructureId);
+            var pivot = Vector3.Transform(DoorGeometry.Pivot(p), DoorGeometry.Root(structure, p));
+            legacyDoors.Add((p.Id, BuildingMesh(triangles), AxisAlignedBoundingBox.FromPoints(triangles.SelectMany(t => new[] { t.A, t.B, t.C })), pivot));
+        }
+        var groups = changes.Pieces.Where(p => p.Kind != PieceKind.Prefab && p.Kind != PieceKind.Door).GroupBy(p => BuildingGeometry.Chunks(BuildingGeometry.Bounds(BuildingGeometry.Mesh(changes, p))).Order().First()).ToDictionary(g => g.Key, g => g.OrderBy(p => p.Id).ToArray());
         foreach (var c in buildingMeshes.Keys.Where(c => !groups.ContainsKey(c)).ToArray())
         {
             buildingMeshes[c].Mesh.Dispose();
@@ -86,6 +109,29 @@ sealed partial class SceneRenderer
         shadows.InvalidateAll();
         InvalidateGateShadows();
         fogRoomRevision = -1;
+    }
+    public void UpdateDoorVisuals(DoorMotion[] motions)
+    {
+        bool changed = false;
+        var present = motions.Select(m => m.Id).ToHashSet();
+        foreach (var id in doorAngles.Keys.Where(id => !present.Contains(id)).ToArray())
+            changed |= doorAngles.Remove(id);
+        foreach (var motion in motions)
+        {
+            changed |= !doorAngles.TryGetValue(motion.Id, out float old) || old != motion.Angle;
+            doorAngles[motion.Id] = motion.Angle;
+        }
+        foreach (var (index, p) in prefabDoors)
+        {
+            var s = buildingState.Structures.Single(s => s.Id == p.StructureId);
+            var transform = BuildingPrefabs.Transform(s, p with { DoorAngle = doorAngles.GetValueOrDefault(p.Id, p.Open ? MathF.PI / 2 : 0) });
+            var old = buildingPrefabs[index];
+            if (old.Transform == transform) continue;
+            var b = modelBounds[p.Prefab];
+            var bounds = AxisAlignedBoundingBox.FromPoints(Enumerable.Range(0, 8).Select(i => Vector3.Transform(new Vector3((i & 1) == 0 ? b.Min.X : b.Max.X, (i & 2) == 0 ? b.Min.Y : b.Max.Y, (i & 4) == 0 ? b.Min.Z : b.Max.Z), transform)));
+            buildingPrefabs[index] = (p.Prefab, transform, bounds); changed = true;
+        }
+        if (changed) { RebuildPrefabBuckets(); shadows.InvalidateAll(); InvalidateGateShadows(); }
     }
     Mesh3D BuildingMesh(BuildTriangle[] triangles, float textureMetres = 2)
     {
@@ -130,6 +176,13 @@ sealed partial class SceneRenderer
         foreach (var batch in buildingMeshes.Values)
             if (frustum.Intersects(batch.Bounds))
                 Mesh(pass, batch.Mesh, depth ? white : buildingTexture, program);
+        foreach (var d in legacyDoors)
+        {
+            var p = buildingState.Pieces.Single(p => p.Id == d.Id);
+            float angle = doorAngles.GetValueOrDefault(d.Id, p.Open ? MathF.PI / 2 : 0);
+            using var model = pass.PushModel(Matrix4x4.CreateTranslation(-d.Pivot) * Matrix4x4.CreateRotationY(angle) * Matrix4x4.CreateTranslation(d.Pivot));
+            Mesh(pass, d.Mesh, depth ? white : buildingTexture, program);
+        }
         program.SetUniform("uTerrain", 0);
         program.SetUniform("uTint", Vector3.One);
         program.SetUniform("uHasModelNormal", 0);
@@ -221,6 +274,8 @@ sealed partial class SceneRenderer
     }
     void ClearBuildings()
     {
+        foreach (var d in legacyDoors) d.Mesh.Dispose();
+        legacyDoors.Clear(); prefabDoors.Clear(); doorAngles.Clear();
         ClearDemolition();
         foreach (var b in buildingMeshes.Values)
             b.Mesh.Dispose();

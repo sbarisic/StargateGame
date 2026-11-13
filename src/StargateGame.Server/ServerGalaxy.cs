@@ -123,7 +123,7 @@ public sealed partial class GameServer
     {
         foreach (var travel in travels.Values.Where(t => t.Link == link))
             travel.Failure = reason;
-        if (HasEmergences(link) || travels.Values.Any(t => t.Link == link) || !RecoverPartialProps(link.Source) || link.Destination is { } failedReceiver && !RecoverPartialProps(failedReceiver))
+        if (HasEmergences(link) || npcFlights.Values.Any(t => t.Link == link) || travels.Values.Any(t => t.Link == link) || !RecoverPartialProps(link.Source) || link.Destination is { } failedReceiver && !RecoverPartialProps(failedReceiver))
         {
             link.CloseRequested = true;
             return;
@@ -573,7 +573,7 @@ public sealed partial class GameServer
             bool hardLimit = ConnectionExpired(link);
             if (hardLimit)
                 link.CloseRequested = true;
-            if (link.CloseRequested && link.Closing == 0 && !HasEmergences(link) && (hardLimit || !travels.Values.Any(t => t.Link == link)))
+            if (link.CloseRequested && link.Closing == 0 && !HasEmergences(link) && (hardLimit || !travels.Values.Any(t => t.Link == link) && !npcFlights.Values.Any(t => t.Link == link)))
             {
                 if (!RecoverPartialProps(link.Source, hardLimit) || link.Destination is { } closingReceiver && !RecoverPartialProps(closingReceiver, hardLimit))
                     continue;

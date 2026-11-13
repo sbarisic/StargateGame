@@ -61,6 +61,7 @@ public sealed partial class GameServer
         }
         if (edit?.Command.RequestId == cmd.RequestId && edit.Session == s)
             return true;
+        if (doorSaves.Any(d => d.Session == s && d.Command.RequestId == cmd.RequestId)) return true;
         if (repository is not null && s.CheckedRequest != cmd.RequestId)
         {
             if (s.LookupReceipt is not null)
@@ -94,7 +95,7 @@ public sealed partial class GameServer
             Fail("Building requires a persistent generated planet.");
             return true;
         }
-        if (edit is not null || transition is not null || preparing is not null || HasLocationTransfer || sessions.Any(p => p.JoinName is not null))
+        if (DoorSavePending || edit is not null || transition is not null || preparing is not null || HasLocationTransfer || sessions.Any(p => p.JoinName is not null))
         {
             Fail("World update in progress; try again.");
             return true;
@@ -137,6 +138,11 @@ public sealed partial class GameServer
             Fail(error);
             return true;
         }
+        if (cmd.Action == "door")
+        {
+            BeginDoorMotion(s, cmd, result);
+            return true;
+        }
         edit = new(s, cmd, result, BuildSoundPosition(cmd, result));
         var coordinates = PhysicsWorld.IncludeBuildingOwners(result.State, physics.TerrainCoordinates);
         preparing = PrepareCollision(coordinates);
@@ -158,8 +164,8 @@ public sealed partial class GameServer
             mesh = physics.SceneryMesh(cmd.Category, cmd.SceneryId, cmd.Chunk).ToArray();
         else
         {
-            var state = cmd.Action is "remove" or "door" ? CurrentChanges : proposed.State;
-            var p = cmd.Action is "door" or "remove" ? CurrentChanges.Pieces.Single(p => p.Id == cmd.Target) : proposed.Piece!;
+            var state = cmd.Action is "remove" or "door" ? physics.PosedChanges : proposed.State;
+            var p = cmd.Action is "door" or "remove" ? state.Pieces.Single(p => p.Id == cmd.Target) : proposed.Piece!;
             mesh = BuildingGeometry.Mesh(state, p);
         }
         if (mesh.Length == 0)

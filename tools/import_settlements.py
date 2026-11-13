@@ -466,6 +466,7 @@ for family in ["mega", "seahill"]:
 # Targeted re-export restores original source faces before applying the current
 # foundation rule. Preserve unrelated generated assets and metadata.
 if '--houses-only' in sys.argv:
+    prefabs = generate_doors(prefabs, OUT)
     for filename, generated in [('prefabs.json', prefabs), ('templates.json', templates)]:
         path = DEST / filename
         current = json.loads(path.read_text())

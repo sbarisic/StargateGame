@@ -58,7 +58,8 @@ public sealed partial class PhysicsWorld
             foreach (var p in state.Pieces.Where(p => changedStructures.Contains(p.StructureId))) dirtyBuildings.Add(Owner(state,p));
         }
     }
-    static ChunkCoordinate Owner(WorldChanges state, BuildingPiece p) => BuildingGeometry.Chunks(BuildingGeometry.Bounds(BuildingGeometry.Mesh(state, p))).Order().First();
+    static ChunkCoordinate Owner(WorldChanges state, BuildingPiece p) => BuildingGeometry.Chunks(BuildingGeometry.Bounds(BuildingGeometry.Mesh(state,
+        BuildingPrefabs.IsDoor(p) ? p with { Open = false, DoorAngle = null } : p))).Order().First();
     public static ChunkCoordinate[] IncludeBuildingOwners(WorldChanges state, IEnumerable<ChunkCoordinate> chunks)
     {
         var result = chunks.ToHashSet();
@@ -66,7 +67,7 @@ public sealed partial class PhysicsWorld
         {
             var touched = BuildingGeometry.Chunks(BuildingGeometry.Bounds(BuildingGeometry.Mesh(state, p))).ToArray();
             if (touched.Any(result.Contains))
-                result.Add(touched.Order().First());
+                result.Add(Owner(state, p));
         }
         return result.Order().ToArray();
     }
@@ -152,6 +153,7 @@ public sealed partial class PhysicsWorld
             else foreach (var part in parts) { shapes.Remove(part.Shape); part.Shape.Dispose(); }
         }
         Changes = stagedChanges ?? Changes;
+        SyncHingedDoors();
         stagedChanges = null;
         dirtyTerrain.Clear();
         dirtyBuildings.Clear();
@@ -187,7 +189,7 @@ public sealed partial class PhysicsWorld
         foreach (var e in World.Definition.Entities.Where(e => e.Id != ignoreEntity))
             foreach (var t in ReadCollision(e.Model))
                 yield return new(Vector3.Transform(t.A, e.Transform), Vector3.Transform(t.B, e.Transform), Vector3.Transform(t.C, e.Transform));
-        foreach (var p in Changes.Pieces.Where(p => p.Id != ignoreBuilding))
+        foreach (var p in PosedChanges.Pieces.Where(p => p.Id != ignoreBuilding))
         {
             if (p.Kind == PieceKind.Prefab)
             {

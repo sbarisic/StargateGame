@@ -7,6 +7,7 @@ static class AudioEventChecks
 {
     public static void Run()
     {
+        RifleAudioChecks.Run();
         var wall = new StargateGame.Client.AudioOcclusion(new[] { new StargateGame.Building.BuildTriangle(new(-2, -2, 0), new(2, -2, 0), new(2, 2, 0)), new StargateGame.Building.BuildTriangle(new(-2, -2, 0), new(2, 2, 0), new(-2, 2, 0)) });
         Verify.Check(wall.Blocked(new(0, 0, -2), new(0, 0, 2)), "solid wall obstructs audio");
         Verify.Check(wall.Blocked(new(0, 0, 2), new(0, 0, -2)), "audio obstruction is two-sided");

@@ -9,7 +9,7 @@ sealed partial class GameApp
     bool physicsGunEquipped;
     void TogglePhysicsGun()
     {
-        if(session?.World.Definition.Fixture!="gate-pair")return;
+        if(session?.World.Definition.Fixture!="gate-pair" || session.Reloading)return;
         if(session.Carrying)session.Carry(CarryAction.Drop);
         if(cableTool)ExitCable();
         physicsGunEquipped=!physicsGunEquipped;

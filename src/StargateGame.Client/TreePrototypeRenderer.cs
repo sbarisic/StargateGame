@@ -33,7 +33,17 @@ sealed partial class SceneRenderer
 {
     public TreeVolumeSettings VolumeTreeSettings { get; set; } = new();
     public bool CanopyLodBaseline { get; set; }
+    // Forest measurements favor depth rejection. Other optimizations remain opt-in.
+    public bool CanopyDepthCulling {get;set;} = true;
+    public bool CanopyLightLod {get;set;}
+    public bool CanopyHierarchicalSkip {get;set;}
+    public bool CanopyConservativeDepthSupported => graphics.Capabilities.Version>=new OpenGlVersion(4,2)||graphics.Capabilities.SupportsExtension("GL_ARB_conservative_depth");
+    public object CanopyDiagnostics => new { depthCulling=CanopyDepthCulling, lightLod=CanopyLightLod, hierarchicalSkip=CanopyHierarchicalSkip,
+        conservativeDepthSupported=CanopyConservativeDepthSupported, conservativeDepthActive=CanopyDepthCulling&&CanopyConservativeDepthSupported,
+        draws=CanopyDraws,lods=CanopyLodCounts,lightCounts=CanopyLightCounts,width=opaqueTarget?.Width,height=opaqueTarget?.Height, gpuMs=CanopyGpuMilliseconds,depthCopyGpuMs=gpuTimer.CanopyDepthMilliseconds };
     public int[] CanopyLodCounts { get; } = new int[4];
+    // Primary 24/12/8/6 estimates followed by the number of blended (two-estimate) draws.
+    public int[] CanopyLightCounts { get; } = new int[5];
     public int CanopyDraws => CanopyLodCounts.Sum();
     public double CanopyGpuMilliseconds => gpuTimer.CanopyMilliseconds;
     public double CanopyCpuMilliseconds { get; private set; }
@@ -316,7 +326,7 @@ sealed partial class SceneRenderer
 
     void DrawPrototypeVolume(RenderPass pass, Camera camera, Matrix4x4 inverse)
     {
-        Array.Clear(CanopyLodCounts); CanopyCpuMilliseconds = 0;
+        Array.Clear(CanopyLodCounts); Array.Clear(CanopyLightCounts); CanopyCpuMilliseconds = 0;
         if (InspectTree ? TreePrototype != "volume" : !WorldVolumeTrees)
             return;
         if (prototypeShader is null)
@@ -335,6 +345,9 @@ sealed partial class SceneRenderer
         var cpu = System.Diagnostics.Stopwatch.StartNew();
         var viewProjection = camera.View * camera.Projection;
         program.SetUniform("uCanopy", 1);
+        program.SetUniform("uCanopySceneDepth",3);
+        program.SetUniform("uDepthCulling",CanopyDepthCulling?1:0);
+        program.SetUniform("uHierarchicalSkip",CanopyHierarchicalSkip?1:0);
         program.SetUniform("uCanopyNormals", 2);
         program.SetUniform("uInverseViewProjection", inverse);
         program.SetUniform("uCanopyViewProjection", viewProjection);
@@ -350,15 +363,24 @@ sealed partial class SceneRenderer
         {
             if (!prototypeVolumes.TryGetValue(tree.Species, out var volume) || !volume.Ready)
                 continue;
-            var bounds = PrototypeBounds(tree, volume.Minimum, volume.Maximum);
+            var visibilityBounds = PrototypeBounds(tree, volume.Minimum, volume.Maximum);
+            var bounds=visibilityBounds;
+            // A rotated local cell cube fits in this world-space sphere. Include the
+            // full interval margin even for coarse resident volumes and rotated trees.
+            var intervalMargin=new Vector3(volume.Cell*tree.Scale*MathF.Sqrt(3));
+            bounds=new(bounds.Min-intervalMargin,bounds.Max+intervalMargin);
             if (!frustum.Intersects(bounds))
                 continue;
-            float pixels = CanopyLod.ProjectedHeight(bounds.Min, bounds.Max, camera.Position, viewProjection, graphics.Backbuffer.Height);
+            float pixels = CanopyLod.ProjectedHeight(visibilityBounds.Min, visibilityBounds.Max, camera.Position, viewProjection, opaqueTarget!.Height);
             var lod = CanopyLod.Select(pixels, volume.Levels, CanopyLodBaseline);
+            var light=StargateGame.Client.CanopyLightLod.Select(pixels,this.CanopyLightLod);
+            CanopyLightCounts[light.First switch {24=>0,12=>1,8=>2,_=>3}]++;
+            if(light.Blend>0)CanopyLightCounts[4]++;
+            program.SetUniform("uCanopyLight",new Vector3(light.First,light.Second,light.Blend));
+            program.SetUniform("uProxyDepth",CanopyDepthCulling&&CanopyConservativeDepthSupported?CanopyDepthBounds.Nearest(bounds.Min,bounds.Max,camera.Position,viewProjection):-1f);
             CanopyLodCounts[lod.Band]++;
             program.SetUniform("uCanopyLod", new Vector4(lod.Mip, volume.Levels - 1, lod.MarchLimit,
-                // Lighting quadrature must not slide through the crown as the
-                // camera crosses a LOD band. Only primary visibility uses LOD.
+                // Sunlight uses separately blended fixed quadrature grids.
                 (float)Math.Clamp(VolumeTreeSettings.SunSteps, 1, 24)));
             var definition = tree.Definition;
             var rigid = Matrix4x4.CreateRotationY(tree.Yaw) * Matrix4x4.CreateTranslation(tree.Position);

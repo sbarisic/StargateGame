@@ -113,6 +113,9 @@ An old generation cannot mutate a newly reset world.
 Operations report queued/running/completed/failed/cancelled/timed-out independently
 of test assertions. Capture-only recipes report evidence production, not visual
 correctness. Cancellation does not undo gameplay effects already committed.
+Recipes release their synthetic input and pending client work on completion,
+failure, or cancellation, including steps targeting a second client. A step
+deadline reports `timed-out`. MCP tool errors include structured JSON details.
 `assert` and `wait` support paths with equality, numeric tolerance, presence, or
 distance conditions; no expressions or scripts are evaluated.
 
@@ -142,6 +145,10 @@ Without `--rendered`, it checks only actual stdio discovery. The report records
 startup/reset timings, observation latency/size, and retained bytes; these are
 measurements, not performance targets.
 
+Add `--control-only` to `--rendered` for the focused two-client recipe regression:
+timeout, cancellation, successful completion, input cleanup, and structured
+observation/capture errors. It reuses Sandbox and stops its session afterward.
+
 
 ## Measured acceptance baseline
 
@@ -164,7 +171,7 @@ abrupt host exit. A recorded NPC failure was inspected, exported, and reproduced
 from a fresh Sandbox, including semantic NPC targeting. Menu attachment, F6
 control grant, Escape takeover, detach, and host-loss behavior were checked using
 native window events on an owned test client; the driver did not move the desktop
-cursor. The focused harness suite has 35 checks, and the separate MCP discovery
+cursor. The focused harness suite has 36 checks, and the separate MCP discovery
 group launches no rendered client. Interrupted checks finalize cancelled/skipped
 results. Game builds and publication require an exclusive runtime lease; live
 sessions hold shared leases until cleanup.

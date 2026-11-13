@@ -23,7 +23,8 @@ sealed partial class GameApp
     float testForward, testStrafe;
     bool testJump, testCrouch, testWalk;
     Vector3? testCameraEye, testCameraTarget;
-    readonly List<double> testSamples = [];
+    readonly List<CanopyFrameSample> testSamples = [];
+    long testSampleFrame;
     string? testCapture;
     bool testCaptureIncludeUi = true;
     bool testWeatherFixture, testHorizonProps, testHorizonPlayers, testHorizonOcclusion, testShadowFixture, testOrbit, testTraverse;
@@ -56,15 +57,16 @@ sealed partial class GameApp
         gates = session?.Gates.Values.ToArray(), gate = session?.Gate, destinations = session?.Destinations,
         entities = session?.World.Definition.Entities, props = session?.World.Definition.Props,
         bodies = session?.Physics.Bodies(), carries = session?.Physics.Carries,
-        npcs = session?.Npcs, npcReply = session?.LastNpcReply, npcNavigation = session?.NpcDiagnostics, npcCollision = session?.Physics.NpcMotions, npcRendered = session?.PresentedNpcs(),
-        returnAddress = session?.ReturnAddress, inventory = session?.Inventory, container = session?.OpenWeaponContainer, changes = session?.Changes, pieces = session?.Changes.Pieces, revision = session?.Changes.Revision,
+        physics = new { tick = session?.Physics.Tick, epoch = session?.Physics.Epoch, rebuiltBatches = session?.Physics.RebuiltBatches, transitionPending = session?.TransitionPending },
+        navmesh = NavigationOverlayState(), npcs = session?.Npcs, npcReply = session?.LastNpcReply, npcNavigation = session?.NpcDiagnostics, npcCollision = session?.Physics.NpcMotions, npcRendered = session?.PresentedNpcs(),
+        returnAddress = session?.ReturnAddress, inventory = session?.Inventory, container = session?.OpenWeaponContainer, changes = session?.Changes, pieces = session?.Changes.Pieces, doors = session?.Physics.DoorStates, revision = session?.Changes.Revision,
         operation = testOperation, camera = new { eye = camera.Position, target = camera.Position + camera.WorldForwardNormal, view = testView },
         pointLights = new { count = scene?.PointLightCount, shadowFaceUpdates = scene?.PointShadowUpdates, targetBytes = scene?.PointLightTargetBytes, shadowMs = scene?.CommonReady == true ? scene.PointShadowGpuMilliseconds : 0, lightingMs = scene?.CommonReady == true ? scene.PointLightGpuMilliseconds : 0 },
         performance = new { cpuMs = scene?.RenderCpuMilliseconds, gpuMs = scene?.CommonReady == true ? scene.RenderGpuMilliseconds : 0, modelGpuBytes = scene?.ModelGpuBytes, gbufferMs = scene?.CommonReady == true ? scene.GbufferGpuMilliseconds : 0, aoMs = scene?.CommonReady == true ? scene.AoGpuMilliseconds : 0, deferredMs = scene?.CommonReady == true ? scene.DeferredGpuMilliseconds : 0, weaponMs = scene?.CommonReady == true ? scene.WeaponGpuMilliseconds : 0, compositionMs = scene?.CommonReady == true ? scene.CompositionGpuMilliseconds : 0 },
         build = new { physicsHash = Physics.PhysicsWorld.PhysicsHash, contentHash = Physics.PhysicsWorld.ContentHash },
         resources = new { targetsBytes = scene?.CommonReady == true ? scene.TargetBytes : 0, gbufferBytes = scene?.GbufferTargetBytes, weaponBytes = scene?.WeaponDeferredTargetBytes, aoBytes = scene?.AoTargetBytes, lightingBytes = scene?.DeferredLightingTargetBytes, environmentBytes = (scene?.GrassWorldBytes ?? 0) + (scene?.WeatherBytes ?? 0), sharedGrassBytes = scene?.GrassVolumeBytes ?? 0, volumeBytes = scene?.VolumeBytes ?? 0, horizonBytes = scene?.HorizonTargetBytes ?? 0 },
-        audioCues = audio?.TestCueCounts,
-        rendering = scene is null ? null : new { hour = scene.TimeOfDay, quality = graphicsSettings.Quality, ao = scene.AoSettings, exposure = scene.ToneMapping, visualTime = testVisualTime, deferredReady = scene.DeferredCaptureReady, weather = scene.WeatherSettings, roof = scene.WeatherFixtureRoof, weatherCheck = scene.WeatherDiagnostics, camera = testView, gatePreview = testPreview }, options = testOptions
+        audioCues = audio?.TestCueCounts, rifle = new { ammo = session?.EquippedRifle, reloading = session?.Reloading, character = session?.LocalCharacter, effects = scene?.RifleDiagnostics, reloadAudio = audio?.TestReloadEvents, reloadMarkers = RifleReloadAudio.Markers },
+        rendering = scene is null ? null : new { viewmodel=scene.ViewmodelDiagnostics, dhdFocus=new { active=LookingAtDhd, entity=dhdFocus?.Entity.Id, key=dhdHover }, grass=scene.GrassDiagnostics, canopy=scene.CanopyDiagnostics, hour = scene.TimeOfDay, quality = graphicsSettings.Quality, ao = scene.AoSettings, exposure = scene.ToneMapping, visualTime = testVisualTime, deferredReady = scene.DeferredCaptureReady, weather = scene.WeatherSettings, roof = scene.WeatherFixtureRoof, weatherCheck = scene.WeatherDiagnostics, camera = testView, gatePreview = testPreview }, options = testOptions
     };
     TestResult ExecuteTest(TestRequest r)
     {
@@ -138,6 +140,8 @@ sealed partial class GameApp
                 Vector3? eyePosition = r.Data.TryGetProperty("eye", out _) ? r.Value<Vector3>("eye") : null;
                 Vector3? targetPosition = eyePosition is not null ? r.Value<Vector3>("target") : null;
                 if (eyePosition is { } ep && targetPosition is { } tp && (!Finite(ep) || !Finite(tp) || Vector3.DistanceSquared(ep, tp) < .0001f)) throw new ArgumentException("Camera requires distinct finite eye/target positions.");
+                if (eyePosition is { } ce && targetPosition is { } ct && Vector3.Cross(ct - ce, Vector3.UnitY).LengthSquared() < .000001f * (ct - ce).LengthSquared())
+                    throw new ArgumentException("Camera direction cannot be parallel to its up axis; offset the target horizontally.");
                 if (eyePosition is null && view != "player") VisualChecks.Camera(camera, session, TestBookmark(view), 0, false, false, scene.TimeOfDay);
                 testView = view; testCameraEye = eyePosition; testCameraTarget = targetPosition;
                 return TestResult.Ok(r);
@@ -149,7 +153,7 @@ sealed partial class GameApp
                 testPreviewTime = r.Number("seconds"); return TestResult.Ok(r, new { renderOnly = true });
             case TestAction.AudioRecord:
                 if (audio is null) throw new InvalidOperationException("Audio unavailable.");
-                if (r.Flag("stop")) audio.StopRecording(); else { audio.TestCueCounts.Clear(); audio.Record(TestOutput(r.Text("name", "audio.wav"))); } return TestResult.Ok(r);
+                if (r.Flag("stop")) audio.StopRecording(); else { audio.TestCueCounts.Clear(); audio.TestReloadEvents.Clear(); audio.Record(TestOutput(r.Text("name", "audio.wav"))); } return TestResult.Ok(r);
             case TestAction.Move:
                 double seconds = r.Number("seconds");
                 if (seconds is < 0 or > 30 || !double.IsFinite(seconds)) throw new ArgumentException("Movement duration must be 0–30 seconds.");
@@ -211,11 +215,22 @@ sealed partial class GameApp
             case TestAction.Sample:
                 double duration = r.Number("seconds", 3);
                 if (!double.IsFinite(duration) || duration is < .1 or > 60) throw new ArgumentException("Sample duration must be 0.1–60 seconds.");
-                testSamples.Clear(); testSampleUntil = timer.Elapsed.TotalSeconds + duration; break;
+                testSamples.Clear(); testSampleFrame=scene?.PerformanceFrame??0; testSampleUntil = timer.Elapsed.TotalSeconds + duration; break;
             default: throw new ArgumentException("Unsupported client action: " + r.Action);
         }
         testPending = r; testDeadline = timer.Elapsed.TotalSeconds + Math.Clamp(r.TimeoutSeconds, 1, 300);
         return testOperation = new(r.Id, r.Session, r.Generation, "pending", TestJson.Element(new { }), Client: r.Client);
+    }
+    object PerformanceSummary()
+    {
+        object Stats(Func<CanopyFrameSample,double> select) {var v=testSamples.Select(select).Order().ToArray();return new {median=v.Length==0?0:v[v.Length/2],p95=v.Length==0?0:P95(v.ToList()),max=v.Length==0?0:v[^1]};}
+        return new {frames=testSamples.Count, gpuP95Ms=testSamples.Count==0?0:P95(testSamples.Select(s=>s.GpuMs).ToList()),
+            gpuMaxMs=testSamples.Count==0?0:testSamples.Max(s=>s.GpuMs), gpuMs=Stats(s=>s.GpuMs),canopyMs=Stats(s=>s.CanopyMs),depthCopyMs=Stats(s=>s.DepthCopyMs),
+            canopyWithCopyMs=Stats(s=>s.CanopyMs+s.DepthCopyMs),cpuMs=Stats(s=>s.CpuMs),frameMs=Stats(s=>s.FrameMs),draws=Stats(s=>s.Draws),
+            lods=Enumerable.Range(0,4).Select(i=>Stats(s=>s.Lods[i])).ToArray(),settings=scene?.CanopyDiagnostics,
+            grassMs=Stats(s=>s.GrassMeshMs+s.GrassVolumeMs),grassMeshMs=Stats(s=>s.GrassMeshMs),grassVolumeMs=Stats(s=>s.GrassVolumeMs),foliageMs=Stats(s=>s.FoliageMs),grassDepthCopyMs=Stats(s=>s.GrassDepthMs),
+            grassWithCopyMs=Stats(s=>s.GrassMeshMs+s.GrassVolumeMs+s.GrassDepthMs),grassPatches=Stats(s=>s.GrassPatches),grassTriangles=Stats(s=>s.GrassTriangles),
+            grassLods=Enumerable.Range(0,4).Select(i=>Stats(s=>s.GrassLods[i])).ToArray(),grassSettings=scene?.GrassDiagnostics};
     }
     static bool Finite(Vector3 p) => float.IsFinite(p.X) && float.IsFinite(p.Y) && float.IsFinite(p.Z);
     string TestOutput(string name)
@@ -223,11 +238,11 @@ sealed partial class GameApp
         if (Path.GetFileName(name) != name || name is "" or "." or "..") throw new ArgumentException("Capture name must be a filename.");
         return Path.Combine(testRoot, name);
     }
-    void FinishTest(string outcome = "passed", string? error = null, object? data = null)
+    void FinishTest(string outcome = "passed", string? error = null, object? data = null, string? errorCode = null)
     {
         if (testPending is not { } r) return;
         if (outcome != "passed" && r.Action == TestAction.Relocate) session?.CancelPlanetLoad();
-        testOperation = new(r.Id, r.Session, r.Generation, outcome, TestJson.Element(data ?? new { }), error, Client: r.Client);
+        testOperation = new(r.Id, r.Session, r.Generation, outcome, TestJson.Element(data ?? new { }), error, ErrorCode: errorCode, Client: r.Client);
         if (r.Action == TestAction.Input || outcome != "passed") ReleaseTestInput();
         testPending = null; testCapture = null; testMovementReview = false; testUiReview = false; testMoveUntil = 0; testJump = false;
     }
@@ -235,7 +250,7 @@ sealed partial class GameApp
     {
         testQueue.Drain(ExecuteTest);
         if (testPending is not { } r) return;
-        if (now > testDeadline) { FinishTest("failed", "Action timed out: " + r.Action); return; }
+        if (now > testDeadline) { FinishTest("failed", "Action timed out: " + r.Action, errorCode: "timed-out"); return; }
         if (session is null) { FinishTest("failed", "Session disconnected."); return; }
         switch (r.Action)
         {
@@ -255,8 +270,9 @@ sealed partial class GameApp
                 bool wanted = r.Text("action").Equals("grab", StringComparison.OrdinalIgnoreCase);
                 if (session.Physics.IsCarrying(session.Local.Id) == wanted) FinishTest(); break;
             case TestAction.Sample:
-                if (scene is not null) testSamples.Add(scene.RenderGpuMilliseconds);
-                if (now >= testSampleUntil) FinishTest(data: new { frames = testSamples.Count, gpuP95Ms = testSamples.Count == 0 ? 0 : P95(testSamples), gpuMaxMs = testSamples.Count == 0 ? 0 : testSamples.Max() }); break;
+                if (scene is not null)
+                    foreach(var sample in scene.CompletedPerformanceFrames.Where(s=>s.Frame>testSampleFrame)) {testSamples.Add(sample);testSampleFrame=sample.Frame;}
+                if (now >= testSampleUntil) FinishTest(data: PerformanceSummary()); break;
         }
     }
     void ApplyTestSettings(TestRequest r)
@@ -270,11 +286,26 @@ sealed partial class GameApp
         if (r.Data.TryGetProperty("aoView", out _)) AmbientOcclusionSettings.InspectionId(r.Text("aoView"));
         if (r.Data.TryGetProperty("quality", out _) && !new[] { "performance", "low", "high" }.Contains(r.Text("quality"))) throw new ArgumentException("Invalid quality.");
         if (r.Data.TryGetProperty("weather", out _)) WeatherSettings.Parse(r.Text("weather"));
+        if (r.Data.TryGetProperty("grassVolumeDensity", out _) && (!double.IsFinite(r.Number("grassVolumeDensity")) || r.Number("grassVolumeDensity") is < .1 or > 1))
+            throw new ArgumentException("Grass volume density must be finite and between 0.1 and 1.");
         if (r.Data.TryGetProperty("grassDensity", out _) && r.Int("grassDensity") is < 0 or > 64) throw new ArgumentException("Grass density must be 0�64.");
         if (r.Data.TryGetProperty("visualTime", out var vt) && vt.ValueKind != JsonValueKind.Null && (!double.IsFinite(r.Number("visualTime")) || r.Number("visualTime") < 0)) throw new ArgumentException("Invalid visual time.");
         if (r.Data.TryGetProperty("propMode", out _) && r.Text("propMode") is not ("all" or "motion" or "stationary")) throw new ArgumentException("Unknown prop preview mode.");
         if (testOptions.Scenario == "sandbox" && testOptions.Preset != "graphics-lab") scene.SetTestingInspection(true); else scene.SetTestingInspection(false);
         if (r.Data.TryGetProperty("hour", out _) && (!double.IsFinite(r.Number("hour")) || r.Number("hour") is < 0 or > 24)) throw new ArgumentException("Hour must be 0–24.");
+        if(r.Data.TryGetProperty("renderWidth",out _) || r.Data.TryGetProperty("renderHeight",out _)) {
+            int w=r.Int("renderWidth"),h=r.Int("renderHeight");
+            if(w<640||w>3840||h<480||h>2160)throw new ArgumentException("Render dimensions must be supplied together, within 640x480–3840x2160.");
+            window.SetClientSize(w,h); scene.InspectionResolution=new(w,h);
+        }
+        if(r.Data.TryGetProperty("grassDepthCulling",out _))scene.GrassDepthCulling=r.Flag("grassDepthCulling");
+        if(r.Data.TryGetProperty("grassShaderReuse",out _))scene.GrassShaderReuse=r.Flag("grassShaderReuse");
+        if(r.Data.TryGetProperty("grassScreenLod",out _))scene.GrassScreenLod=r.Flag("grassScreenLod");
+        if(r.Data.TryGetProperty("grassVolumeDensity",out _))scene.GrassVolumeDensity=(float)r.Number("grassVolumeDensity");
+        if(r.Data.TryGetProperty("canopyDepthCulling",out _))scene.CanopyDepthCulling=r.Flag("canopyDepthCulling");
+        if(r.Data.TryGetProperty("canopyLightLod",out _))scene.CanopyLightLod=r.Flag("canopyLightLod");
+        if(r.Data.TryGetProperty("canopyHierarchicalSkip",out _))scene.CanopyHierarchicalSkip=r.Flag("canopyHierarchicalSkip");
+        if (r.Data.TryGetProperty("navmesh", out _)) session?.SetNavigationOverlay(r.Flag("navmesh"));
         if (r.Data.TryGetProperty("hour", out _)) scene.TimeOfDay = (float)r.Number("hour");
         if (r.Data.TryGetProperty("quality", out _)) { graphicsSettings = GraphicsSettings.Parse(r.Text("quality")); scene.SetGraphics(graphicsSettings); }
         if (r.Data.TryGetProperty("weather", out _)) scene.WeatherSettings = scene.WeatherSettings with { Mode = WeatherSettings.Parse(r.Text("weather")) };
@@ -330,6 +361,8 @@ sealed partial class GameApp
     }
     string TestBookmark(string name) => name switch
     {
+        "grass" when testOptions.Scenario=="sandbox" => "region:-26,.85,23,-26,.25,5",
+        "forest" when testOptions.Scenario=="sandbox" => "region:0,3,24,0,7,-24",
         "movement" => "region:-22,3,18,-22,0,6", "equipment" => "region:22,2,15,22,1,10",
         "interior" => "region:25,3,29,25,1,23", "technology" => "region:37,3,18,37,1,10",
         "water" => "water-shallow", "region" => testRegionalView is { Length: > 0 } view ? view : throw new InvalidOperationException("This scenario has no regional bookmark."), _ => name
@@ -337,6 +370,10 @@ sealed partial class GameApp
     void CaptureTest(RenderPass pass, bool beforeUi = false)
     {
         if (beforeUi == testCaptureIncludeUi || testCapture is not { } path || !(testPending?.Flag("immediate") == true ? scene is not null : TestCaptureReady)) return;
+        // Check transient effects on the frame being captured, avoiding a pipe
+        // round trip between a readiness observation and the screenshot.
+        if (testPending is { } request && request.Data.TryGetProperty("when", out var condition) &&
+            !Conditions.Matches(TestJson.Element(TestStatus()), condition, out _)) return;
         Capture(pass, path, true); TestJson.Write(Path.ChangeExtension(path, ".json"), ObserveTest(new() { Data = TestJson.Element(new { sections = new[] { "rendering", "diagnostics" } }) }));
         FinishTest(data: new { path, metadata = Path.ChangeExtension(path, ".json") });
     }

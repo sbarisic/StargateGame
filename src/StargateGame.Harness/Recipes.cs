@@ -72,8 +72,51 @@ static partial class Recipes
         }
         if (!Names.Contains(name)) throw new ArgumentException("Unknown recipe: " + name);
         if(name=="npc-follow-buildings"){await FollowBuildings(manifest,token,controller,dispatch);return;}
+        if(name=="rifle-audio"){await RifleAudio(manifest,token,controller,dispatch);return;}
         switch (name)
         {
+            case "grass-performance":
+            {
+                if(manifest.Options.Scenario!="sandbox")throw new ArgumentException("Grass comparison requires Sandbox.");
+                await Send(TestAction.Camera,new{bookmark="grass"});
+                await Send(TestAction.Settings,new{quality="performance",hour=12,weather="off",visualTime=10,exposure="manual",exposureEv=0,renderWidth=1920,renderHeight=1080,
+                    grassVolumeDensity=1,canopyDepthCulling=true,canopyLightLod=false,canopyHierarchicalSkip=false,grassDepthCulling=false,grassShaderReuse=false,grassScreenLod=false});
+                await Send(TestAction.Wait,new{condition="captureReady"});
+                await Until(s=>s.GetProperty("rendering").GetProperty("grass").GetProperty("ready").GetBoolean());
+                var results=new List<object>();
+                foreach(var mode in new[]{"baseline","depth","reuse","lod","combined"}) {
+                    await Send(TestAction.Settings,new{grassDepthCulling=mode is "depth" or "combined",grassShaderReuse=mode is "reuse" or "combined",grassScreenLod=mode is "lod" or "combined"});
+                    await Send(TestAction.Wait,new{condition="captureReady"});
+                    await Send(TestAction.Sample,new{seconds=5});
+                    var sample=await Send(TestAction.Sample,new{seconds=8});
+                    if(sample.Data.GetProperty("frames").GetInt32()==0)throw new InvalidOperationException("No completed GPU timing samples.");
+                    var grass=sample.Data.GetProperty("grassSettings");
+                    if(grass.GetProperty("lods").EnumerateArray().Sum(v=>v.GetInt32())!=grass.GetProperty("patches").GetInt32())
+                        throw new InvalidOperationException("Grass LOD counters do not match this frame's submitted patches.");
+                    results.Add(new{mode,metrics=sample.Data});
+                    TestJson.Write(Path.Combine(manifest.Root,"grass-performance.json"),new{results});
+                    await Send(TestAction.Capture,new{name="grass-"+mode+".png",includeUi=false});
+                }
+                break;
+            }
+            case "canopy-performance":
+            {
+                if(manifest.Options.Scenario!="sandbox")throw new ArgumentException("Canopy comparison requires Sandbox.");
+                await Send(TestAction.Camera,new{bookmark="forest"});
+                await Send(TestAction.Settings,new{quality="performance",hour=12,weather="off",visualTime=10,renderWidth=1920,renderHeight=1080,canopyDepthCulling=false,canopyLightLod=false,canopyHierarchicalSkip=false});
+                await Send(TestAction.Wait,new{condition="captureReady"});
+                var results=new List<object>();
+                foreach(var mode in new[]{"baseline","depth","skip","light","combined"}) {
+                    await Send(TestAction.Settings,new{canopyDepthCulling=mode is "depth" or "combined",canopyLightLod=mode is "light" or "combined",canopyHierarchicalSkip=mode is "skip" or "combined"});
+                    await Send(TestAction.Wait,new{condition="captureReady"});
+                    await Send(TestAction.Sample,new{seconds=5}); // Bounded warmup; discard its timings.
+                    var sample=await Send(TestAction.Sample,new{seconds=8});
+                    results.Add(new{mode,metrics=sample.Data});
+                    TestJson.Write(Path.Combine(manifest.Root,"canopy-performance.json"),new{results});
+                    if(mode is "baseline" or "combined")await Send(TestAction.Capture,new{name="canopy-"+mode+".png"});
+                }
+                break;
+            }
             case "npc-lifecycle":
             {
                 if(manifest.Options.Scenario!="sandbox")throw new ArgumentException("NPC checks require Sandbox.");
@@ -195,12 +238,14 @@ static partial class Recipes
                     try { await Send(TestAction.Teleport, new { position = new Vector3(centre.X, .03f, centre.Z) + offset * 1.5f }); placed = true; break; } catch (InvalidOperationException) { }
                 }
                 if (!placed) throw new Exception("No safe door interaction station.");
+                await Send(TestAction.Camera, new { bookmark = "player" });
+                await Send(TestAction.Aim, new { target = centre });
                 await Send(TestAction.Build, new { command = new BuildCommand(Guid.NewGuid(), 0, "door", Target: door.Id) });
-                await Until(s => s.GetProperty("pieces").EnumerateArray().Any(p => p.GetProperty("id").GetGuid() == door.Id && p.GetProperty("open").GetBoolean()));
-                var second = await State(2);
-                if (!second.GetProperty("pieces").EnumerateArray().Any(p => p.GetProperty("id").GetGuid() == door.Id && p.GetProperty("open").GetBoolean())) throw new Exception("Door change did not reach second client.");
+                bool DoorAt(JsonElement s, float angle) => s.GetProperty("doors").EnumerateArray().Any(d => d.GetProperty("id").GetGuid() == door.Id && Math.Abs(d.GetProperty("angle").GetSingle() - angle) < .001f);
+                await Until(s => DoorAt(s, MathF.PI / 2));
+                await Until(s => DoorAt(s, MathF.PI / 2), 2);
                 await Send(TestAction.ResetStation, new { station = "interior" });
-                await Until(s => s.GetProperty("pieces").EnumerateArray().Any(p => p.GetProperty("id").GetGuid() == door.Id && !p.GetProperty("open").GetBoolean()));
+                await Until(s => DoorAt(s, 0));
                 var crate = changes.Pieces.First(p => p.Prefab == "weapon-crate");
                 await Send(TestAction.Teleport, new { station = "equipment" });
                 await Send(TestAction.Weapon, new { action = "open", container = crate.Id });

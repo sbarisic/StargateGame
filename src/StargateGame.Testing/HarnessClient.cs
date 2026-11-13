@@ -16,12 +16,13 @@ public sealed class HarnessClient(string? controllerId = null, bool detachOnDisp
     }
     public static bool Alive(SessionManifest m)
     {
+        if (m.State is "stopped" or "failed") return false;
         try {
             using var p = Process.GetProcessById(m.CoordinatorPid);
             var expected = m.CoordinatorStartedUtc?.UtcDateTime ?? File.GetLastWriteTimeUtc(Path.Combine(m.Root, "launch.json"));
             return !p.HasExited && Math.Abs((p.StartTime.ToUniversalTime() - expected).TotalSeconds) < 5;
         }
-        catch (ArgumentException) { return false; }
+        catch (Exception e) when (e is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception) { return false; }
     }
     public static object[] Sessions()
     {

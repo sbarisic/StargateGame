@@ -11,7 +11,7 @@ public sealed partial class GameServer
     void SpawnSandboxProp(Session session, BuildCommand cmd)
     {
         void Reply(bool success,string reason) => BuildReply(session,new(cmd.RequestId,success,reason,CurrentChanges.Revision));
-        if (physics.World.Definition.Fixture != "gate-pair" || cmd.Prefab is not ("wooden-crate" or "barrel-red" or "wooden-lantern"))
+        if (physics.World.Definition.Fixture != "gate-pair" || cmd.Prefab is not ("wooden-crate" or "barrel-red" or "wooden-lantern" or "zpm-hub" or "zpm"))
         { Reply(false,"Spawning is available only in Sandbox."); return; }
         var player=physics.Player(session.PlayerId);
         var eye=player.Position+Vector3.UnitY*Movement.ViewHeight(player);
@@ -32,7 +32,14 @@ public sealed partial class GameServer
         if (id == 0){Reply(false,"Sandbox prop limit reached (64, including gate reservations).");return;}
         if (cmd.Prefab=="wooden-lantern" && LanternCount(physics)>=LanternAsset.LocationLimit)
         {Reply(false,"Lantern limit reached (8 per location).");return;}
-        var prop=cmd.Prefab=="wooden-lantern" ? PropDefinition.Lantern(id,hit) : cmd.Prefab=="barrel-red" ? PropDefinition.Barrel(id,hit,false) : new PropDefinition(id,hit,new(.5f),10);
+        var prop=cmd.Prefab switch
+        {
+            "zpm-hub" => PropDefinition.ZpmHub(id,hit),
+            "zpm" => PropDefinition.Zpm(id,hit),
+            "wooden-lantern" => PropDefinition.Lantern(id,hit),
+            "barrel-red" => PropDefinition.Barrel(id,hit,false),
+            _ => new PropDefinition(id,hit,new(.5f),10)
+        };
         prop=prop with { PersistentId=Guid.NewGuid() };
         // Keep props upright. Back away from walls if the first resting pose overlaps.
         for(int attempt=0;attempt<9;attempt++)

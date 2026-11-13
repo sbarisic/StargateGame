@@ -12,7 +12,8 @@ public readonly record struct BuildPoint(int XA, int XB, int ZA, int ZB)
 {
     public Vector3 Position => new((float)(1.5 * (XA + XB * Math.Sqrt(3))), 0, (float)(1.5 * (ZA + ZB * Math.Sqrt(3))));
 }
-public sealed record BuildingPiece(Guid Id, Guid StructureId, PieceKind Kind, BuildPoint Point, int Rotation, int Level, bool Open = false, float FoundationBottom = 0, string Prefab = "", Vector3 Offset = default, Guid Parent = default);
+public sealed record BuildingPiece(Guid Id, Guid StructureId, PieceKind Kind, BuildPoint Point, int Rotation, int Level, bool Open = false, float FoundationBottom = 0, string Prefab = "", Vector3 Offset = default, Guid Parent = default, [property: System.Text.Json.Serialization.JsonIgnore] float? DoorAngle = null);
+public sealed record DoorMotion(Guid Id, float Angle, bool Blocked = false, bool Open = false);
 public sealed record SceneryRemoval(string Category, ulong Id, ChunkCoordinate Chunk);
 public sealed record WorldChanges(Guid UniverseId, Guid LocationId, long Revision, StructureRecord[] Structures, BuildingPiece[] Pieces, SceneryRemoval[] Removed)
 {

@@ -15,6 +15,8 @@ public sealed partial class GameServer
         public WeaponContainer? Snapshot;
         public WeaponRequest? Command;
         public readonly Dictionary<Guid, WeaponResult> Receipts = [];
+        public long LastFire = -1000;
+        public Task<bool>? AmmoSave;
     }
     readonly Dictionary<Session, WeaponAccess> weaponAccess = [];
     readonly Dictionary<Guid, WeaponInventory> fixtureWeapons = [];
@@ -44,6 +46,7 @@ public sealed partial class GameServer
             if (access.Command?.Id != request.Id) Fail("Previous weapon request is still committing.");
             return true;
         }
+        if (Reloading(s) && request.Action is not ("snapshot" or "close")) { Fail("Finish reloading first."); return true; }
         if (physics.Player(s.PlayerId).TransitFrozen || HomeDebugBusy) { Fail("Equipment is unavailable during travel or world updates."); return true; }
         if (request.Id == Guid.Empty) { Fail("Invalid request ID."); return true; }
         if (request.Action is "open" or "store" or "take")
@@ -106,6 +109,15 @@ public sealed partial class GameServer
                         other.Key.Peer.Send(new() { Kind = "weapon-state", Weapons = new(Guid.Empty, true, "", other.Value.Inventory!, changed) });
                     }
                 a.Command = null;
+            }
+            if (a.AmmoSave is { IsFaulted: true }) { Reject(s, "Unable to save ammunition."); continue; }
+            if (characterStates.GetValueOrDefault(s.PlayerId) is { Action: "reload", ReloadUntil: > 0 } reload && serverTick >= reload.ReloadUntil)
+            {
+                if (a.Inventory?.Slots.FirstOrDefault(i => i?.Id == a.Inventory.Equipped) is { } rifle)
+                    UpdateAmmo(s, a, Rifle.Reload(rifle));
+                var ready = reload with { Action = "idle", Aiming = false, StartTick = serverTick, ReloadUntil = 0 };
+                characterStates[s.PlayerId] = ready;
+                Broadcast(new() { Kind = "character-state", Characters = [ready], GateTick = serverTick });
             }
             if (a.Container != Guid.Empty && !CanAccessWeaponContainer(s, a.Location, a.Container))
             {

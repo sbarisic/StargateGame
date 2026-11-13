@@ -13,6 +13,7 @@ sealed partial class ClientSession
     bool closeWeaponsWhenReady;
     public void Weapon(string action, Guid? item = null, Guid container = default)
     {
+        if (Reloading && action is not ("close" or "snapshot")) { WeaponStatus = "Finish reloading first."; return; }
         if (action == "close") { OpenWeaponContainer = null; if (WeaponPending) { closeWeaponsWhenReady = true; return; } }
         if (WeaponPending || Inventory is null || TransitLocked) return;
         pendingWeapon = Guid.NewGuid(); WeaponPending = true;

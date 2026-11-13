@@ -70,6 +70,8 @@ sealed partial class SceneRenderer
         }
         var compileClock = System.Diagnostics.Stopwatch.StartNew();
         string vertexSource = Source(vertex), fragmentSource = Source(fragment);
+        if((fragment=="tree_volume.frag" || fragment=="grass_volume.frag") && CanopyConservativeDepthSupported)
+            fragmentSource=fragmentSource.Replace("#version 400 core", (graphics.Capabilities.SupportsExtension("GL_ARB_conservative_depth") ? "#version 400 core\n#extension GL_ARB_conservative_depth : require" : "#version 420 core") + "\nlayout(depth_greater) out float gl_FragDepth;");
         string cachePath = ShaderCachePath(vertexSource, fragmentSource);
         if (ReadShaderCache(cachePath) is { } cached)
         {
@@ -254,7 +256,10 @@ sealed partial class SceneRenderer
     }
 
     public Vector2? InspectionResolution { get; set; }
-    public void RenderScene(RenderFrame frame, Camera camera, SceneFrame snapshot, float time, IEnumerable<DebugLine>? debug)
+    long canopyFrameStart; double canopyFrameInterval;
+    public long PerformanceFrame=>gpuTimer.CurrentFrame;
+    public CanopyFrameSample[] CompletedPerformanceFrames=>gpuTimer.Completed.ToArray();
+    public void RenderScene(RenderFrame frame, Camera camera, SceneFrame snapshot, float time, IEnumerable<DebugLine>? debug, IEnumerable<DebugLine>? overlay = null)
     {
         if (graphics.Backbuffer.Width <= 0 || graphics.Backbuffer.Height <= 0)
             return;
@@ -273,6 +278,8 @@ sealed partial class SceneRenderer
             LoadFoliage();
         using var surfaceBinding = BindSurface();
         ResetVisibility();
+        long timestamp=Stopwatch.GetTimestamp();
+        canopyFrameInterval=canopyFrameStart==0?0:Stopwatch.GetElapsedTime(canopyFrameStart,timestamp).TotalMilliseconds;canopyFrameStart=timestamp;
         gpuTimer.StartFrame(frameNumber);
         PrepareWeather(snapshot, time);
         PrepareAtmosphere(frame, camera, snapshot);
@@ -324,6 +331,8 @@ sealed partial class SceneRenderer
         CheckHorizonWaves(frame, view);
         AdvanceHorizonWaves(frame, view, time);
         PrepareGateLights(frame, camera, snapshot, time);
+        PrepareViewmodelPose(camera, snapshot, time);
+        PrepareRifleEffects(camera, snapshot, time);
         PreparePointLights(frame, camera, snapshot, time);
         PrepareDhds(frustum);
         // The scattering volume samples this frame's shelter map too.
@@ -363,11 +372,21 @@ sealed partial class SceneRenderer
                 using (gpuTimer.Measure(pass, "character"))
                     DrawActors(pass, shader, frustum, snapshot, false);
             }
+            if(CanopyDepthCulling)
+                using(gpuTimer.Measure(pass,"canopy-depth"))
+                    opaqueTarget!.DepthStencilAttachment.CopyTo(waterTarget!.DepthStencilAttachment);
+        }
+        using (var pass = frame.BeginPass(opaqueTarget!, new RenderPassDescriptor {
+            View=view, State=OpaqueState, Time=time, ColorLoadAction=RenderLoadAction.Load, DepthLoadAction=RenderLoadAction.Load }))
+        {
+            using var canopyDepth=CanopyDepthCulling?waterTarget!.DepthStencilAttachment.Bind(3):null;
             using (gpuTimer.Measure(pass, "canopy"))
                 DrawPrototypeVolume(pass, camera, inverse);
         }
         // Separate depth snapshot avoids sampling an attached render target.
-        opaqueTarget!.DepthStencilAttachment.CopyTo(waterTarget!.DepthStencilAttachment);
+        using (var copyPass=frame.BeginPass(waterTarget!,new RenderPassDescriptor { ColorLoadAction=RenderLoadAction.Load,DepthLoadAction=RenderLoadAction.Load }))
+        using (gpuTimer.Measure(copyPass,"grass-depth"))
+            opaqueTarget!.DepthStencilAttachment.CopyTo(waterTarget!.DepthStencilAttachment);
         using (var pass = frame.BeginPass(opaqueTarget!, new RenderPassDescriptor
         {
             View = view,
@@ -376,10 +395,9 @@ sealed partial class SceneRenderer
             ColorLoadAction = RenderLoadAction.Load,
             DepthLoadAction = RenderLoadAction.Load
         }))
-        using (gpuTimer.Measure(pass, "grass"))
         {
             DrawGroundCover(pass, frustum, camera, inverse);
-            DrawFoliage(pass);
+            using (gpuTimer.Measure(pass,"foliage")) DrawFoliage(pass);
         }
         RenderDeferredWorld(frame, camera);
         opaqueTarget!.DepthStencilAttachment.CopyTo(resolvedOpaque!.DepthStencilAttachment);
@@ -454,6 +472,10 @@ sealed partial class SceneRenderer
                 DrawCachedPhysics(pass, camera);
             DrawBuildPreview(pass);
             DrawPhysicsGunBeam(pass, camera);
+            DrawRifleEffects(pass, camera);
+            if (overlay is not null)
+                using (pass.PushState(pass.State with { DepthTestEnabled = false, DepthWriteEnabled = false }))
+                    DrawPhysics(pass, overlay);
         }
         DrawDemolition(frame, camera);
         DrawViewmodel(frame, camera, snapshot, time);
@@ -481,7 +503,7 @@ sealed partial class SceneRenderer
             }
             else Mesh(pass, screen, toneTarget!.ColorAttachments[0], aaShader);
         }
-        gpuTimer.EndFrame();
+        gpuTimer.EndFrame(RenderCpuMilliseconds,canopyFrameInterval,CanopyDraws,CanopyLodCounts,GrassVolumePatches,GrassTriangles,GrassLodCounts);
     }
     void DrawStatic(RenderPass pass, ShaderProgram program, ViewFrustum frustum, bool depth)
     {
@@ -664,6 +686,7 @@ sealed partial class SceneRenderer
 }
 
 // Non-blocking GPU queries, grouped by complete frame so cached shadows contribute zero when not drawn.
+sealed record CanopyFrameSample(long Frame,double GpuMs,double CanopyMs,double DepthCopyMs,double CpuMs,double FrameMs,int Draws,int[] Lods,double GrassMeshMs,double GrassVolumeMs,double FoliageMs,double GrassDepthMs,int GrassPatches,int GrassTriangles,int[] GrassLods);
 sealed class GpuFrameTimer : IDisposable
 {
     sealed class Sample
@@ -671,7 +694,8 @@ sealed class GpuFrameTimer : IDisposable
         public long Frame;
         public int Remaining;
         public bool Complete, Valid = true;
-        public double PointLight, PointShadow, Gbuffer, Deferred, Weapon, Composition, Ao, Total, Character, Wave, Spray, Grass, Weather, Atmosphere, Cloud, Fog, Water, MistMap, Terrain, Canopy, Exposure, ToneMap;
+        public double CpuMs,FrameMs; public int Draws; public int[] Lods=[]; public int GrassPatches,GrassTriangles; public int[] GrassLods=[]; public double GrassMesh,GrassVolume,Foliage,GrassDepth;
+        public double PointLight, PointShadow, Gbuffer, Deferred, Weapon, Composition, Ao, Total, Character, Wave, Spray, Grass, Weather, Atmosphere, Cloud, Fog, Water, MistMap, Terrain, Canopy, CanopyDepth, Exposure, ToneMap;
     }
     readonly GraphicsQuery[] queries;
     readonly Queue<int> free = [];
@@ -684,6 +708,9 @@ sealed class GpuFrameTimer : IDisposable
         private set;
     }
     public double CanopyMilliseconds { get; private set; }
+    public double CanopyDepthMilliseconds {get;private set;}
+    public long CurrentFrame=>current.Frame;
+    public Queue<CanopyFrameSample> Completed {get;}=[];
     public double ExposureMilliseconds { get; private set; }
     public double ToneMapMilliseconds { get; private set; }
     public double AoMilliseconds { get; private set; }
@@ -761,7 +788,7 @@ sealed class GpuFrameTimer : IDisposable
             pending.Dequeue();
             double ms = queries[p.Index].GetResult() / 1_000_000.0;
             p.Sample.Total += ms;
-            if (p.Group is "gbuffer" or "terrain" or "character" or "grass" or "canopy") p.Sample.Gbuffer += ms;
+            if (p.Group is "gbuffer" or "terrain" or "character" or "grass-mesh" or "grass-volume" or "foliage" or "canopy") p.Sample.Gbuffer += ms;
             if (p.Group == "deferred") p.Sample.Deferred += ms;
             if (p.Group is "weapon" or "weapon-ao") p.Sample.Weapon += ms;
             if (p.Group is "fog" or "water" or "tonemap" or "weather" or "gate-spray" or "composition") p.Sample.Composition += ms;
@@ -772,8 +799,12 @@ sealed class GpuFrameTimer : IDisposable
                 p.Sample.Wave += ms;
             if (p.Group == "character")
                 p.Sample.Character += ms;
-            if (p.Group == "grass")
+            if (p.Group is "grass-mesh" or "grass-volume")
                 p.Sample.Grass += ms;
+            if (p.Group == "grass-mesh") p.Sample.GrassMesh += ms;
+            if (p.Group == "grass-volume") p.Sample.GrassVolume += ms;
+            if (p.Group == "foliage") p.Sample.Foliage += ms;
+            if (p.Group == "grass-depth") p.Sample.GrassDepth += ms;
             if (p.Group == "weather")
                 p.Sample.Weather += ms;
             if (p.Group == "atmosphere")
@@ -791,6 +822,7 @@ sealed class GpuFrameTimer : IDisposable
             if (p.Group == "point-shadow") p.Sample.PointShadow += ms;
             if (p.Group == "point-light") p.Sample.PointLight += ms;
             if (p.Group == "canopy") p.Sample.Canopy += ms;
+            if (p.Group == "canopy-depth") p.Sample.CanopyDepth += ms;
             if (p.Group == "exposure") p.Sample.Exposure += ms;
             if (p.Group == "tonemap") p.Sample.ToneMap += ms;
             p.Sample.Remaining--;
@@ -817,7 +849,9 @@ sealed class GpuFrameTimer : IDisposable
                 WaterMilliseconds = f.Water;
                 MistMapMilliseconds = f.MistMap;
                 TerrainMilliseconds = f.Terrain;
-                CanopyMilliseconds = f.Canopy;
+                CanopyMilliseconds = f.Canopy; CanopyDepthMilliseconds=f.CanopyDepth;
+                Completed.Enqueue(new(f.Frame,f.Total,f.Canopy,f.CanopyDepth,f.CpuMs,f.FrameMs,f.Draws,f.Lods,f.GrassMesh,f.GrassVolume,f.Foliage,f.GrassDepth,f.GrassPatches,f.GrassTriangles,f.GrassLods));
+                while(Completed.Count>256)Completed.Dequeue();
                 ExposureMilliseconds = f.Exposure;
                 ToneMapMilliseconds = f.ToneMap;
             }
@@ -844,7 +878,10 @@ sealed class GpuFrameTimer : IDisposable
             pending.Enqueue((index, sample, group));
         });
     }
-    public void EndFrame() => current.Complete = true;
+    public void EndFrame(double cpu,double frameMs,int draws,int[] lods,int grassPatches,int grassTriangles,int[] grassLods) {
+        current.GrassPatches=grassPatches;current.GrassTriangles=grassTriangles;current.GrassLods=(int[])grassLods.Clone();
+        current.CpuMs=cpu;current.FrameMs=frameMs;current.Draws=draws;current.Lods=(int[])lods.Clone();current.Complete=true;
+    }
     public void Dispose()
     {
         foreach (var query in queries)

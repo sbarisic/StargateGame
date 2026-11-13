@@ -29,6 +29,7 @@ sealed partial class ClientSession
     }
     void ClearAudioEvents()
     {
+        RifleShots.Clear(); lastRifleShot=0; pendingReload=0;
         AudioGates.Clear();
         AudioPresses.Clear();
         AudioSounds.Clear();

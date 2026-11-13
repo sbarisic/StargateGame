@@ -2,7 +2,7 @@
 The near meshes and voxel fields are baked together; no separate silhouette generator.
 """
 from pathlib import Path
-import json, hashlib, struct
+import json, hashlib, struct, argparse
 import numpy as np
 from PIL import Image
 from tree_volume_data import downsample_canopy, pad_attributes, normalize_normals
@@ -11,13 +11,13 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'assets/vegetation/grass-volume'
 CELL=2/128
 
-def bake(variant):
+def bake(variant, previous=None):
     tall=variant>=4
     extent=1.0 if tall else .5
     cell=np.array([CELL,extent/32,CELL],np.float32)
     rng=np.random.default_rng(0x613AB+variant)
     atlas=np.asarray(Image.open(ROOT/'assets/vegetation/grass-blades.png').convert('RGB'),np.float32)/255
-    vertices=[]; normals=[]; uvs=[]
+    vertices=[]; normals=[]; uvs=[]; roots=[]
     # Same four-segment curved profile as grass.vert; wider blades give a full,
     # porous sward while the 0.10-0.28m root-to-tip heights remain unchanged.
     profile=[(-.45,0),(-1,.22),(.45,0),(.45,0),(-1,.22),(1,.22),(-1,.22),(-.8,.48),(1,.22),(1,.22),(-.8,.48),(.8,.48),(-.8,.48),(-.46,.76),(.8,.48),(.8,.48),(-.46,.76),(.46,.76),(-.46,.76),(0,1),(.46,.76)]
@@ -31,18 +31,29 @@ def bake(variant):
                 pos=base+side*x*width+np.array([0,h*(y-.22*r*y*y*y),0])+facing*h*bend*y*y
                 along=np.array([0,1-.66*r*y*y,0])+facing*(2*bend*y)
                 vertices.append(pos); normals.append(np.cross(along,side)); uvs.append([(tex+(x+1)*.46+.04)/8,y])
+                roots.append(base[[0,2]])
     vertices=np.asarray(vertices,np.float32); normals=normalize_normals(np.asarray(normals,np.float32)); uvs=np.asarray(uvs,np.float32)
     # Periodic geometry: keep the portions of edge-crossing blades on the opposite
     # side too. Clipping without these copies leaves a visible square gutter.
-    original=np.concatenate([vertices,normals,uvs],axis=1).reshape(-1,3,8)
+    original=np.concatenate([vertices,normals,uvs,np.asarray(roots,np.float32)],axis=1).reshape(-1,3,10)
     copies=[]
     for dx in (-2,0,2):
         for dz in (-2,0,2):
             moved=original.copy();moved[:,:,0]+=dx;moved[:,:,2]+=dz
+            moved[:,:,8]+=dx;moved[:,:,9]+=dz
             inside=(moved[:,:,0].max(1)>=0)&(moved[:,:,0].min(1)<=2)&(moved[:,:,2].max(1)>=0)&(moved[:,:,2].min(1)<=2)
             copies.append(moved[inside])
-    mesh=np.concatenate(copies).reshape(-1,8).astype('<f4')
-    meshfile=f'variant-{variant}.mesh.bin'; (OUT/meshfile).write_bytes(struct.pack('<I',len(mesh))+mesh.tobytes())
+    packed=np.concatenate(copies).reshape(-1,10).astype('<f4')
+    mesh=packed[:,:8].copy(); rootdata=packed[:,8:].copy()
+    meshfile=f'variant-{variant}.mesh.bin'; meshbytes=struct.pack('<I',len(mesh))+mesh.tobytes()
+    if previous is not None:
+        if (OUT/meshfile).read_bytes()!=meshbytes:
+            raise ValueError('Geometry changed; a full grass bake is required')
+    else:
+        (OUT/meshfile).write_bytes(meshbytes)
+    rootfile=f'variant-{variant}.roots.bin'; (OUT/rootfile).write_bytes(rootdata.tobytes())
+    if previous is not None:
+        return dict(previous,roots=rootfile)
     shape=(128,32,128); colors=np.zeros((*shape,3),np.float32); ns=np.zeros_like(colors); weights=np.zeros(shape,np.float32)
     for start in range(0,len(vertices),3):
         tri=vertices[start:start+3]; uv=uvs[start:start+3]; nn=normals[start:start+3]
@@ -70,15 +81,19 @@ def bake(variant):
             name=f'variant-{variant}.{mip}.{kind}.bin'; (OUT/name).write_bytes(np.round(np.clip(values,0,1)*255).astype('u1').tobytes()); files.append(name)
         levels.append(dict(size=[density.shape[2],density.shape[1],density.shape[0]],files=files))
         if mip!=7: colors,ns,density,occupancy=downsample_canopy(colors,ns,density,occupancy)
-    return dict(extent=extent,tip=.75 if tall else .28,mesh=meshfile,vertices=len(mesh),levels=levels,ambient=ambientfile)
+    return dict(extent=extent,tip=.75 if tall else .28,mesh=meshfile,roots=rootfile,vertices=len(mesh),levels=levels,ambient=ambientfile)
 
 def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--roots-only',action='store_true',help='Add blade roots only after verifying existing mesh bytes match; reuse volume fields.')
+    args=parser.parse_args()
+    previous=json.loads((OUT/'grass.json').read_text()) if args.roots_only else None
     OUT.mkdir(parents=True,exist_ok=True)
     variants=[]
     for i in range(8):
-        variants.append(bake(i));print('Baked grass variant',i,flush=True)
+        variants.append(bake(i,previous['variants'][i] if previous else None));print('Baked grass variant',i,flush=True)
     deps=[f'vegetation/grass-volume/{p.name}' for p in sorted(OUT.glob('*.bin'))]
-    doc=dict(version=2,extent=[2,.5,2],resolution=[128,32,128],referenceDistance=CELL,variants=variants,dependencies=deps,
+    doc=dict(version=3,extent=[2,.5,2],resolution=[128,32,128],referenceDistance=CELL,variants=variants,dependencies=deps,
         source='Existing grass.vert curved blades and grass-blades.png; see grass-blades.provenance.json',
         sourceHash=hashlib.sha256((ROOT/'assets/vegetation/grass-blades.png').read_bytes()+Path(__file__).read_bytes()).hexdigest())
     (OUT/'grass.json').write_text(json.dumps(doc,separators=(',',':'))+'\n')

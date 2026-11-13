@@ -9,6 +9,7 @@ static class WeaponChecks
 {
     public static async Task Run()
     {
+        ViewmodelAnimationChecks.Run();
         var starter = WeaponCatalog.Starter(true); var rifle = starter.Slots[0]!;
         var holster = WeaponCatalog.Apply(starter, null, new(Guid.NewGuid(), "holster"));
         Verify.Check(holster.Success && holster.Inventory.Equipped is null && holster.Inventory.Slots[0] == rifle, "holster preserves ownership");

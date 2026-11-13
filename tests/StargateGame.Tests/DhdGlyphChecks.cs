@@ -1,9 +1,36 @@
 using StargateGame.Client;
+using StargateGame.Shared;
+using System.Numerics;
 
 static class DhdGlyphChecks
 {
+    static void ConsoleFocus()
+    {
+        var dhd = new StaticEntity("test", "dhd", Vector3.Zero);
+        Vector3 eye = new(0, 1.7f, 1.8f);
+        int keys = 0, gaps = 0;
+        for (int z = -6; z <= 6; z++) for (int x = -8; x <= 8; x++)
+        {
+            var aim = Vector3.Normalize(new Vector3(x * .1f, .95f, z * .1f) - eye);
+            var whole = DhdInteraction.PickConsole(dhd, eye, aim);
+            var button = DhdInteraction.Pick(dhd, eye, aim);
+            if (whole is not { } hit) continue;
+            if (hit.Key >= 0) { keys++; Verify.Check(button == whole, "console focus retains exact button picking"); }
+            else { gaps++; Verify.Check(button is null, "console gap keeps focus without becoming a button"); }
+            var rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, .7f);
+            var transformed = dhd with { Position = new(8, 2, -5), Rotation = rotation, Scale = .8f };
+            var rotated = DhdInteraction.PickConsole(transformed, Vector3.Transform(eye * .8f, rotation) + transformed.Position, Vector3.Transform(aim, rotation));
+            Verify.Check(rotated is { } h && h.Key == hit.Key && Math.Abs(h.Distance - hit.Distance * .8f) < .0001f,
+                "console focus follows translated rotated scaled DHD");
+        }
+        Verify.Check(keys > 0 && gaps > 0, "panel sweep covers buttons and gaps");
+        Verify.Check(DhdInteraction.PickConsole(dhd, eye, Vector3.UnitZ) is null, "looking away releases console focus");
+        Verify.Check(DhdInteraction.PickConsole(dhd, new(0, 6, 0), -Vector3.UnitY) is null, "distant console does not hide weapon");
+        Verify.Check(DhdInteraction.PickConsole(dhd, eye, new(float.NaN, 0, 0)) is null, "invalid console aim is rejected");
+    }
     public static void Run()
     {
+        ConsoleFocus();
         var hint = new DhdAddressHint();
         var world = Guid.NewGuid();
         int[] address = [2, 6, 9, 17, 26, 39];
