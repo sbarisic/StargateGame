@@ -21,7 +21,8 @@ param(
     [string]$Repo = (Split-Path $PSScriptRoot -Parent),
     [ValidateRange(0,87600)][double]$MinAgeHours = 2,
     [string[]]$Protect = @(),
-    [switch]$Delete
+    [switch]$Delete,
+    [switch]$Sessions
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -30,6 +31,22 @@ if (!(Test-Path -LiteralPath "$Repo/src/StargateGame.Server/StargateGame.Server.
     throw 'Not a StargateGame checkout.'
 }
 $cutoff = [DateTime]::UtcNow.AddHours(-$MinAgeHours)
+if ($Sessions) {
+    $sessionRoot = Join-Path $env:LOCALAPPDATA 'StargateGame/Testing/sessions'
+    if (!(Test-Path -LiteralPath $sessionRoot)) { return }
+    foreach ($directory in Get-ChildItem -LiteralPath $sessionRoot -Directory) {
+        if ($directory.LastWriteTimeUtc -gt $cutoff -or $directory.Attributes -band [IO.FileAttributes]::ReparsePoint) { continue }
+        $manifestPath = Join-Path $directory.FullName 'session.json'
+        if (!(Test-Path -LiteralPath $manifestPath)) { continue }
+        $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+        if ($manifest.state -notin @('stopped','failed')) { continue }
+        $arguments = @('cleanup','-Session',$directory.Name,'-NoBuild','-Json')
+        if ($Delete -and !$WhatIfPreference -and $PSCmdlet.ShouldProcess($directory.FullName,'Remove disposable harness state; keep evidence')) { $arguments += '-Delete' }
+        & (Join-Path $Repo 'scripts/Test.ps1') @arguments
+    }
+    return
+}
+
 $art = Join-Path $Repo 'artifacts'
 $protected = @($Protect | ForEach-Object {
     if ([IO.Path]::IsPathRooted($_)) { [IO.Path]::GetFullPath($_) }

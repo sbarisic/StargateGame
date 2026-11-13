@@ -93,40 +93,9 @@ sealed partial class GameApp
         });
         window = ownedWindow;
         StartupTrace.Mark("window-context-ready");
-        window.Scrolled += (_, e) =>
-        {
-            if (planetPanel && generatorTab) { generatorScroll = Math.Clamp(generatorScroll + (e.Offset.Y > 0 ? -1 : 1), 0, 12 - GeneratorRows); return; }
-            if (bookOpen)
-            {
-                bookScroll = Math.Max(0, bookScroll + (e.Offset.Y > 0 ? -1 : 1));
-                return;
-            }
-            if(cableTool&&!spawnMenuOpen&&!paused){cableSlack=Math.Clamp(cableSlack+Math.Sign(e.Offset.Y)*.05f,0,1);return;}
-            if (physicsGunEquipped && !spawnMenuOpen && !paused && session?.Carrying==true)
-            {
-                session.ScrollCarriedProp(e.Offset.Y);
-                return;
-            }
-            if (spawnMenuOpen) { spawnScroll += e.Offset.Y > 0 ? -1 : 1; ClampSpawnScroll(); return; }
-            if (buildPaletteOpen)
-            {
-                palettePage = Math.Clamp(palettePage + (e.Offset.Y > 0 ? -1 : 1), 0, (BuildPaletteItemCount - 1) / Layout.PageSize);
-                return;
-            }
-            if (debugPhysics && !buildMode && !paused)
-            {
-                debugScroll = Math.Max(0, debugScroll + (e.Offset.Y > 0 ? -3 : 3));
-                nextDebugText = 0;
-                return;
-            }
-            if (buildMode && !paused)
-            {
-                buildSelection = (buildSelection + (e.Offset.Y > 0 ? 1 : BuildItemCount - 1)) % BuildItemCount;
-                buildRotation = 0;
-                nextBuildPreview = 0;
-            }
-        };
+        window.Scrolled += (_, e) => { if (!AiInputOwned) HandleScroll(e.Offset.Y); };
         using var input = new InputManager(window);
+        testInput = input;
         using var ownedFont = new TrueTypeFont(Path.Combine(AppContext.BaseDirectory, "data", "fonts", "Consolas-Regular.ttf"));
         font = ownedFont;
         using var ownedUi = new UiPainter(window.Graphics);
@@ -136,36 +105,10 @@ sealed partial class GameApp
         // FishGfx reports previous - current; our look angles use current - previous.
         window.MouseDelta += (_, e) =>
         {
-            if (session is not null && !paused && !buildPaletteOpen && !spawnMenuOpen && !Smoke)
+            if (!AiInputOwned && session is not null && !paused && !buildPaletteOpen && !spawnMenuOpen && !Smoke)
                 mouseDelta -= e.Delta;
         };
-        window.TextInput += (_, e) =>
-        {
-            if (planetPanel && session is not null)
-            {
-                if (generatorTab) { GeneratorText(e.Text); return; }
-                if (e.Text.All(c => char.IsDigit(c) || c == '-'))
-                {
-                    if (selectAll)
-                    {
-                        planetSeed = "";
-                        selectAll = false;
-                    }
-                    if (planetSeed.Length + e.Text.Length <= 30)
-                        planetSeed += e.Text;
-                }
-                return;
-            }
-            if (session is not null || Joining || e.Text.Any(char.IsControl))
-                return;
-            if (selectAll)
-            {
-                fields[field] = "";
-                selectAll = false;
-            }
-            if (fields[field].Length + e.Text.Length <= (field == 2 ? 24 : field == 1 ? 5 : 128))
-                fields[field] += e.Text;
-        };
+        window.TextInput += (_, e) => { if (!AiInputOwned) HandleText(text: e.Text); };
         InitializeTestControl();
         StartupTrace.Mark("ui-initialized");
         double previous = timer.Elapsed.TotalSeconds;
@@ -208,11 +151,14 @@ sealed partial class GameApp
                 }
                 previous = now;
                 targetingFrame++;
+                input.SuppressPhysical = AiInputOwned;
                 input.BeginFrame();
                 window.PollEvents();
                 CompleteConnection();
                 PollPreparingSession();
+                if (input.PhysicalEscapePressed && AiInputOwned) RevokeAiControl();
                 PumpTests(now);
+                PumpTestInput(now);
                 HandleInput(input);
                 if (!bookInputConsumed)
                 {
@@ -279,9 +225,9 @@ sealed partial class GameApp
                             SmokeDial(now, ref strafe, ref forward);
                             InspectPickup(now, ref strafe, ref forward);
                         }
-                        if (TestAutomated && !testMovementReview) { strafe = forward = 0; }
+                        if (TestAutomated && !testMovementReview && !testRawInputActive) { strafe = forward = 0; }
                         if (testMoveUntil > now) { strafe = testStrafe; forward = testForward; jumpQueued |= testJump; testJump = false; }
-                        session.Step(strafe, forward, yaw, pitch, (testMoveUntil > now && testWalk) || !TestAutomated && !paused && !session.PlanetVisualPending && !buildPaletteOpen && !spawnMenuOpen && input.IsKeyDown(Key.LeftShift), jumpQueued && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed, !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.Space), (testMoveUntil > now && testCrouch) || !TestAutomated && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.LeftControl), (testMoveUntil > now && testCrouch) || !TestAutomated && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.LeftControl));
+                        session.Step(strafe, forward, yaw, pitch, (testMoveUntil > now && testWalk) || (!TestAutomated || testRawInputActive) && !paused && !session.PlanetVisualPending && !buildPaletteOpen && !spawnMenuOpen && input.IsKeyDown(Key.LeftShift), jumpQueued && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed, !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.Space), (testMoveUntil > now && testCrouch) || (!TestAutomated || testRawInputActive) && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.LeftControl), (testMoveUntil > now && testCrouch) || (!TestAutomated || testRawInputActive) && !paused && !buildPaletteOpen && !spawnMenuOpen && !uiInputConsumed && input.IsKeyDown(Key.LeftControl));
                         jumpQueued = false;
                         if (!bookInputConsumed && !uiInputConsumed && !uiMouseGuard && !session.TransitLocked)
                             BuildingInput(input);
@@ -403,7 +349,7 @@ sealed partial class GameApp
         buildMode = false;
         buildPaletteOpen = false;
         spawnMenuOpen = false;
-        physicsGunEquipped = false; cableTool=false; cableStart=null; cablePreview=null;
+        ExitNpcs();physicsGunEquipped = false; cableTool=false; cableStart=null; cablePreview=null;
         paletteMouseGuard = false;
         previewCommand = null;
         previewEdit = null;
@@ -435,7 +381,7 @@ sealed partial class GameApp
         uiInputConsumed = true;
         uiMouseGuard = true;
         paused = value;
-        window.CaptureCursor = !paused && !Smoke && !UiPreview && !TestAutomated;
+        window.CaptureCursor = !paused && !Smoke && !UiPreview && !TestAutomated && !AiInputOwned;
         mouseDelta = Vector2.Zero;
         jumpQueued = false;
     }
@@ -450,6 +396,7 @@ sealed partial class GameApp
             if(scene is not null)scene.PhysicsGunBeam=null;
         }
         if (SpawnMenuInput(input)) return;
+        if(npcTool && input.WasKeyPressed(Key.Escape)){ExitNpcs();uiInputConsumed=true;return;}
         if(cableTool && input.WasKeyPressed(Key.Escape)){ExitCable();uiInputConsumed=true;return;}
         if (TestingInput(input)) return;
         if (!input.IsMouseButtonDown(MouseButton.Left) && !input.IsMouseButtonDown(MouseButton.Right))
@@ -814,7 +761,8 @@ sealed partial class GameApp
                 debugPhysics = true;
             if (args.Contains("--debug-collision"))
                 debugCollision = true;
-            scene.CableToolEquipped=cableTool;
+            scene.CableToolEquipped=cableTool||npcTool;
+            scene.NpcActors=session.PresentedNpcs();scene.NpcDefinitions=session.Npcs.Records;
             scene.UpdateCableMarkers(session.Physics, presented!.Value.Bodies, cableTool&&!spawnMenuOpen&&!paused ? cableStart : null, cableTool&&!spawnMenuOpen&&!paused ? cableHover : null);
             scene.UpdateCables(session.Physics, session.Cables, presented!.Value.Bodies, camera, now, cablePreview);
             scene.SetGraphics(graphicsSettings);
@@ -874,7 +822,7 @@ sealed partial class GameApp
             scene.ExposureTransitHold = session.TransitWhite > 0;
             scene.ExposureDiagnosticsEnabled = debugPhysics || exposureMenu;
             ApplyTestPreview();
-            scene.RenderScene(frame, camera, snapshot, visualTime, args.Contains("--settlement-overlay") ? SettlementInspection.Lines(session.World.Definition) : null);
+            scene.RenderScene(frame, camera, snapshot, visualTime, (args.Contains("--settlement-overlay") ? SettlementInspection.Lines(session.World.Definition) : []).Concat(scene.NpcToolLines).Concat(NpcDebugLines()));
             if (benchmark && debugCollision && now - connectedAt > benchmarkWarmup)
                 collisionOverlayTimes.Add(scene.DebugLineCpuMilliseconds);
             if (audio is not null)

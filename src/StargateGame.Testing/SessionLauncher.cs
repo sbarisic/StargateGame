@@ -68,6 +68,7 @@ public static class SessionLauncher
     [DllImport("kernel32.dll")] static extern bool CloseHandle(nint handle);
     public static Process Launch(LaunchOptions options)
     {
+        using var buildLease = RuntimeLease.Read(options.BuildRoot);
         var paths = new[] { "StargateGame.Client", "StargateGame.Server", "StargateGame.Harness" }.Select(p => Path.GetDirectoryName(Binary(options.BuildRoot, p))!).ToArray();
         foreach (string name in new[] { "StargateGame.Testing.dll", "StargateGame.Shared.dll" })
         {

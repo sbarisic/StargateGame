@@ -80,20 +80,21 @@ public sealed partial class PhysicsWorld : IDisposable
             hasWorldGeometry = buildWorld;
             World = new(definition, terrain);
             Changes = changes ?? WorldChanges.Empty;
-            var pairs = new ObjectLayerPairFilterTable(5);
+            var pairs = new ObjectLayerPairFilterTable(6);
             pairs.EnableCollision(StaticLayer, PropLayer);
             pairs.EnableCollision(StaticLayer, CharacterLayer);
             pairs.EnableCollision(PropLayer, PropLayer);
             pairs.EnableCollision(PropLayer, CharacterLayer);
             pairs.EnableCollision(StairPropLayer, PropLayer);
             pairs.EnableCollision(StairPlayerLayer, CharacterLayer);
-            var broad = new BroadPhaseLayerInterfaceTable(5, 2);
+            pairs.EnableCollision(NpcLayer, StaticLayer); pairs.EnableCollision(NpcLayer, PropLayer); pairs.EnableCollision(NpcLayer, CharacterLayer); pairs.EnableCollision(NpcLayer, StairPlayerLayer); pairs.EnableCollision(NpcLayer, NpcLayer);
+            var broad = new BroadPhaseLayerInterfaceTable(6, 2);
             broad.MapObjectToBroadPhaseLayer(StaticLayer, 0);
             broad.MapObjectToBroadPhaseLayer(StairPropLayer, 0);
             broad.MapObjectToBroadPhaseLayer(StairPlayerLayer, 0);
             broad.MapObjectToBroadPhaseLayer(PropLayer, 1);
-            broad.MapObjectToBroadPhaseLayer(CharacterLayer, 1);
-            var filter = new ObjectVsBroadPhaseLayerFilterTable(broad, 2, pairs, 5);
+            broad.MapObjectToBroadPhaseLayer(CharacterLayer, 1); broad.MapObjectToBroadPhaseLayer(NpcLayer, 1);
+            var filter = new ObjectVsBroadPhaseLayerFilterTable(broad, 2, pairs, 6);
             system = new(new()
             {
                 MaxBodies = 4096,
@@ -119,6 +120,7 @@ public sealed partial class PhysicsWorld : IDisposable
                 Own(new CapsuleShape(Movement.CrouchHeight / 2 - Movement.Radius, Movement.Radius))));
             try
             {
+                InitializeNpcCharacters();
                 if (buildWorld)
                 {
                     if (terrain is null)
@@ -167,6 +169,7 @@ public sealed partial class PhysicsWorld : IDisposable
             {
                 if (!TryRestoreTerrain(c, chunk, changes))
                     preparedTerrain.Add(c, Cook(input));
+                preparedNavigationChunks[c]=chunk;
             }
         }
     }
@@ -188,6 +191,7 @@ public sealed partial class PhysicsWorld : IDisposable
             {
                 if (!TryRestoreTerrain(c, chunk, changes))
                     preparedTerrain.Add(c, Cook(ready));
+                preparedNavigationChunks[c]=chunk;
             }
             cooked++;
         }
@@ -247,6 +251,7 @@ public sealed partial class PhysicsWorld : IDisposable
                 ownedBodies.Remove(old.Body);
                 RetainTerrain(c, old.Shape);
                 terrainBodies.Remove(c);
+                committedNavigationChunks.Remove(c);
                 topology++;
             }
             foreach (var c in wanted.Order())
@@ -255,17 +260,22 @@ public sealed partial class PhysicsWorld : IDisposable
                     var shape = preparedTerrain[c];
                     preparedTerrain.Remove(c);
                     terrainBodies.Add(c, (nextTerrain[c], shape));
+                    committedNavigationChunks[c]=preparedNavigationChunks[c];
+                    preparedNavigationChunks.Remove(c);
                 }
             foreach (var c in preparedTerrain.Keys.Where(c => !wanted.Contains(c)).ToArray())
             {
                 var shape = preparedTerrain[c];
                 preparedTerrain.Remove(c);
+                preparedNavigationChunks.Remove(c);
                 shapes.Remove(shape);
                 shape.Dispose();
             }
             CommitBuildings(wanted, nextBuildings);
+            NavigationCommitVersion++;
             foreach (var c in characters.Values)
                 Refresh(c);
+            foreach(var n in npcMotions.Values)Native.SG_Refresh(npcCharacters[n.Slot].Handle,system.Handle,allocator,NpcLayer);
             system.OptimizeBroadPhase();
         }
         Console.WriteLine($"COLLISION commit revision={Changes.Revision} chunks={requested.Length} ms={commitWatch.Elapsed.TotalMilliseconds:F2}");
@@ -489,8 +499,8 @@ public sealed partial class PhysicsWorld : IDisposable
                     };
                 }
                 var support = onGround ? c.GroundVelocity : Vector3.Zero;
-                Vector3 velocity = Movement.Accelerate(current - support,
-                    Movement.DesiredVelocity(input, players[id].Crouched), onGround, players[id].AirSpeedLimit, c.GroundNormal) + support;
+                Vector3 velocity = new JoltCharacterMovement(c).Accelerate(current,
+                    Movement.DesiredVelocity(input, players[id].Crouched), onGround, players[id].AirSpeedLimit);
                 if (onGround)
                 {
                     if (jump) velocity.Y = support.Y + Movement.JumpSpeed;
@@ -528,6 +538,7 @@ public sealed partial class PhysicsWorld : IDisposable
             ApplyCarrying();
             ApplyWaterBuoyancy();
             ApplyEntrySupports();
+            StepNpcs();
             uint error = Native.SG_Step(system.Handle, Movement.Dt, allocator, jobs.Handle);
             if (error != 0)
                 throw new InvalidOperationException($"Jolt update capacity error: {error}.");
@@ -546,7 +557,7 @@ public sealed partial class PhysicsWorld : IDisposable
             return dormant;
         return new BodyState(p.Key, b.GetPosition(p.Value), b.GetRotation(p.Value), b.GetLinearVelocity(p.Value), b.GetAngularVelocity(p.Value), !b.IsActive(p.Value));
     }).ToArray();
-    public PhysicsSnapshot Snapshot() => new(Tick, Epoch, players.Values.ToArray(), Bodies(), commands.Values.ToArray(), propDefinitions.Values.OrderBy(p => p.Id).ToArray(), CurrentClips(), TravelGate, Carries, EntrySupports);
+    public PhysicsSnapshot Snapshot() => new(Tick, Epoch, players.Values.ToArray(), Bodies(), commands.Values.ToArray(), propDefinitions.Values.OrderBy(p => p.Id).ToArray(), CurrentClips(), TravelGate, Carries, EntrySupports, npcMotions.Values.ToArray());
     public void Acknowledge(int id, long sequence) => players[id] = players[id] with { LastInput = Math.Max(sequence, players[id].LastInput) };
     public void Apply(PhysicsSnapshot snapshot)
     {
@@ -598,6 +609,7 @@ public sealed partial class PhysicsWorld : IDisposable
                     FreezePlayer(state.Id, state.TransitFrozen);
                 players[state.Id] = state;
             }
+            ApplyNpcs(snapshot.Npcs ?? []);
             TravelGate = snapshot.TravelGate;
             SetPropClips(snapshot.Clips ?? []);
             SetCarries(snapshot.Carries ?? []);
@@ -612,6 +624,9 @@ public sealed partial class PhysicsWorld : IDisposable
     }
     public static void Validate(PhysicsSnapshot snapshot, PlanetDefinition definition)
     {
+        ValidateNpcs(snapshot.Npcs);
+        if(snapshot.Npcs?.Any(n=>n.CommandTick>snapshot.Tick||n.EffectiveTick>snapshot.Tick)==true)
+            throw new InvalidDataException("NPC collision state is ahead of its baseline.");
         static bool Vec(Vector3 v) => float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z) && v.LengthSquared() < 1e8f;
         if (snapshot.Registry is { } supplied && (supplied.Length > 64 || supplied.Any(p => p is null)))
             throw new InvalidDataException("Invalid prop registry bounds.");
@@ -647,7 +662,7 @@ public sealed partial class PhysicsWorld : IDisposable
     {
         lock (NativeGate)
         {
-            var handles = characters.Values.Select(c => c.Handle).ToArray();
+            var handles = characters.Values.Concat(npcCharacters).Select(c => c.Handle).ToArray();
             var checkpoint = new Checkpoint(this, topology, Native.SG_Save(system.Handle, handles, (uint)handles.Length), Snapshot());
             checkpoints.Add(checkpoint);
             return checkpoint;
@@ -676,9 +691,11 @@ public sealed partial class PhysicsWorld : IDisposable
                 if (p.TransitFrozen != frozenCharacters.Contains(p.Id))
                     FreezePlayer(p.Id, p.TransitFrozen);
             }
-            var handles = characters.Values.Select(c => c.Handle).ToArray();
+            var handles = characters.Values.Concat(npcCharacters).Select(c => c.Handle).ToArray();
+            SetNpcMembership(checkpoint.State.Npcs ?? []);
             if (!Native.SG_Restore(checkpoint.Handle, system.Handle, handles, (uint)handles.Length))
                 throw new InvalidOperationException("Jolt checkpoint restore failed.");
+            npcMotions.Clear(); foreach(var n in checkpoint.State.Npcs ?? []) npcMotions.Add(n.Slot,n);
             players.Clear();
             foreach (var p in checkpoint.State.Players)
                 players.Add(p.Id, p);
@@ -869,7 +886,7 @@ public sealed partial class PhysicsWorld : IDisposable
                 c.Dispose();
             foreach (var c in characters.Values)
                 c.Dispose();
-            characters.Clear();
+            characters.Clear(); foreach(var c in npcCharacters)c.Dispose(); npcCharacters.Clear();
             foreach (var b in ownedBodies)
             {
                 system.BodyInterface.RemoveBody(b);

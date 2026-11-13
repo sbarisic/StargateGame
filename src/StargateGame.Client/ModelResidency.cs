@@ -48,7 +48,7 @@ sealed partial class SceneRenderer
         {
             Use(part.texture); Use(part.normal); Use(part.Emission); Use(part.MetallicRoughness);
         }
-        foreach (var asset in new[] { military, rifle })
+        foreach (var asset in characterAssets.Values.Cast<SkeletalAsset?>().Append(rifle).Distinct())
             if (asset is not null) foreach (var part in asset.Parts) { Use(part.Albedo); Use(part.Normal); Use(part.MetallicRoughness); }
         foreach (string key in textures.Keys.Where(k => !used.Contains(textures[k])).ToArray())
         {

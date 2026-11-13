@@ -15,6 +15,8 @@
     <Compile Include="../../src/StargateGame.Client/DeviceIdentity.cs" Link="DeviceIdentity.cs" />
     <Compile Include="../../src/StargateGame.Client/ClientTravel.cs" Link="ClientTravel.cs" />
     <Compile Include="../../src/StargateGame.Client/ClientSession.cs" Link="ClientSession.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientCables.cs" Link="ClientCables.cs" />
+    <Compile Include="../../src/StargateGame.Client/ClientNpcs.cs" Link="ClientNpcs.cs" />
     <Compile Include="../../src/StargateGame.Client/ClientDialing.cs" Link="ClientDialing.cs" />
     <Compile Include="../../src/StargateGame.Client/ClientCharacters.cs" Link="ClientCharacters.cs" />
     <Compile Include="../../src/StargateGame.Client/PredictionClock.cs" Link="PredictionClock.cs" />

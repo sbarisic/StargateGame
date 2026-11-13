@@ -108,7 +108,7 @@ public sealed class PredictedWorld : IDisposable
         // Exact confirmations do not need a rewind. In particular, don't
         // refresh a character's live pushing/standing contacts every 50 ms.
         if (snapshot.Epoch == Simulation.Epoch && history.TryGetValue(snapshot.Tick, out var match) &&
-            match.State.Players.SequenceEqual(snapshot.Players) && match.State.Bodies.SequenceEqual(snapshot.Bodies) && match.State.Commands.SequenceEqual(snapshot.Commands) && match.State.TravelGate == snapshot.TravelGate &&
+            (match.State.Npcs ?? []).SequenceEqual(snapshot.Npcs ?? []) && match.State.Players.SequenceEqual(snapshot.Players) && match.State.Bodies.SequenceEqual(snapshot.Bodies) && match.State.Commands.SequenceEqual(snapshot.Commands) && match.State.TravelGate == snapshot.TravelGate &&
             (match.State.EntrySupports ?? []).SequenceEqual(snapshot.EntrySupports ?? []) && (match.State.Carries ?? []).SequenceEqual(snapshot.Carries ?? []) && (match.State.Clips ?? []).SequenceEqual(snapshot.Clips ?? []) && (match.State.Registry ?? definition.Props).SequenceEqual(snapshot.Registry ?? definition.Props))
         {
             MatchedSnapshots++;

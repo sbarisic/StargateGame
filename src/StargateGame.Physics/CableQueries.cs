@@ -83,7 +83,7 @@ public sealed partial class PhysicsWorld
             interactionFilter.Ignore=BodyID.Invalid;interactionFilter.Buildings=null;
             interactionFilter.Player=characters.TryGetValue(player,out var c)?c.InnerBodyID:BodyID.Invalid;
             if(!system.NarrowPhaseQuery.CastRay(new Ray(origin,direction*reach),out var hit,bodyFilter:interactionFilter))return null;
-            if(characters.Values.Any(c=>c.InnerBodyID==hit.BodyID))return null;
+            if(characters.Values.Concat(npcCharacters).Any(c=>c.InnerBodyID==hit.BodyID))return null;
             var point=origin+direction*(reach*hit.Fraction);
             var normal=Vector3.Normalize(CableNormal(hit,point));
             var anchor=new CableAnchor("world",Guid.Empty,"",point,normal);

@@ -5,7 +5,12 @@ if(-not $OutputDirectory){$OutputDirectory=Join-Path $root 'artifacts/publish'}
 if(-not $BuildCache){$BuildCache=Join-Path $root 'artifacts/package-build'}
 $OutputDirectory=[IO.Path]::GetFullPath($OutputDirectory);$BuildCache=[IO.Path]::GetFullPath($BuildCache)
 Push-Location $root
+$runtimeLease=$null
 try {
+    if ($Client) {
+        New-Item -ItemType Directory -Force $OutputDirectory | Out-Null
+        $runtimeLease=[IO.File]::Open((Join-Path $OutputDirectory 'client-win-x64.prepare.lock'),[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
+    }
     $catalogueCommand=if(Test-Path -LiteralPath "$root/artifacts/galaxy/galaxy.bin"){'verify'}else{'build'}
     dotnet run --project "$root/tools/GalaxyCatalogue" -c Release --artifacts-path "$BuildCache" -- $catalogueCommand "$root/artifacts/galaxy/galaxy.bin"
     if ($LASTEXITCODE -ne 0) { throw 'Galaxy catalogue build failed.' }
@@ -31,7 +36,7 @@ try {
         dotnet publish "$root/src/StargateGame.Client" -c Release -r win-x64 --artifacts-path "$BuildCache" --self-contained false "-p:CookedAssetPacks=$cooked" -p:CookAssets=false -o $candidate
         if ($LASTEXITCODE -ne 0) { throw 'Client publish failed; previous release retained.' }
         # The local menu owns matching server/harness processes; no checkout paths are needed.
-        foreach ($project in @('StargateGame.Server','StargateGame.Harness')) {
+        foreach ($project in @('StargateGame.Server','StargateGame.Harness','StargateGame.TestHost')) {
             dotnet publish "$root/src/$project" -c Release -r win-x64 --artifacts-path "$BuildCache" --self-contained false -o "$candidate/testing/$project"
             if ($LASTEXITCODE) { throw "Local testing runtime publish failed: $project" }
         }
@@ -48,4 +53,4 @@ try {
             throw
         }
     }
-} finally { Pop-Location }
+} finally { if ($runtimeLease) { $runtimeLease.Dispose() }; Pop-Location }

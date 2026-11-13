@@ -16,7 +16,7 @@ public readonly record struct PlayerState(int Id, string Name, Vector3 Position,
     bool Crouched = false, float AirSpeedLimit = 0);
 public readonly record struct BodyState(int Id, Vector3 Position, Quaternion Rotation, Vector3 LinearVelocity, Vector3 AngularVelocity, bool Sleeping);
 public readonly record struct AppliedCommand(int PlayerId, PlayerInput Input, int MissingTicks);
-public sealed record PhysicsSnapshot(long Tick, long Epoch, PlayerState[] Players, BodyState[] Bodies, AppliedCommand[] Commands, PropDefinition[]? Registry = null, PropClip[]? Clips = null, GateFrame? TravelGate = null, CarryState[]? Carries = null, PropEntrySupport[]? EntrySupports = null);
+public sealed record PhysicsSnapshot(long Tick, long Epoch, PlayerState[] Players, BodyState[] Bodies, AppliedCommand[] Commands, PropDefinition[]? Registry = null, PropClip[]? Clips = null, GateFrame? TravelGate = null, CarryState[]? Carries = null, PropEntrySupport[]? EntrySupports = null, NpcMotion[]? Npcs = null);
 
 public static class Movement
 {

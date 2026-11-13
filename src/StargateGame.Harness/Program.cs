@@ -18,9 +18,11 @@ try
     int Number(string key, int fallback) => int.Parse(Get(key, fallback.ToString()), System.Globalization.CultureInfo.InvariantCulture);
     bool Has(string key) => args.Contains("--" + key);
     void Print(object value) => Console.WriteLine(JsonSerializer.Serialize(value, TestJson.Options));
-    if (verb == "list") { Print(new { version = ScenarioCatalog.Version, scenarios = ScenarioCatalog.Scenarios, presets = ScenarioCatalog.Presets, advancedPresets = ScenarioCatalog.AdvancedPresets, defaults = new ScenarioOptions(), renderingSettings = ScenarioCatalog.RenderSettings, actions = Enum.GetValues<TestAction>().Select(a => TestJson.Element(a)), readiness = new[] { "serverReady", "playable", "captureReady" }, capabilities = new { platform = "Windows x64", renderedClients = true, maxClients = 8, typedLocalControl = true, arbitraryCode = false, renderingPreviews = true, ringsGameplay = false, zpmGameplay = false }, recipes = Recipes.Names, groups = CheckRunner.Groups }); return; }
+    if (verb == "list") { Print(ActionCatalog.Discovery()); return; }
+    using var hostCancellation = new CancellationTokenSource();
+    if (Has("control-stdin")) _ = Task.Run(async () => { if (await Console.In.ReadLineAsync() == "cancel") hostCancellation.Cancel(); });
     string build = Path.GetFullPath(Get("build-root", AppContext.BaseDirectory));
-    if (verb == "check") { Environment.ExitCode = await CheckRunner.Run(build, Get("group", "quick"), Get("repo-root", Directory.GetCurrentDirectory()), args.Where(a => new[] { "--delayed", "--stress", "--explore", "--slow", "--cold" }.Contains(a)).ToArray()); return; }
+    if (verb == "check") { Environment.ExitCode = await CheckRunner.Run(build, Get("group", "quick"), Get("repo-root", Directory.GetCurrentDirectory()), args.Where(a => new[] { "--delayed", "--stress", "--explore", "--slow", "--cold" }.Contains(a)).ToArray(), hostCancellation.Token); return; }
     if (verb is "start" or "run")
     {
         var options = ScenarioCatalog.Resolve(new(Get("scenario", "sandbox"), Get("preset", "default"), Number("seed", 7319),
@@ -29,14 +31,15 @@ try
             Has("cold"), Has("delayed"), Number("terrain-rate", 0), Number("destination-delay", 0), Get("overrides", string.Join(",", new[] { "seed", "biome", "landscape" }.Where(n => Has(n)))).Split(',', StringSplitOptions.RemoveEmptyEntries)));
         string id = Guid.NewGuid().ToString("N"), root = HarnessFiles.SessionRoot(id);
         int count = Number("clients", 1); if (count is < 1 or > 8) throw new ArgumentException("Clients must be 1–8.");
-        var launch = new LaunchOptions(id, root, build, options, count, verb == "run" && !Has("keep-open") ? Environment.ProcessId : 0, Manual: verb == "start");
-        using var process = SessionLauncher.Launch(launch);
+        var launch = new LaunchOptions(id, root, build, options, count, verb == "run" && !Has("keep-open") ? Environment.ProcessId : 0, Manual: false, RetainState: Has("retain-state"));
+        Process? process = null;
         SessionManifest? manifest = null;
-        using var cancellation = new CancellationTokenSource();
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(hostCancellation.Token);
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; cancellation.Cancel(); };
         bool success = false; var clock = Stopwatch.StartNew();
         try
         {
+            process = SessionLauncher.Launch(launch);
             while (clock.Elapsed.TotalSeconds < Number("timeout", 240))
             {
                 cancellation.Token.ThrowIfCancellationRequested();
@@ -50,18 +53,21 @@ try
             if (verb == "run") await Recipes.Run(manifest, Get("recipe", "visual-check"), cancellation.Token);
             manifest = TestJson.Read<SessionManifest>(Path.Combine(root, "session.json"));
             success = true;
-            TestJson.Write(Path.Combine(root, "result.json"), new { outcome = "passed", session = id, options, recipe = verb == "run" ? Get("recipe", "visual-check") : null, elapsedSeconds = clock.Elapsed.TotalSeconds });
+            TestJson.Write(Path.Combine(root, "result.json"), new { outcome = "completed", verification = RecipeCatalog.All.FirstOrDefault(r => r.Id == Get("recipe"))?.Verification ?? "execution", session = id, options, recipe = verb == "run" ? Get("recipe", "visual-check") : null, elapsedSeconds = clock.Elapsed.TotalSeconds });
         }
-        catch (Exception e) { TestJson.Write(Path.Combine(root, "result.json"), new { outcome = "failed", session = id, options, error = e.ToString() }); throw new InvalidOperationException($"Run {id} failed. Artifacts: {root}. {e.Message}", e); }
+        catch (Exception e) { TestJson.Write(Path.Combine(root, "result.json"), new { outcome = "failed", session = id, options, recipe = Get("recipe", "visual-check"), error = e.ToString() }); throw new InvalidOperationException($"Run {id} failed. Artifacts: {root}. {e.Message}", e); }
         finally
         {
             if (!success || verb == "run" && !Has("keep-open"))
             {
                 try { await LocalPipe.Send("stargate-test-" + id, new() { Session = id, Action = TestAction.Stop, TimeoutSeconds = 3 }); } catch { }
-                if (!process.HasExited) try { await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(40)); } catch (TimeoutException) { process.Kill(true); }
+                if (process is { HasExited: false }) try { await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(40)); } catch (TimeoutException) { process.Kill(true); }
             }
+            process?.Dispose();
         }
-        Print(new { outcome = "passed", session = id, artifacts = root, elapsedSeconds = clock.Elapsed.TotalSeconds, manifest = TestJson.Read<SessionManifest>(Path.Combine(root, "session.json")) });
+        var finalManifest = TestJson.Read<SessionManifest>(Path.Combine(root, "session.json"));
+        if (finalManifest.State == "failed") { TestJson.Write(Path.Combine(root, "result.json"), new { outcome = "failed", execution = success ? "completed" : "failed", cleanup = "failed", session = id, recipe = Get("recipe"), error = finalManifest.Error }); throw new InvalidOperationException(finalManifest.Error); }
+        Print(new { outcome = "completed", execution = success ? "completed" : "failed", cleanup = finalManifest.State == "stopped" ? "completed" : "session-retained", session = id, artifacts = root, elapsedSeconds = clock.Elapsed.TotalSeconds, manifest = TestJson.Read<SessionManifest>(Path.Combine(root, "session.json")) });
         return;
     }
     string session = Get("session"); string sessionRoot = HarnessFiles.SessionRoot(session);

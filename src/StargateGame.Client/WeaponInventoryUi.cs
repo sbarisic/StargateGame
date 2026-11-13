@@ -63,12 +63,12 @@ sealed partial class GameApp
         for (int i = 0; i < 4; i++)
         {
             var item = session?.Inventory?.Slots[i];
-            Button(pass, WeaponSlot(false, i), $"{i + 1}  " + (item is null ? "EMPTY" : "RIFLE" + (session!.Inventory!.Equipped == item.Id ? " / EQUIPPED" : "")), selected: !selectedShared && item is not null && item.Id == selectedWeapon);
+            Button(pass, WeaponSlot(false, i), $"{i + 1}  " + (item is null ? "EMPTY" : "RIFLE" + (session!.Inventory!.Equipped == item.Id ? " / EQUIPPED" : "")), selected: !selectedShared && item is not null && item.Id == selectedWeapon, testId: "inventory/personal/" + i);
         }
         for (int i = 0; i < 16; i++)
         {
             var item = session?.OpenWeaponContainer?.Slots[i];
-            Button(pass, WeaponSlot(true, i), $"{i + 1:00} " + (item is null ? "--" : "RIFLE"), selected: selectedShared && item is not null && item.Id == selectedWeapon);
+            Button(pass, WeaponSlot(true, i), $"{i + 1:00} " + (item is null ? "--" : "RIFLE"), selected: selectedShared && item is not null && item.Id == selectedWeapon, testId: "inventory/container/" + i);
         }
         string[] actions = ["Equip", "Holster", "Store", "Take"];
         bool ready = session?.WeaponPending == false && session.Inventory is not null;
@@ -78,7 +78,7 @@ sealed partial class GameApp
             ready && session!.Inventory!.Equipped is not null,
             ready && ownedSelection && session!.OpenWeaponContainer is not null,
             ready && sharedSelection && session!.Inventory!.Slots.Any(s => s is null)];
-        for (int i = 0; i < 4; i++) Button(pass, WeaponButton(i), actions[i], enabled: enabled[i]);
+        for (int i = 0; i < 4; i++) Button(pass, WeaponButton(i), actions[i], enabled: enabled[i], testId: "inventory/action/" + actions[i].ToLowerInvariant());
         Text(pass, p.X + 24, p.Bottom - 38, Fit(session?.WeaponPending == true ? "Committing..." : session?.WeaponStatus is { Length: > 0 } reason ? reason : "I / ESC Close    1-4 Select or holster    0 Empty hands", p.W - 48, 14), 14, UiTheme.Muted);
     }
     (Guid Piece, float Distance) PickWeaponContainer(Vector3 eye, Vector3 direction)

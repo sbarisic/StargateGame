@@ -347,8 +347,11 @@ sealed partial class SceneRenderer
         // staging capacity. Keep a complete smaller chain rather than deadlocking.
         while (first < levels.Length - 1 && !modelAssets.FitsStaging(levels[first])) first++;
         long plannedBytes = MipChainBytes(format, Math.Max(1, width >> first), Math.Max(1, height >> first), levels.Length - first);
-        while (replace && !reducingTextures.Contains(cache) && ModelGpuBytes + plannedBytes > ModelBudgetBytes)
-            yield return false;
+        // Keep the complete resident mip chain when an optional upgrade cannot fit.
+        // Residency schedules a fresh upgrade when there is headroom; leaving this
+        // iterator pending forever also prevents capture readiness from completing.
+        if (replace && !reducingTextures.Contains(cache) && ModelGpuBytes + plannedBytes > ModelBudgetBytes)
+            yield break;
         float anisotropy = graphics.Capabilities.SupportsAnisotropy ? Math.Min(8, graphics.Capabilities.MaximumAnisotropy) : 1;
         var texture = Own(graphics.CreateTexture(new TextureDescriptor(Math.Max(1, width >> first), Math.Max(1, height >> first), format,
             mipLevels: levels.Length - first, sampling: new(TextureFilter.LinearMipmapLinear, TextureFilter.Linear, wrap, wrap, anisotropy: anisotropy))));
@@ -414,7 +417,7 @@ sealed partial class SceneRenderer
                 var p = parts[i];
                 parts[i] = p with { texture = Swap(p.texture)!, normal = Swap(p.normal), Emission = Swap(p.Emission), MetallicRoughness = Swap(p.MetallicRoughness) };
             }
-        foreach (var asset in new[] { military, rifle })
+        foreach (var asset in characterAssets.Values.Cast<SkeletalAsset?>().Append(rifle).Distinct())
             if (asset is not null)
                 for (int i = 0; i < asset.Parts.Count; i++)
                 {

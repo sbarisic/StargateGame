@@ -262,3 +262,16 @@ to the bottom centre. Our importer bakes node transforms at authored scale,
 converts normal maps to the runtime convention, and adds a steady flame insert.
 Source credits: assets_itch/props/wooden_lantern/CREDITS.md. Generated model
 credits, licence and source hash accompany assets/models/wooden-lantern.json.
+
+
+## Local AI test host
+
+ModelContextProtocol and ModelContextProtocol.Core 2.4.0 are from the official
+[C# MCP SDK](https://github.com/modelcontextprotocol/csharp-sdk/tree/v2.4.0).
+The package declares Apache-2.0; its upstream license also identifies retained
+MIT contributions. The complete upstream text is in
+`licenses/ModelContextProtocol-LICENSE.txt`.
+
+Microsoft.Extensions and System support libraries distributed with the test host
+use the .NET Foundation MIT license in `licenses/dotnet-runtime-LICENSE.txt`.
+The matching versions are recorded in the host dependency manifest.

@@ -25,10 +25,12 @@ public sealed partial class GameServer : IAsyncDisposable
     LocationContext homeContext = null!;
     long serverTick, nextLocationEpoch;
     readonly SettlementSettings settlementSettings;
+    readonly string fixtureDatabasePath;
     public GameServer(IPAddress bind, int port, int maxPlayers, int? seed = null, string preset = "temperate", bool devPlanets = false, string? saveDirectory = null, string universe = "default", string? cataloguePath = null, string? fixture = null, SettlementSettings? settlements = null, bool allowTestIdentities = false, PlanetGenerationSettings? generationSettings = null, long? testSeed = null)
     {
         if (testSeed.HasValue && (!allowTestIdentities || !devPlanets || !IPAddress.IsLoopback(bind) || saveDirectory is null)) throw new ArgumentException("Deterministic test persistence requires an explicit private test server.");
         this.allowTestIdentities = allowTestIdentities;
+        fixtureDatabasePath = Path.Combine(saveDirectory ?? StargateGame.Persistence.WorldRepository.DefaultDirectory,"sandbox-cables","cables.sqlite");
         settlementSettings = settlements ?? new();
         settlementSettings.Validate();
         listener = new(bind, port);
@@ -152,6 +154,7 @@ public sealed partial class GameServer : IAsyncDisposable
         }
         finally
         {
+            await FlushNpcs();
             foreach (var state in cableLocations.Values)
                 if (state.Saving is not null)
                     try { await state.Saving; } catch (Exception error) { Console.Error.WriteLine("Cable shutdown save: " + error.Message); }
@@ -293,6 +296,7 @@ public sealed partial class GameServer : IAsyncDisposable
         }
         if (commitThisTick && commitWasSwitch)
             inputs.Clear();
+        TickNpcs();
         physics.EnableSoundObservations();
         physics.Step(inputs);
         if (fixtureGates.Count > 0)
@@ -364,6 +368,7 @@ public sealed partial class GameServer : IAsyncDisposable
         if (HandleWeapons(session, message)) return true;
         if (HandleCharacter(session, message))
             return true;
+        if (HandleNpcs(session, message)) return true;
         if (HandleCables(session, message)) return true;
         if (message.Kind == "build")
             return HandleBuild(session, message);
@@ -437,6 +442,7 @@ public sealed partial class GameServer : IAsyncDisposable
         {
             while (!HomeDebugBusy && accepted.TryDequeue(out var socket))
                 socket.Dispose();
+            await FlushNpcs();
             foreach (var state in cableLocations.Values)
                 if (state.Saving is not null)
                     try { await state.Saving; } catch (Exception error) { Console.Error.WriteLine("Cable shutdown save: " + error.Message); }

@@ -26,13 +26,14 @@ public sealed class OwnedProcesses : IDisposable
     }
     public Process Start(string executable, IEnumerable<string> arguments, string log, IDictionary<string, string>? environment = null, string? workingDirectory = null)
     {
-        var info = new ProcessStartInfo(executable) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        var info = new ProcessStartInfo(executable) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true, RedirectStandardInput = true };
         if (workingDirectory is not null) info.WorkingDirectory = workingDirectory;
         foreach (var argument in arguments) info.ArgumentList.Add(argument);
         if (environment is not null) foreach (var pair in environment) info.Environment[pair.Key] = pair.Value;
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(log))!);
         var process = Process.Start(info) ?? throw new InvalidOperationException("Process failed to start.");
         if (job != 0 && !AssignProcessToJobObject(job, process.Handle)) { process.Kill(true); process.Dispose(); throw new Win32Exception(); }
+        process.StandardInput.Close();
         processes.Add(process);
         logs.Add(Copy(process.StandardOutput, log));
         logs.Add(Copy(process.StandardError, log + ".error"));

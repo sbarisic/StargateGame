@@ -26,7 +26,7 @@ public sealed partial class GameServer
         var id=physics.World.Definition.LocationId;
         if(!cableLocations.TryGetValue(id,out var state))
         {
-            string file=repository?.DatabasePath ?? Path.Combine(WorldRepository.DefaultDirectory,"sandbox-cables","cables.sqlite");
+            string file=repository?.DatabasePath ?? fixtureDatabasePath;
             state=new(){File=file,Loading=CableStorage.Load(file,id)};cableLocations.Add(id,state);
         }
         return state;

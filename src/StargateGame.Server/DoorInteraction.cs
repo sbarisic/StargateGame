@@ -34,6 +34,9 @@ public sealed partial class GameServer
             foreach(var p in dynamic)
                 if(SolidGeometry.ConvexBox(p.Local.Select(v=>Vector3.Transform(v,inv)).ToArray(),p.Hull.Faces,p.Hull.Edges,sweep.Bounds))
                     return Block(p.Name,p.Id.ToString(),sweep);
+            foreach(var n in physics.NpcMotions)
+                if(DoorGeometry.CapsuleBox(Vector3.Transform(Vector3.Transform(n.Position,inverse),inv),Movement.Height,Movement.Radius,sweep.Bounds))
+                    return Block("NPC",n.Id.ToString(),sweep);
             foreach(var p in players)
                 if(DoorGeometry.CapsuleBox(Vector3.Transform(Vector3.Transform(p.Position,inverse),inv),Movement.BodyHeight(p),Movement.Radius,sweep.Bounds))
                     return Block("player",p.Id.ToString(),sweep);

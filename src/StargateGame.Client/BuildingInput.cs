@@ -34,7 +34,7 @@ sealed partial class GameApp
     }
     void BuildingInput(InputManager input)
     {
-        if(cableTool){CancelDemolition();return;}
+        if(cableTool||npcTool){CancelDemolition();return;}
         bool down=input.IsMouseButtonDown(MouseButton.Left);
         if(!down) { CancelDemolition(false); demolitionNeedsRelease=false; }
         if(session is null || paused || buildPaletteOpen || !buildMode)

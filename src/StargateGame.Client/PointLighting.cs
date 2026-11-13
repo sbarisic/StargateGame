@@ -103,7 +103,7 @@ sealed partial class SceneRenderer
             propWindTime[i] = weatherFrame.Time;
             if (propStaticDirty[i]) { DrawPropShadowFace(frame, i, false, snapshot, time); propStaticDirty[i] = false; }
             var actors = new List<ShadowActor>();
-            foreach (var p in snapshot.Remotes.Append(snapshot.Local).OrderBy(p => p.Id))
+            foreach (var p in CharacterActors(snapshot).OrderBy(p => p.Id))
                 if (face.Intersects(new(p.Position - new Vector3(.4f, .01f, .4f), p.Position + new Vector3(.4f, 1.8f, .4f))))
                     actors.Add(new(0, p.Id, p.Position, Quaternion.CreateFromAxisAngle(Vector3.UnitY, -p.Yaw)));
             foreach (var p in snapshot.Bodies.OrderBy(p => p.Id))

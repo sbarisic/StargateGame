@@ -1,6 +1,7 @@
 param(
-    [ValidateSet('list','run','start','status','wait','action','capture','stop','check')][string]$Operation='check',
+    [ValidateSet('list','run','start','status','wait','action','capture','stop','check','mcp','prepare','doctor','sessions','attach','detach','observe','operation','cancel','recipe','cleanup')][string]$Operation='check',
     [string]$Scenario='sandbox', [string]$Preset='default', [string]$Recipe='visual-check', [string[]]$Group=@('quick'),
+    [string]$Id='', [string[]]$Sections=@(), [string]$Filter='', [int]$Offset=0, [int]$Limit=20, [int]$WaitSeconds=0, [switch]$Async, [switch]$Export, [switch]$RetainState, [switch]$Headless, [switch]$Delete,
     [string]$Session='', [string]$Request='', [string]$Condition='captureReady', [string]$Name='capture.png',
     [string]$BuildRoot='', [string]$ContentCache='', [switch]$NoBuild, [switch]$Json, [switch]$KeepOpen,
     [int]$Clients=1, [int]$Client=1, [int]$Timeout=240, [int]$Seed=7319,
@@ -20,35 +21,39 @@ if (!$BuildRoot) { $BuildRoot=Join-Path $root 'artifacts/testing-build' }
 $BuildRoot=[IO.Path]::GetFullPath($BuildRoot)
 if ($Building) { $Group='building' }
 if ($Streaming -or $Stress -or $Explore -or $Slow) { $Group='streaming' }
-$binary=Join-Path $BuildRoot 'bin/StargateGame.Harness/release/StargateGame.Harness.dll'
+$hostRoot=Join-Path $root 'artifacts/testing-tools'
+$binary=Join-Path $hostRoot 'bin/StargateGame.TestHost/release/StargateGame.TestHost.dll'
 Push-Location $root
 try {
-    if (!$NoBuild -and $Operation -in @('list','run','start','check')) {
-        $sessions=Join-Path $env:LOCALAPPDATA 'StargateGame/Testing/sessions'
-        if (Test-Path $sessions) { foreach ($file in Get-ChildItem $sessions -Filter session.json -Recurse) {
-            $active=Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json
-            if ($active.buildRoot -eq $BuildRoot -and $active.state -in @('starting','ready','switching') -and (Get-Process -Id $active.coordinatorPid -ErrorAction SilentlyContinue)) { throw "Build is in use by session $($active.id). Stop it, use -NoBuild, or choose a different -BuildRoot." }
-        } }
-        New-Item -ItemType Directory -Force $BuildRoot | Out-Null
-        $buildArgs=@('build','StargateGame.sln','-c','Release','--artifacts-path',$BuildRoot,'--nologo','-p:CookAssets=true')
-        if (!$ContentCache) { $ContentCache=Join-Path $root 'artifacts/cooked' }
-        $ContentCache=[IO.Path]::GetFullPath($ContentCache)
-        $buildArgs += "-p:AssetCookCache=$ContentCache"
-        $packs=Join-Path $ContentCache 'packs'
-        if (Test-Path -LiteralPath (Join-Path $packs 'catalog.json')) { $buildArgs += "-p:CookedAssetPacks=$packs" }
-        & dotnet @buildArgs *> (Join-Path $BuildRoot 'build.log')
-        if ($LASTEXITCODE) { throw "Build failed: $BuildRoot/build.log" }
+    $sources = @(Get-ChildItem "$root/src/StargateGame.TestHost","$root/src/StargateGame.Testing" -File | Where-Object Extension -in '.cs','.csproj')
+    $needsHost = !(Test-Path -LiteralPath $binary) -or @($sources | Where-Object LastWriteTimeUtc -gt (Get-Item $binary -ErrorAction SilentlyContinue).LastWriteTimeUtc).Count -gt 0
+    if ($needsHost -and !$NoBuild) {
+        if (Test-Path -LiteralPath $binary) {
+            try { $probe=[IO.File]::Open($binary,[IO.FileMode]::Open,[IO.FileAccess]::Write,[IO.FileShare]::None); $probe.Dispose() }
+            catch { throw 'The test host needs rebuilding but is in use. Close its MCP connection before updating the host.' }
+        }
+        New-Item -ItemType Directory -Force $hostRoot | Out-Null
+        & dotnet build "$root/src/StargateGame.TestHost" -c Release --artifacts-path $hostRoot --nologo *> (Join-Path $hostRoot 'bootstrap.log')
+        if ($LASTEXITCODE) { throw "Test host build failed: $hostRoot/bootstrap.log" }
     }
-    if (!(Test-Path -LiteralPath $binary)) {
-        foreach ($candidate in @((Join-Path $BuildRoot 'StargateGame.Harness.dll'),(Join-Path $BuildRoot 'testing/StargateGame.Harness/StargateGame.Harness.dll'))) { if (Test-Path -LiteralPath $candidate) { $binary=$candidate; break } }
-    }
-    if (!(Test-Path -LiteralPath $binary)) { throw "Harness missing: $binary. Run without -NoBuild." }
+    if (!(Test-Path -LiteralPath $binary)) { throw 'Test host missing. Run Test.ps1 list once without -NoBuild.' }
     $launch=@($binary,$Operation,'--build-root',$BuildRoot,'--repo-root',$root,'--scenario',$Scenario,'--preset',$Preset,'--recipe',$Recipe,
-        '--group',($Group -join ','),'--clients',"$Clients",'--client',"$Client",'--timeout',"$Timeout",'--seed',"$Seed",'--biome',$Biome,
+        '--group',($Group -join ','),'--clients',"$Clients",'--timeout',"$Timeout",'--seed',"$Seed",'--biome',$Biome,
         '--landscape',$Landscape,'--settlement',$Settlement,'--style',$Style,'--hour',$Hour.ToString([Globalization.CultureInfo]::InvariantCulture),
         '--weather',$Weather,'--quality',$Quality,'--terrain-rate',"$TerrainRate",'--destination-delay',"$DestinationDelay")
     $explicitOverrides=@('seed','biome','landscape') | Where-Object { $PSBoundParameters.ContainsKey($_) }
     $launch+=@('--overrides',($explicitOverrides -join ','))
+    if ($PSBoundParameters.ContainsKey('Client')) { $launch+=@('--client',"$Client") }
+    if ($ContentCache) { $launch+=@('--content-cache',[IO.Path]::GetFullPath($ContentCache)) }
+    if ($NoBuild) { $launch+='--no-build' }
+    if ($RetainState) { $launch+='--retain-state' }
+    if ($Headless) { $launch+='--headless' }
+    if ($Async) { $launch+='--async' }
+    if ($Export) { $launch+='--export' }
+    if ($Delete) { $launch+='--delete' }
+    if ($Id) { $launch+=@('--id',$Id) }
+    if ($Sections) { $launch+=@('--sections',($Sections -join ',')) }
+    $launch+=@('--offset',"$Offset",'--limit',"$Limit",'--wait-seconds',"$WaitSeconds",'--filter',$Filter)
     if ($Session) { $launch+=@('--session',$Session) }
     if ($Request) { $launch+=@('--request',[IO.Path]::GetFullPath($Request)) }
     if ($Operation -eq 'wait') { $launch+=@('--condition',$Condition) }

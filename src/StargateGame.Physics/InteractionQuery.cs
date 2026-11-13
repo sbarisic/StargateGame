@@ -36,7 +36,7 @@ public sealed partial class PhysicsWorld
                 ? origin+direction*(distance*hit.Fraction) : null;
         }
     }
-    public bool InteractionBlocked(Vector3 origin, Vector3 direction, float distance, string? ignoreEntity = null, int ignorePlayer = 0, int ignoreProp = 0, bool ignoreBuildings = false)
+    public bool InteractionBlocked(Vector3 origin, Vector3 direction, float distance, string? ignoreEntity = null, int ignorePlayer = 0, int ignoreProp = 0, bool ignoreBuildings = false, Guid ignoreNpc = default)
     {
         if (distance <= 0)
             return false;
@@ -44,6 +44,8 @@ public sealed partial class PhysicsWorld
         {
             interactionFilter ??= Native.Own(new InteractionFilter());
             interactionFilter.Ignore = ignoreEntity is not null ? entityBodies.GetValueOrDefault(ignoreEntity, BodyID.Invalid) : props.GetValueOrDefault(ignoreProp, BodyID.Invalid);
+            if(ignoreNpc!=Guid.Empty&&npcMotions.Values.FirstOrDefault(n=>n.Id==ignoreNpc) is var npc&&npc.Id==ignoreNpc)
+                interactionFilter.Ignore=npcCharacters[npc.Slot].InnerBodyID;
             interactionFilter.Player = characters.TryGetValue(ignorePlayer, out var c) ? c.InnerBodyID : BodyID.Invalid;
             interactionFilter.Buildings = ignoreBuildings ? interactionBuildings : null;
             var ray = new Ray(origin, direction * distance);

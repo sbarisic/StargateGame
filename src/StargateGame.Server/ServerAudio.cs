@@ -6,8 +6,9 @@ namespace StargateGame.Server;
 public sealed partial class GameServer
 {
     long nextSoundId;
-    void EmitSound(WorldSoundKind kind, Vector3 position, float strength = 1, int body = 0)
+    void EmitSound(WorldSoundKind kind, Vector3 position, float strength = 1, int body = 0,Guid sourceNpc=default)
     {
+        if(kind==WorldSoundKind.Impact)HearNpcs(position,false,strength:strength,sourceNpc:sourceNpc);
         var sound = new WorldSoundEvent(++nextSoundId, physics.Tick, kind, body, position, Math.Clamp(strength, 0, 1));
         foreach (var s in sessions.Where(s => s.PlayerId != 0 && s.RejectAt == 0))
             if (Vector3.DistanceSquared(physics.Player(s.PlayerId).Position, position) < 100 * 100)
@@ -36,7 +37,7 @@ public sealed partial class GameServer
             var key = (impact.BodyId, impact.OtherId, false);
             if (impact.Approach > .65f && (!context.SoundCooldown.TryGetValue(key, out var last) || physics.Tick - last >= 12))
             {
-                EmitSound(WorldSoundKind.Impact, impact.Position, Math.Clamp(impact.Approach / 6, .08f, 1), impact.BodyId);
+                EmitSound(WorldSoundKind.Impact, impact.Position, Math.Clamp(impact.Approach / 6, .08f, 1), impact.BodyId,physics.NpcForCollisionBody(impact.OtherId));
                 context.SoundCooldown[key] = physics.Tick;
             }
             var scrape = group.MaxBy(c => c.Sliding);

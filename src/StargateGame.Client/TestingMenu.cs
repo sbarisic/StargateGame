@@ -109,6 +109,7 @@ sealed partial class GameApp
             for (int i = 0; i < 3; i++) if (TestButton(i, 0).Contains(UiMouse)) StartLocalScenario(menuScenario with { Scenario = ScenarioCatalog.Scenarios[i].Id });
             var definition = ScenarioCatalog.Scenarios.Single(s => s.Id == menuScenario.Scenario);
             var bookmarks = definition.Bookmarks; var stations = definition.Stations;
+            if (TestButton(0, 1).Contains(UiMouse)) { testAiGranted = !testAiGranted; if (!testAiGranted) RevokeAiControl(); else { testingPanel = false; SetPause(false); } }
             if (TestButton(1, 1).Contains(UiMouse)) testingStation = (testingStation + 1) % stations.Length;
             if (TestButton(2, 1).Contains(UiMouse)) LocalCommand(TestAction.Teleport, new { station = stations[testingStation % stations.Length] });
             if (TestButton(3).Contains(UiMouse)) testingBookmark = (testingBookmark + 1) % bookmarks.Length;
@@ -180,6 +181,7 @@ sealed partial class GameApp
             {
                 var definition = ScenarioCatalog.Scenarios.Single(s => s.Id == menuScenario.Scenario);
             var bookmarks = definition.Bookmarks; var stations = definition.Stations;
+                Button(pass, TestButton(0, 1), "AI control: " + (testAiGranted ? "ON / Escape revokes" : "OFF"), testId: "testing/ai-control");
                 Button(pass, TestButton(1, 1), "Station: " + stations[testingStation % stations.Length]);
                 Button(pass, TestButton(2, 1), "Move player to station");
                 Button(pass, TestButton(3), "View: " + bookmarks[testingBookmark % bookmarks.Length]); Button(pass, TestButton(3, 1), "Inspect camera");
@@ -211,6 +213,7 @@ sealed partial class GameApp
             catch (InvalidOperationException) { }
             finally { coordinator.Dispose(); }
         });
+        RevokeAiControl();
         localCoordinator = null; localManifest = null; localWork = null;
         if (testPipe is not null) { testPipe.DisposeAsync().AsTask().GetAwaiter().GetResult(); testPipe = null; }
         Environment.SetEnvironmentVariable("STARGATEGAME_USER_DATA", previousProfile);

@@ -17,6 +17,7 @@ public sealed partial class GameServer
         if (a.Equipped != equipped || !equipped && a.Action is "fire" or "reload") return true;
         var next = new CharacterPresentation(s.PlayerId, a.Sequence, equipped, equipped && a.Aiming, equipped ? a.Action : "holster", serverTick);
         characterStates[s.PlayerId] = next;
+        if (equipped && a.Action == "fire") HearNpcs(Movement.EyePosition(physics.Player(s.PlayerId)), true, s.PlayerId);
         Broadcast(new()
         {
             Kind = "character-state",

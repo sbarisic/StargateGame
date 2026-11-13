@@ -15,7 +15,7 @@ sealed partial class GameApp
     void EquipCable()
     {
         if(session?.Carrying==true)session.Carry(CarryAction.Drop);
-        physicsGunEquipped=false;buildMode=false;cableTool=true;
+        ExitNpcs();physicsGunEquipped=false;buildMode=false;cableTool=true;
         if(scene is not null){scene.PhysicsGunEquipped=false;scene.PhysicsGunBeam=null;}
         CancelDemolition();
     }

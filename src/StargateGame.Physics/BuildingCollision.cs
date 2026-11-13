@@ -86,6 +86,7 @@ public sealed partial class PhysicsWorld
                 shape.Dispose();
             }
             preparedBuildings.Clear();
+            preparedNavigationChunks.Clear();
             dirtyTerrain.Clear();
             dirtyBuildings.Clear();
             stagedChanges = null;

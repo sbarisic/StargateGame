@@ -86,7 +86,7 @@ public sealed partial class GameServer
     }
     double exitSearchMilliseconds;
     bool TravelBusy(LocationContext c) => c.Gate?.Phase == GatePhase.Opening || hazards.TryGetValue(c, out var hazard) && hazard.Pending || travels.Values.Any(t => t.Source == c || t.Destination == c) || propDestructions.Any(d => d.Context == c) || emergingProps.Values.Any(e => e.Location == c);
-    bool UnattendedPhysicsActive(LocationContext c) => fixtureConnection is not null || links.Values.Any(l => l.Source == c || l.Destination == c) || c.Physics.NeedsPropSimulation;
+    bool UnattendedPhysicsActive(LocationContext c) => fixtureConnection is not null || links.Values.Any(l => l.Source == c || l.Destination == c) || c.Physics.NeedsPropSimulation || c.Physics.NpcMotions.Any(n=>c.Physics.HasTerrain(n.Position,2)&&(!n.Grounded||n.Velocity.LengthSquared()>.01f));
     void Notice(PendingTravel t, TransitPhase phase, string? reason = null)
     {
         Console.WriteLine($"TRANSIT id={t.Id} item={t.Prop?.PersistentId} connection={t.Link.Id} source={t.Record.Source} destination={t.Record.Destination} phase={phase} sourceEpoch={t.Source.Physics.Epoch} reason={reason}");

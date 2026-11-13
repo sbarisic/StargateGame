@@ -46,6 +46,7 @@ sealed partial class GameApp
         Directory.CreateDirectory(testRoot);
         testPipe = new LocalPipe(pipe, testQueue.Enqueue);
     }
+    object TestProgress() => new { playable = TestPlayable, captureReady = TestCaptureReady, generation = testGeneration, revision = session?.Changes.Revision, operation = testOperation, failure = startupFailure ?? session?.Failure, readiness = TestReadiness() };
     object TestStatus() => new
     {
         syntheticInputActive = testMoveUntil > timer.Elapsed.TotalSeconds, playable = TestPlayable, captureReady = TestCaptureReady, generation = testGeneration,
@@ -55,6 +56,7 @@ sealed partial class GameApp
         gates = session?.Gates.Values.ToArray(), gate = session?.Gate, destinations = session?.Destinations,
         entities = session?.World.Definition.Entities, props = session?.World.Definition.Props,
         bodies = session?.Physics.Bodies(), carries = session?.Physics.Carries,
+        npcs = session?.Npcs, npcReply = session?.LastNpcReply, npcNavigation = session?.NpcDiagnostics, npcCollision = session?.Physics.NpcMotions, npcRendered = session?.PresentedNpcs(),
         returnAddress = session?.ReturnAddress, inventory = session?.Inventory, container = session?.OpenWeaponContainer, changes = session?.Changes, pieces = session?.Changes.Pieces, revision = session?.Changes.Revision,
         operation = testOperation, camera = new { eye = camera.Position, target = camera.Position + camera.WorldForwardNormal, view = testView },
         pointLights = new { count = scene?.PointLightCount, shadowFaceUpdates = scene?.PointShadowUpdates, targetBytes = scene?.PointLightTargetBytes, shadowMs = scene?.CommonReady == true ? scene.PointShadowGpuMilliseconds : 0, lightingMs = scene?.CommonReady == true ? scene.PointLightGpuMilliseconds : 0 },
@@ -77,13 +79,37 @@ sealed partial class GameApp
             testWeatherFixture = testHorizonProps = testHorizonPlayers = testHorizonOcclusion = testShadowFixture = testOrbit = testTraverse = false; testVisualTime = null;
             scene?.SetTestMeadowMaterial(null); if (scene is not null) ConfigureScene();
             testView = "player"; testPreview = null; testCameraEye = testCameraTarget = null; testPending = null; testOperation = null;
-            testMoveUntil = 0; testFrames = 0; testChangedFrame = 0;
+            ReleaseTestInput(); testMoveUntil = 0; testFrames = 0; testChangedFrame = 0;
             fields[0] = "127.0.0.1"; fields[1] = r.Int("port").ToString();
             if (scene is not null) ApplyTestSettings(r with { Data = TestJson.Element(new { hour = testOptions.Hour, weather = testOptions.Weather, quality = testOptions.Quality }) });
             Connect(); return TestResult.Ok(r);
         }
         if (r.Generation != testGeneration) throw new InvalidOperationException("Stale scenario generation.");
-        if (r.Action == TestAction.Status) return TestResult.Ok(r, TestStatus());
+        if (r.Action == TestAction.Observe) return TestResult.Ok(r, ObserveTest(r));
+        if (r.Action == TestAction.ReleaseControl) { if (testController == r.Controller && testController.Length > 0) RevokeAiControl(); return TestResult.Ok(r); }
+        if (r.Action == TestAction.Cancel)
+        {
+            bool pending = testPending?.Id == r.Value<Guid>("id");
+            if (pending) FinishTest("failed", "Cancelled; already-applied gameplay effects remain.");
+            if (testInputRequest == r.Value<Guid>("id") || pending) ReleaseTestInput();
+            return TestResult.Ok(r);
+        }
+        if (r.Controller.Length > 0 && r.Action is not (TestAction.Status or TestAction.Capture))
+        {
+            if (!AiInputOwned) throw new InvalidOperationException("control-not-granted");
+            if (testController.Length > 0 && testController != r.Controller) throw new InvalidOperationException("Another AI controller owns this client.");
+            if (testController != r.Controller)
+            {
+                testControllerProcess?.Dispose(); testControllerProcess = null;
+                if (int.TryParse(r.Controller.Split(':')[0], out int ownerPid))
+                {
+                    try { testControllerProcess = System.Diagnostics.Process.GetProcessById(ownerPid); }
+                    catch (ArgumentException) { throw new InvalidOperationException("AI controller exited."); }
+                }
+                testController = r.Controller;
+            }
+        }
+        if (r.Action == TestAction.Status) return TestResult.Ok(r, r.Flag("compact") ? TestProgress() : TestStatus());
         if (r.Action == TestAction.Stop) { window.IsCloseRequested = true; return TestResult.Ok(r); }
         if (r.Action == TestAction.Disconnect) { CancelJoin(); Disconnect("Local test disconnected."); testMoveUntil = 0; FinishTest("failed", "Disconnected."); return TestResult.Ok(r); }
         if (session is null || scene is null) throw new InvalidOperationException("No playable local session.");
@@ -91,6 +117,22 @@ sealed partial class GameApp
         testChangedFrame = testFrames;
         switch (r.Action)
         {
+            case TestAction.Input: return StartTestInput(r);
+            case TestAction.Aim:
+                Vector3 target;
+                if (r.Data.TryGetProperty("target", out _)) target = r.Value<Vector3>("target");
+                else if (session.World.Definition.Entities.FirstOrDefault(e => e.Id == r.Text("entity")) is { } entity) target = entity.Position;
+                else if (session.PresentedNpcs().FirstOrDefault(n => n.Id.ToString() == r.Text("entity")) is var npc && npc.Id != Guid.Empty) target = npc.Position + Vector3.UnitY;
+                else if (session.Changes.Pieces.FirstOrDefault(p => p.Id.ToString() == r.Text("entity")) is { } piece)
+                {
+                    var bounds = BuildingGeometry.Bounds(BuildingGeometry.Mesh(session.Changes, piece)); target = (bounds.Min + bounds.Max) / 2;
+                }
+                else if (session.World.Definition.Props.FirstOrDefault(p => p.PersistentId.ToString() == r.Text("entity")) is { } prop) target = session.Physics.Bodies().Single(b => b.Id == prop.Id).Position;
+                else throw new ArgumentException("unsupported-target: entity is absent or cannot be aimed at.");
+                var direction = target - StargateGame.Shared.Movement.EyePosition(session.Local);
+                if (!Finite(target) || direction.LengthSquared() < .0001f) throw new ArgumentException("Invalid aim target.");
+                direction = Vector3.Normalize(direction); yaw = MathF.Atan2(direction.X, -direction.Z); pitch = MathF.Asin(direction.Y);
+                testView = "player"; testCameraEye = testCameraTarget = null; return TestResult.Ok(r);
             case TestAction.Camera:
                 string view = r.Text("bookmark", "player");
                 Vector3? eyePosition = r.Data.TryGetProperty("eye", out _) ? r.Value<Vector3>("eye") : null;
@@ -110,7 +152,7 @@ sealed partial class GameApp
                 if (r.Flag("stop")) audio.StopRecording(); else { audio.TestCueCounts.Clear(); audio.Record(TestOutput(r.Text("name", "audio.wav"))); } return TestResult.Ok(r);
             case TestAction.Move:
                 double seconds = r.Number("seconds");
-                if (seconds is < 0 or > 30 || !double.IsFinite(seconds)) throw new ArgumentException("Movement duration must be 0â€“30 seconds.");
+                if (seconds is < 0 or > 30 || !double.IsFinite(seconds)) throw new ArgumentException("Movement duration must be 0–30 seconds.");
                 testForward = (float)r.Number("forward"); testStrafe = (float)r.Number("strafe");
                 if (!float.IsFinite(testForward + testStrafe) || Math.Abs(testForward) > 1 || Math.Abs(testStrafe) > 1) throw new ArgumentException("Input must be between -1 and 1.");
                 if (!double.IsFinite(r.Number("yaw", yaw)) || !double.IsFinite(r.Number("pitch", pitch)) || Math.Abs(r.Number("pitch", pitch)) > 1.55) throw new ArgumentException("Invalid look angles.");
@@ -145,6 +187,9 @@ sealed partial class GameApp
             case TestAction.Carry:
                 session.Carry(Enum.Parse<CarryAction>(r.Text("action"), true), r.Data.TryGetProperty("item", out _) ? r.Value<Guid>("item") : Guid.Empty);
                 break;
+            case TestAction.Npc:
+                npcDebug = r.Flag("debug", npcDebug);
+                session.Npc(r.Value<NpcCommand>("command") with { Request = r.Id }); break;
             case TestAction.Build:
                 var buildCommand = r.Value<BuildCommand>("command") with { RequestId = r.Id, Revision = session.Changes.Revision };
                 if (buildCommand.Action == "door" && buildCommand.HitPoint is null)
@@ -160,11 +205,12 @@ sealed partial class GameApp
                     r.Data.TryGetProperty("container", out _) ? r.Value<Guid>("container") : Guid.Empty); break;
             case TestAction.Capture:
                 testCapture = TestOutput(r.Text("name", "capture-" + r.Id.ToString("N") + ".png"));
+                if (!r.Flag("retain", true)) { var transient = Path.Combine(testRoot, "transient"); Directory.CreateDirectory(transient); testCapture = Path.Combine(transient, Path.GetFileName(testCapture)); }
                 testCaptureIncludeUi = r.Flag("includeUi", true);
                 break;
             case TestAction.Sample:
                 double duration = r.Number("seconds", 3);
-                if (!double.IsFinite(duration) || duration is < .1 or > 60) throw new ArgumentException("Sample duration must be 0.1â€“60 seconds.");
+                if (!double.IsFinite(duration) || duration is < .1 or > 60) throw new ArgumentException("Sample duration must be 0.1–60 seconds.");
                 testSamples.Clear(); testSampleUntil = timer.Elapsed.TotalSeconds + duration; break;
             default: throw new ArgumentException("Unsupported client action: " + r.Action);
         }
@@ -182,6 +228,7 @@ sealed partial class GameApp
         if (testPending is not { } r) return;
         if (outcome != "passed" && r.Action == TestAction.Relocate) session?.CancelPlanetLoad();
         testOperation = new(r.Id, r.Session, r.Generation, outcome, TestJson.Element(data ?? new { }), error, Client: r.Client);
+        if (r.Action == TestAction.Input || outcome != "passed") ReleaseTestInput();
         testPending = null; testCapture = null; testMovementReview = false; testUiReview = false; testMoveUntil = 0; testJump = false;
     }
     void PumpTests(double now)
@@ -199,6 +246,8 @@ sealed partial class GameApp
             case TestAction.Move when now >= testMoveUntil: FinishTest(); break;
             case TestAction.Dial when testFrames > testChangedFrame + 1 && !session.DialPending:
                 FinishTest(session.LastDhdResult?.Accepted == true ? "passed" : "failed", session.LastDhdResult?.Reason, session.LastDhdResult); break;
+            case TestAction.Npc when !session.NpcPending:
+                FinishTest(session.LastNpcReply?.Accepted == true ? "passed" : "failed", session.LastNpcReply?.Reason, session.LastNpcReply); break;
             case TestAction.Build when !session.BuildPending:
                 FinishTest(session.LastBuildResult?.Success == true ? "passed" : "failed", session.BuildStatus, session.LastBuildResult); break;
             case TestAction.Weapon when !session.WeaponPending: FinishTest(session.LastWeaponResult?.Success == true ? "passed" : "failed", session.WeaponStatus, data: new { session.Inventory, session.WeaponStatus }); break;
@@ -221,7 +270,7 @@ sealed partial class GameApp
         if (r.Data.TryGetProperty("aoView", out _)) AmbientOcclusionSettings.InspectionId(r.Text("aoView"));
         if (r.Data.TryGetProperty("quality", out _) && !new[] { "performance", "low", "high" }.Contains(r.Text("quality"))) throw new ArgumentException("Invalid quality.");
         if (r.Data.TryGetProperty("weather", out _)) WeatherSettings.Parse(r.Text("weather"));
-        if (r.Data.TryGetProperty("grassDensity", out _) && r.Int("grassDensity") is < 0 or > 64) throw new ArgumentException("Grass density must be 0�64.");
+        if (r.Data.TryGetProperty("grassDensity", out _) && r.Int("grassDensity") is < 0 or > 64) throw new ArgumentException("Grass density must be 0�64.");
         if (r.Data.TryGetProperty("visualTime", out var vt) && vt.ValueKind != JsonValueKind.Null && (!double.IsFinite(r.Number("visualTime")) || r.Number("visualTime") < 0)) throw new ArgumentException("Invalid visual time.");
         if (r.Data.TryGetProperty("propMode", out _) && r.Text("propMode") is not ("all" or "motion" or "stationary")) throw new ArgumentException("Unknown prop preview mode.");
         if (testOptions.Scenario == "sandbox" && testOptions.Preset != "graphics-lab") scene.SetTestingInspection(true); else scene.SetTestingInspection(false);
@@ -287,8 +336,8 @@ sealed partial class GameApp
     };
     void CaptureTest(RenderPass pass, bool beforeUi = false)
     {
-        if (beforeUi == testCaptureIncludeUi || testCapture is not { } path || !TestCaptureReady) return;
-        Capture(pass, path, true); TestJson.Write(Path.ChangeExtension(path, ".json"), TestStatus());
+        if (beforeUi == testCaptureIncludeUi || testCapture is not { } path || !(testPending?.Flag("immediate") == true ? scene is not null : TestCaptureReady)) return;
+        Capture(pass, path, true); TestJson.Write(Path.ChangeExtension(path, ".json"), ObserveTest(new() { Data = TestJson.Element(new { sections = new[] { "rendering", "diagnostics" } }) }));
         FinishTest(data: new { path, metadata = Path.ChangeExtension(path, ".json") });
     }
 }

@@ -26,6 +26,13 @@ sealed partial class SceneRenderer
         && grassTiles.Values.All(tile => coverClock.Elapsed.TotalSeconds - tile.Born >= .4) && grassJobs.Count == 0 && meadowJobs.Count == 0 && surfaceJobs.Count == 0 && grassVolumeUpload is null
         && (!GroundCoverSettings.Enabled || World.Definition.Preset != "temperate"
             || (grassTiles.Count == 0 || (GroundCoverSettings.Hybrid ? grassVolumes is not null && hybridGrassShader is not null && hybridMeshShader is not null : grassShader is not null)));
+    public object DeferredReadiness => new { shader = deferredShader is not null, optionalPrograms = optionalPrograms.Count,
+        terrainSize, paletteSize = PaletteSize, buildingModelsPending, models = modelJobs.Count, textures = textureRefinements.Count,
+        fadingGrass = grassTiles.Values.Count(tile => coverClock.Elapsed.TotalSeconds - tile.Born < .4), grass = grassJobs.Count,
+        meadows = meadowJobs.Count, surfaces = surfaceJobs.Count, uploadingGrass = grassVolumeUpload is not null,
+        groundCover = GroundCoverSettings.Enabled, hybrid = GroundCoverSettings.Hybrid, grassTiles = grassTiles.Count,
+        grassVolumes = grassVolumes is not null, hybridShader = hybridGrassShader is not null, hybridMeshShader = hybridMeshShader is not null,
+        grassShader = grassShader is not null };
     static long TargetSize(RenderTarget? target, int bytes) => target is null ? 0 : (long)target.Width * target.Height * bytes * target.SampleCount;
     RenderTarget CreateGbuffer(int width, int height, int samples)
     {

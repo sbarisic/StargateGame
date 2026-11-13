@@ -35,7 +35,7 @@
     <Content Include="$(AssetCookCache)/models/**/*" Link="assets/vegetation/models/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Import Project="../../scripts/VisualStudioAssets.targets" />
-<ItemGroup><ProjectReference Include="../StargateGame.Testing/StargateGame.Testing.csproj" /></ItemGroup>
+<ItemGroup><ProjectReference Include="../StargateGame.Testing/StargateGame.Testing.csproj" /><ProjectReference Include="../StargateGame.TestHost/StargateGame.TestHost.csproj" ReferenceOutputAssembly="false" /></ItemGroup>
 <ItemGroup>
 <ProjectReference Include="../StargateGame.Server/StargateGame.Server.csproj" ReferenceOutputAssembly="false" OutputItemType="LocalTestingRuntime" />
 <ProjectReference Include="../StargateGame.Harness/StargateGame.Harness.csproj" ReferenceOutputAssembly="false" OutputItemType="LocalTestingRuntime" />

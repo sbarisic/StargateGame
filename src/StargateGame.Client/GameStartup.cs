@@ -141,7 +141,7 @@ sealed partial class GameApp
                 yaw = session.Local.Yaw;
                 pitch = session.Local.Pitch;
                 paused = false;
-                window.CaptureCursor = !Smoke && !TestAutomated;
+                window.CaptureCursor = !Smoke && !TestAutomated && !AiInputOwned;
                 connectedAt = timer.Elapsed.TotalSeconds;
                 firstPlayablePresented = false;
                 startupPhase = StartupPhase.Playable;

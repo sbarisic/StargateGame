@@ -5,16 +5,22 @@ namespace StargateGame.Harness;
 
 static class CheckRunner
 {
-    public static readonly string[] Groups = ["quick", "full", "harness", "harness-processes", "movement", "tactical-movement", "fixture-gates", "travel", "travel-network", "galaxy", "persistence", "building", "prefab", "settlements", "settlement-seeds", "furnishing-fixtures", "furnishings", "weapons", "weapon-network", "interaction", "streaming", "regional", "regional-hydrology", "regional-seams", "environment", "atmosphere", "horizon", "address-book", "ui", "ui-render", "audio", "assets", "blender", "network", "dhd", "trees", "rocks", "worldgen", "canopy-lod", "planet-debug", "emergence", "forest-fixture", "prop-exit", "cooked-assets", "gate-physics", "palettes", "mounted-palettes", "buried-props", "terrain-physics", "regional-integration", "regional-profile", "streaming-cache", "horizon-network", "environment-network", "atmosphere-network", "audio-events", "gate-transition", "settlement-network", "prefab-network", "gate-build", "meadow-props", "address-book-network"];
-    public static async Task<int> Run(string build, string selection, string root, string[] modifiers)
+    public static string[] Groups => CheckCatalog.Groups;
+    public static async Task<int> Run(string build, string selection, string root, string[] modifiers, CancellationToken token = default)
     {
         var selected = selection == "quick" ? new[] { "harness", "tactical-movement", "address-book" } : selection == "full" ? Groups.Except(["quick", "full", "blender", "regional-profile"]).ToArray() : selection.Split(',');
-        var results = new List<object>(); bool failed = false;
+        var results = new List<object>(); bool failed = false; string? activeGroup = null;
+        var completed = new HashSet<string>();
         string run = Path.Combine(build, "checks", DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N")[..8]); Directory.CreateDirectory(run);
-        using var cancel = new CancellationTokenSource();
+        using var cancel = CancellationTokenSource.CreateLinkedTokenSource(token);
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; cancel.Cancel(); };
+        try
+        {
         foreach (string group in selected)
         {
+            if (activeGroup is not null) completed.Add(activeGroup);
+            activeGroup = group;
+            cancel.Token.ThrowIfCancellationRequested();
             if (!Groups.Contains(group)) throw new ArgumentException("Unknown check group: " + group);
             if (group == "harness-processes")
             {
@@ -23,7 +29,8 @@ static class CheckRunner
                 continue;
             }
             var commands = new List<(string Executable, string[] Args)>();
-            if (group == "assets") foreach (string file in Directory.GetFiles(Path.Combine(root, "tools"), "test_*.py")) commands.Add(("python", [file]));
+            if (group == "harness-mcp") commands.Add(("python", [Path.Combine(root, "tools/check_ai_harness.py"), "--host", HarnessFiles.Binary(build, "StargateGame.TestHost"), "--build-root", build, "--output", Path.Combine(run, "mcp.json")]));
+            else if (group == "assets") foreach (string file in Directory.GetFiles(Path.Combine(root, "tools"), "test_*.py")) commands.Add(("python", [file]));
             else if (group == "blender")
             {
                 string? blender = Environment.GetEnvironmentVariable("BLENDER_EXE");
@@ -61,6 +68,12 @@ static class CheckRunner
                 }
             }
             failed |= exit != 0; results.Add(new { group, outcome = exit == 0 ? "passed" : "failed", exitCode = exit });
+        }
+        }
+        catch (Exception e)
+        {
+            failed = true; results.Add(new { group = activeGroup, outcome = e is OperationCanceledException ? "cancelled" : "failed", error = e.ToString() });
+            foreach (var group in selected.Where(g => g != activeGroup && !completed.Contains(g))) results.Add(new { group, outcome = "skipped", reason = "Earlier check interrupted execution." });
         }
         string output = Path.Combine(run, "result.json");
         TestJson.Write(output, new { selected, results }); Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { selected, results, output }, TestJson.Options));

@@ -24,7 +24,7 @@ sealed partial class GameApp
         uiInputConsumed = true;
         uiMouseGuard = true;
         buildPaletteOpen = open;
-        window.CaptureCursor = !open && !paused && !Smoke && !UiPreview;
+        window.CaptureCursor = !open && !paused && !Smoke && !UiPreview && !AiInputOwned;
         mouseDelta = Vector2.Zero;
         jumpQueued = false;
         CancelDemolition();
@@ -47,7 +47,7 @@ sealed partial class GameApp
     }
     bool PaletteInput(InputManager input)
     {
-        if(cableTool)return false;
+        if(cableTool||npcTool)return false;
         ReflowPalette();
         if (buildPaletteOpen && (!input.IsKeyDown(Key.B) && !paletteInspectionHolding || paused))
         {
@@ -118,6 +118,7 @@ sealed partial class GameApp
             if (index >= BuildItemCount)
                 break;
             var tile = l.Tile(slot);
+            RegisterTestUi("building/" + (index < 0 ? "exit" : BuildName(index)), index < 0 ? "Exit build mode" : BuildName(index), tile, true);
             if (index == -1)
             {
                 ui.Frame(pass, tile, tile.Contains(UiMouse) ? UiTheme.Hover : UiTheme.Panel);

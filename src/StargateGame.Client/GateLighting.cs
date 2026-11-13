@@ -210,7 +210,7 @@ sealed partial class SceneRenderer
             }
             var visible = new List<ShadowActor>();
             var faceFrustum = gateLightFrusta[face];
-            foreach (var p in snapshot.Remotes.Append(snapshot.Local).OrderBy(p => p.Id))
+            foreach (var p in CharacterActors(snapshot).OrderBy(p => p.Id))
                 if (faceFrustum.Intersects(new(p.Position - new Vector3(.4f, .01f, .4f), p.Position + new Vector3(.4f, 1.8f, .4f))))
                     visible.Add(new(0, p.Id, p.Position, Quaternion.CreateFromAxisAngle(Vector3.UnitY, -p.Yaw)));
             foreach (var p in snapshot.Bodies.OrderBy(p => p.Id))

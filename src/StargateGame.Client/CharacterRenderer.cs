@@ -9,9 +9,17 @@ sealed partial class SceneRenderer
     public bool HandShadowBaseline { get; set; }
     public string HandInspectionPose { get; set; } = "";
     SkeletalAsset? military, rifle, preparingCharacter;
+    readonly Dictionary<string,SkeletalAsset> characterAssets=[];
+    public NpcMotion[] NpcActors {get;set;}=[];
+    public NpcRecord[] NpcDefinitions {get;set;}=[];
+    public IEnumerable<StargateGame.Physics.DebugLine> NpcToolLines {get;set;}=[];
+    string ActorDefinition(int id)=>id<=-1000?NpcDefinitions.FirstOrDefault(n=>NpcActors.Any(m=>-1000-m.Slot==id&&m.Id==n.Id))?.Definition??"military":"military";
+    SkeletalAsset? ActorAsset(int id)=>characterAssets.GetValueOrDefault(ActorDefinition(id));
     readonly Dictionary<int, Matrix4x4[]> actorPoses = [];
-    sealed record ActorAnimation(string Clip, double Started, string? Previous = null, double PreviousStarted = 0);
+    sealed record ActorAnimation(string Clip, double Started, string? Previous = null, double PreviousPhase = 0,
+        double Phase = 0, double Updated = 0);
     readonly Dictionary<int, ActorAnimation> actorAnimation = [];
+    readonly Dictionary<int,Guid> npcAnimationOwners=[];
     readonly Matrix4x4[] riflePose = new Matrix4x4[128];
     public IReadOnlyDictionary<int, CharacterPresentation> CharacterStates
     {
@@ -69,9 +77,10 @@ sealed partial class SceneRenderer
     public double CharacterGpuMilliseconds => gpuTimer.CharacterMilliseconds;
     IEnumerable<bool> PrepareCharacterResources()
     {
-        foreach (string name in new[] { "military.sga.gz", "retro-rifle.sga.gz" })
+        foreach (string name in CharacterDefinitions.All.Select(d=>d.Model+".sga.gz").Append("retro-rifle.sga.gz").Distinct())
         {
-            if (name == "military.sga.gz" ? military is not null : rifle is not null)
+            var definition=CharacterDefinitions.All.FirstOrDefault(d=>d.Model+".sga.gz"==name);
+            if (definition is not null ? characterAssets.ContainsKey(definition.Id) : rifle is not null)
                 continue;
             var work = modelAssets.PrepareCpuAsync(() => SkeletalAsset.Prepare(Asset("characters", name), modelAssets, startupStop.Token), startupStop.Token);
             while (!work.IsCompleted)
@@ -91,8 +100,11 @@ sealed partial class SceneRenderer
                 foreach (bool step in asset.UploadPart(graphics, p, file => textures[file + "|character"]))
                     yield return step;
             }
-            if (name == "military.sga.gz")
-                military = asset;
+            if (definition is not null)
+            {
+                if(definition.Id==CharacterDefinitions.Soldier.Id)military = asset;
+                foreach(var shared in CharacterDefinitions.All.Where(d=>d.Model==definition.Model))characterAssets[shared.Id]=asset;
+            }
             else
                 rifle = asset;
             preparingCharacter = null;
@@ -105,25 +117,36 @@ sealed partial class SceneRenderer
         if (military is null) return;
         foreach (var p in CharacterActors(snapshot))
         {
+            if(p.Id<=-1000)
+            {
+                var identity=NpcActors.First(n=>-1000-n.Slot==p.Id).Id;
+                if(npcAnimationOwners.GetValueOrDefault(p.Id)!=identity){actorAnimation.Remove(p.Id);npcAnimationOwners[p.Id]=identity;}
+            }
+            var asset=ActorAsset(p.Id);if(asset is null)continue;
+            var definition=CharacterDefinitions.Get(ActorDefinition(p.Id));
             if (!actorPoses.TryGetValue(p.Id, out var pose))
                 actorPoses[p.Id] = pose = new Matrix4x4[128];
             var relative = p.Velocity - (p.Grounded ? p.GroundVelocity : Vector3.Zero);
             float speed = new Vector2(relative.X, relative.Z).Length();
             string clip = p.Swimming ? (speed > .3 ? "swim" : "swim-idle") : p.Crouched ? (speed > .2 ? "crouch-walk" : "crouch-idle") : !p.Grounded ? (p.Velocity.Y > 1 ? "jump" : "fall") : speed > 3.5 ? "run" : speed > .2 ? "walk" : "idle";
-            if (p.Id < 0)
+            if(clip=="idle")clip=definition.Idle;else if(clip=="walk")clip=definition.Walk;else if(clip=="run")clip=definition.Run;
+            float playback=clip==definition.Run?Math.Clamp(speed/definition.RunSpeed,.2f,2):clip==definition.Walk?Math.Clamp(speed/definition.WalkSpeed,.2f,2):1;
+            if (p.Id < 0 && p.Id > -1000)
             {
                 string inspectionClip = InspectionAnimation ?? clip;
-                military.Sample(inspectionClip, InspectionTime ?? snapshot.SimulationTime, pose, inspectionClip is not ("jump" or "land"));
+                asset.Sample(inspectionClip, InspectionTime ?? snapshot.SimulationTime, pose, inspectionClip is not ("jump" or "land"));
             }
             else
             {
                 double now = snapshot.SimulationTime;
                 if (!actorAnimation.TryGetValue(p.Id, out var playing))
-                    playing = new(clip, now);
+                    playing = new(clip, now, Updated:now);
+                double elapsed=Math.Clamp(now-playing.Updated,0,.1);
                 if (playing.Clip != clip)
-                    playing = new(clip, now, playing.Clip, playing.Started);
+                    playing = new(clip, now, playing.Clip, playing.Phase,Updated:now);
+                playing=playing with {Phase=playing.Phase+elapsed*playback,PreviousPhase=playing.PreviousPhase+elapsed,Updated=now};
                 actorAnimation[p.Id] = playing;
-                military.SampleBlend(clip, now - playing.Started, playing.Previous, now - playing.PreviousStarted, (float)((now - playing.Started) / .15), pose, clip is not ("jump" or "land"));
+                asset.SampleBlend(clip, playing.Phase, playing.Previous, playing.PreviousPhase, (float)((now - playing.Started) / .15), pose, clip is not ("jump" or "land"));
             }
         }
         var retained = CharacterActors(snapshot).Select(p => p.Id).ToHashSet();
@@ -131,6 +154,7 @@ sealed partial class SceneRenderer
         {
             actorPoses.Remove(id);
             actorAnimation.Remove(id);
+            npcAnimationOwners.Remove(id);
         }
         CharacterCpuMilliseconds = watch.Elapsed.TotalMilliseconds;
     }
@@ -138,6 +162,8 @@ sealed partial class SceneRenderer
     {
         foreach (var p in snapshot.Remotes.Append(snapshot.Local).Where(p => !p.TransitFrozen))
             yield return p;
+        foreach(var n in NpcActors)
+            yield return new(-1000-n.Slot,"NPC",n.Position,n.Velocity,n.Yaw,0,n.Grounded,0);
         if (World.Definition.Fixture == "graphics-lab")
             for (int i = 0; i < InspectionCharacters; i++)
                 yield return new(-100 - i, "Inspection", new(-4 + i * 2, 0, -4), Vector3.Zero, 0, 0, true, 0);
@@ -182,8 +208,8 @@ sealed partial class SceneRenderer
                 continue;
             float distance = Vector3.Distance(p.Position, grassEye), lod = distance < 25 ? 1 : distance < 60 ? .5f : .25f;
             using var model = pass.PushModel(Matrix4x4.CreateRotationY(-p.Yaw) * Matrix4x4.CreateTranslation(p.Position));
-            if (military is not null && actorPoses.TryGetValue(p.Id, out var pose))
-                DrawSkin(pass, program, military, pose, lod, depth);
+            if (ActorAsset(p.Id) is {} asset && actorPoses.TryGetValue(p.Id, out var pose))
+                DrawSkin(pass, program, asset, pose, lod, depth);
             else
             {
                 program.SetUniform("uSkinning", 0);

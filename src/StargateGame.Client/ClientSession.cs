@@ -87,7 +87,7 @@ sealed partial class ClientSession : IDisposable
             ServerTick = state.Tick;
             clock.Anchor(state.Tick, Now, true);
             latest = state.Players;
-            remotePresentation.Add(state);
+            remotePresentation.Add(state); RecordNpcFrame(state);
             prediction = new(definition, localId, state, Terrain, connection.Welcome.CollisionChunks, changes: connection.InitialChanges);
             lastTarget = state.Tick;
         }
@@ -153,6 +153,7 @@ sealed partial class ClientSession : IDisposable
                     continue;
                 if (message.Kind == "snapshot" && message.LocationId != Guid.Empty && message.LocationId != World.Definition.LocationId)
                     continue;
+                if (HandleNpcs(message)) continue;
                 if (HandleCables(message)) continue;
                 if (HandleBuilding(message))
                     continue;
@@ -192,7 +193,7 @@ sealed partial class ClientSession : IDisposable
                 long epoch = prediction.Simulation.Epoch;
                 int corrections = prediction.Reconciliations + prediction.Resets;
                 latest = state.Players;
-                remotePresentation.Add(state);
+                remotePresentation.Add(state); RecordNpcFrame(state);
                 ServerTick = state.Tick;
                 prediction.Accept(state);
                 LastSnapshot = state;
@@ -263,7 +264,7 @@ sealed partial class ClientSession : IDisposable
             yaw = Local.Yaw;
             pitch = Local.Pitch;
         }
-        PollCables();
+        PollCables(); PollNpcs();
         pendingJump |= jump;
         long target = Math.Min((long)Math.Floor(clock.PredictionTime(Now)), ServerTick + 24);
         if (activationTick > 0 && transfer?.Preparation.SwitchPlanet == true)

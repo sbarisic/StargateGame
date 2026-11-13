@@ -52,7 +52,7 @@ public sealed partial class GameServer
     {
         if (r.Session != testSession || r.Generation != testGeneration) throw new InvalidOperationException("Stale test session/generation.");
         if (r.Action == TestAction.Stop) { stop.Cancel(); return TestResult.Ok(r); }
-        if (r.Action == TestAction.Status) return TestResult.Ok(r, new { ready = true, port = Port, routes = TestRoutes(), operation = testPreparationResult, pendingLocations = locationLoads.Count, repositoryPending = repository?.Pending, relocations = relocations.Count, lookups = AllSessions.Select(s => new { player = s.PlayerId, move = s.MoveLookup?.Status.ToString() }).ToArray(), regionalView = testRegionalView, tick = serverTick, physicsHash = PhysicsWorld.PhysicsHash, contentHash = PhysicsWorld.ContentHash });
+        if (r.Action == TestAction.Status) return TestResult.Ok(r, new { ready = true, port = Port, routes = TestRoutes(), operation = testPreparationResult, pendingLocations = locationLoads.Count, repositoryPending = repository?.Pending, relocations = relocations.Count, lookups = AllSessions.Select(s => new { player = s.PlayerId, move = s.MoveLookup?.Status.ToString() }).ToArray(), regionalView = testRegionalView, npcMovement = NpcMovementDiagnostics(), tick = serverTick, physicsHash = PhysicsWorld.PhysicsHash, contentHash = PhysicsWorld.ContentHash });
         if (r.Action == TestAction.PrepareDestination)
         {
             if (testPreparation is not null || repository is null || galaxy is null || catalogue is null) throw new InvalidOperationException("Destination preparation unavailable or busy.");

@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StargateGame.Ui.Tests", "te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StargateGame.Harness.Tests", "tests\StargateGame.Harness.Tests\StargateGame.Harness.Tests.csproj", "{B76ABBFF-B608-4649-B230-97C402F8AAC4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StargateGame.TestHost", "src\StargateGame.TestHost\StargateGame.TestHost.csproj", "{C0A107ED-B65F-4636-8791-AEEF4367B2E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -261,6 +263,18 @@ Global
 		{B76ABBFF-B608-4649-B230-97C402F8AAC4}.Release|x64.Build.0 = Release|Any CPU
 		{B76ABBFF-B608-4649-B230-97C402F8AAC4}.Release|x86.ActiveCfg = Release|Any CPU
 		{B76ABBFF-B608-4649-B230-97C402F8AAC4}.Release|x86.Build.0 = Release|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Debug|x64.Build.0 = Debug|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Debug|x86.Build.0 = Debug|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Release|x64.ActiveCfg = Release|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Release|x64.Build.0 = Release|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Release|x86.ActiveCfg = Release|Any CPU
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -284,5 +298,6 @@ Global
 		{1EFB1A3A-EDC1-4AF7-8006-0E4178AAAF73} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{72712A05-85A9-47AA-A897-E761F03CF667} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{B76ABBFF-B608-4649-B230-97C402F8AAC4} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{C0A107ED-B65F-4636-8791-AEEF4367B2E6} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

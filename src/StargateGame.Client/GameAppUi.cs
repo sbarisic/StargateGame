@@ -21,7 +21,7 @@ sealed partial class GameApp
     float UiWidth => uiPreviewSize?.X ?? window.Width / UiScale;
     float UiHeight => uiPreviewSize?.Y ?? window.Height / UiScale;
     Vector2 UiPixelScale => uiPreviewSize is null ? window.FramebufferSize / new Vector2(UiWidth, UiHeight) : new(uiPreviewDpi);
-    Vector2 UiMouse => window.MousePosition * new Vector2(UiWidth / window.Width, UiHeight / window.Height);
+    Vector2 UiMouse => (testInput?.PointerTopLeft ?? window.MousePosition) * new Vector2(UiWidth / window.Width, UiHeight / window.Height);
     UiLayout Layout => new(UiWidth, UiHeight);
     bool uiInputConsumed, uiMouseGuard;
     int pauseFocus;
@@ -90,11 +90,13 @@ sealed partial class GameApp
         }
         uiDelta = (float)Math.Clamp(now - uiLastTime, 0, .05);
         uiLastTime = now;
+        testUi.Clear();
         ui.Viewport(UiHeight, UiPixelScale);
     }
     void Panel(RenderPass pass, UiRect rect, bool opaque = false) => ui.Frame(pass, rect, opaque: opaque);
-    void Button(RenderPass pass, UiRect r, string text, bool selected = false, bool enabled = true, string? key = null, float size = 16)
+    void Button(RenderPass pass, UiRect r, string text, bool selected = false, bool enabled = true, string? key = null, float size = 16, string? testId = null)
     {
+        RegisterTestUi(testId ?? "button/" + text, text, r, enabled);
         // Geometry identifies controls; discard transitions when the viewport changes.
         bool hover = enabled && r.Contains(UiMouse);
         float old = uiHover.GetValueOrDefault(r), next = Math.Clamp(old + (hover ? 1 : -1) * uiDelta * 9, 0, 1);
@@ -204,7 +206,7 @@ sealed partial class GameApp
             Text(pass, l.Equipment.X + 112, l.Equipment.Y + 36, "PREVIEW", 14);
             return;
         }
-        DrawCableHud(pass);
+        DrawCableHud(pass); DrawNpcHud(pass);
         if (physicsGunEquipped && !spawnMenuOpen && !paused)
         {
             float width = Math.Min(680, UiWidth - 40);
@@ -213,7 +215,7 @@ sealed partial class GameApp
             Text(pass, x + 12, y + 8, "PHYSICS GUN / Hold Left mouse to grab / Release to drop", 14, UiTheme.Amber);
             Text(pass, x + 12, y + 30, "Wheel: distance / E + Mouse: rotate / G: rifle", 14);
         }
-        else if (pickupHint.Length > 0 && !spawnMenuOpen && !cableTool)
+        else if (pickupHint.Length > 0 && !spawnMenuOpen && !cableTool && !npcTool)
         {
             float x = UiWidth / 2f - 120, y = UiHeight / 2f + 36;
             Panel(pass, new(x - 10, y - 5, 260, 36));

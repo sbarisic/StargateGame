@@ -1,5 +1,8 @@
 # Local testing and AI development
 
+See [AI_TESTING.md](AI_TESTING.md) for direct MCP tools, compact observations,
+input handoff, operation cancellation, replay, and session retention.
+
 Use `scripts/Test.ps1` for builds, scenarios, recipes, and focused checks. The menu and CLI use the versioned catalog in `src/StargateGame.Testing/Contracts.cs`. Defaults are Windows x64, Release, seed 7319, one client, performance graphics, and isolated temporary state.
 
 ## Manual testing
@@ -53,6 +56,13 @@ Press **F6** for the local testing panel: scenario selection, camera bookmarks, 
 Remote connections retain host, port, and player-name fields. The local testing panel is available only for the menu's owned local session. Local control cannot attach to or modify a remote server.
 
 ## Commands
+
+NPC controls, diagnostic actions and the 10/15/20 cm navigation comparison are
+documented in [NPCS.md](NPCS.md). The focused group is `npcs`; Sandbox recipes are
+`npc-lifecycle`, `npc-navigation`, and `npc-follow-buildings`. On 2026-11-13 the
+focused NPC group and `npc-follow-buildings` passed. The latter checks closed-door
+entry, exit, following a walking player and exterior detours at two houses,
+including a rotated house. See [NPCS.md](NPCS.md) for the findings and limits.
 
 ```powershell
 ./scripts/Test.ps1 list -Json
@@ -156,7 +166,7 @@ Timeouts report the last state and unfinished condition. Animation samples, sust
 
 Each session writes `%LOCALAPPDATA%/StargateGame/Testing/sessions/<id>/`: launch and resolved settings, build/content hashes, manifest, JSON-lines requests/results, per-client/server logs, optional recipe copy, captures/recordings, and `result.json`. Capture JSON includes camera, world/player/gates, options, and build/physics identity. Artifacts remain after cleanup.
 
-Client profiles, identities, address books, settings, and server saves are separate from normal play. Warm runs use `test-cache` below the chosen build root. `-Cold` gives the generation a run-local terrain cache; normal caches are never deleted. Full reset abandons old world state and creates a new generation; old generation files remain only as artifacts.
+Client profiles, identities, address books, settings, and server saves are separate from normal play. Warm runs use `test-cache` below the chosen build root. `-Cold` gives the generation a run-local terrain cache; normal caches are never deleted. Full reset creates a new generation. Disposable generation state is removed on final session stop unless retain-state is selected.
 
 The coordinator owns server and added clients through a Windows job object. A menu client remains externally owned; closing it ends its coordinator. Cancellation, startup failure, client/server failure, and coordinator exit release owned children. The current-user-only named pipes are enabled only by explicit harness arguments. Client commands execute on the game thread; server setup executes on the simulation thread. Gameplay networking remains separate.
 

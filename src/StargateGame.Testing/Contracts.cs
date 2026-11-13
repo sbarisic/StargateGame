@@ -24,8 +24,9 @@ public static class TestJson
 public enum TestAction
 {
     Status, Connect, Disconnect, Stop, Capture, Camera, Settings, Move, Teleport,
-    Dial, Carry, Build, Weapon, ResetPlayer, ResetStation, ResetScenario,
-    SwitchScenario, AddClient, GatePreview, AudioRecord, Sample, Wait, Assert, PrepareDestination, SetupProp, Window, Relocate, UiReview, MovementReview
+    Dial, Carry, Build, Weapon, Npc, ResetPlayer, ResetStation, ResetScenario,
+    SwitchScenario, AddClient, GatePreview, AudioRecord, Sample, Wait, Assert, PrepareDestination, SetupProp, Window, Relocate, UiReview, MovementReview,
+    Observe, Input, Aim, Operation, Cancel, ReleaseControl, Recipe
 }
 public sealed record TestRequest
 {
@@ -36,6 +37,8 @@ public sealed record TestRequest
     public TestAction Action { get; init; }
     public JsonElement Data { get; init; } = TestJson.Element(new { });
     public int TimeoutSeconds { get; init; } = 120;
+    public bool Async { get; init; }
+    public string Controller { get; init; } = "";
     public string Text(string key, string fallback = "") => Data.TryGetProperty(key, out var v) ? v.GetString() ?? fallback : fallback;
     public int Int(string key, int fallback = 0) => Data.TryGetProperty(key, out var v) ? v.GetInt32() : fallback;
     public double Number(string key, double fallback = 0) => Data.TryGetProperty(key, out var v) ? v.GetDouble() : fallback;
@@ -58,11 +61,11 @@ public sealed record ScenarioDefinition(string Id, string Name, string Descripti
     public string[] Stations => Id == "sandbox" ? ["gate-pair", "props", "movement", "equipment", "interior", "forest", "water", "technology"] : ["spawn", "gate", "dhd"];
 }
 public sealed record SessionManifest(string Id, int CoordinatorPid, string Pipe, string Root, string BuildRoot,
-    int Generation, ScenarioOptions Options, string State, int[] ClientPids, int ServerPid, string? Error = null);
+    int Generation, ScenarioOptions Options, string State, int[] ClientPids, int ServerPid, string? Error = null, DateTimeOffset? CoordinatorStartedUtc = null);
 public sealed record LaunchOptions(string Session, string Root, string BuildRoot, ScenarioOptions Options,
-    int Clients = 1, int OwnerPid = 0, string? AttachedClientPipe = null, bool Manual = false);
+    int Clients = 1, int OwnerPid = 0, string? AttachedClientPipe = null, bool Manual = false, bool RetainState = false);
 public sealed record RecipeStep(TestAction Action, JsonElement Data, int Client = 1, int TimeoutSeconds = 120);
-public sealed record RecipeDefinition(string Name, RecipeStep[] Steps);
+public sealed record RecipeDefinition(string Name, RecipeStep[] Steps, ScenarioOptions? InitialScenario = null, bool ResetBefore = false);
 
 public static class ScenarioCatalog
 {
@@ -71,7 +74,7 @@ public static class ScenarioCatalog
     public static readonly ScenarioDefinition[] Scenarios = [
         new("sandbox", "Sandbox", "Two gates, physics, equipment and furnished inspection stations.",
             ["player", "gate-pair", "dhd", "props", "movement", "equipment", "interior", "forest", "water", "technology"],
-            ["visual-check", "lantern-lighting", "deferred-ao-compare", "gate-roundtrip", "lifecycle", "audio", "environment", "gate-effects", "sandbox-check", "horizon-lifecycle", "ui-live", "movement-visual"]),
+            ["npc-follow-buildings", "npc-navigation", "npc-lifecycle", "visual-check", "lantern-lighting", "deferred-ao-compare", "gate-roundtrip", "lifecycle", "audio", "environment", "gate-effects", "sandbox-check", "horizon-lifecycle", "ui-live", "movement-visual"]),
         new("planet-explorer", "Planet Explorer", "Generated biomes, regional landscapes and settlements.",
             ["player", "gate", "wide", "grass", "forest", "river", "cliff", "lake", "underwater", "settlement", "settlement-interior", "region"],
             ["visual-check", "environment", "lifecycle"]),

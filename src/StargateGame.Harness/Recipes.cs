@@ -7,14 +7,16 @@ using StargateGame.Testing;
 
 namespace StargateGame.Harness;
 
-static class Recipes
+static partial class Recipes
 {
-    public static readonly string[] Names = ["lantern-lighting", "deferred-ao-compare", "visual-check", "ui-live", "movement-visual", "gate-roundtrip", "travel-roundtrip", "lifecycle", "horizon-lifecycle", "audio", "environment", "gate-effects", "sandbox-check", "audio-endpoints", "dialing-failure", "audio-failure"];
-    public static async Task Run(SessionManifest manifest, string name, CancellationToken token)
+    public static string[] Names => RecipeCatalog.All.Select(r => r.Id).ToArray();
+    public static async Task Run(SessionManifest manifest, string name, CancellationToken token, string controller = "", Func<TestRequest, CancellationToken, Task<TestResult>>? dispatch = null)
     {
+        int actionIndex = 0;
         async Task<TestResult> Send(TestAction action, object? data = null, int client = 1, int timeout = 180)
         {
-            var result = await LocalPipe.Send(manifest.Pipe, new() { Session = manifest.Id, Generation = manifest.Generation, Action = action, Data = TestJson.Element(data ?? new { }), Client = client, TimeoutSeconds = timeout }, token);
+            if (action != TestAction.Status) TestJson.Write(Path.Combine(manifest.Root, "recipe-progress.json"), new { recipe = name, step = actionIndex++, action, expected = data });
+            var result = await (dispatch ?? ((request, cancellation) => LocalPipe.Send(manifest.Pipe, request, cancellation)))(new() { Session = manifest.Id, Generation = manifest.Generation, Controller = controller, Action = action, Data = TestJson.Element(data ?? new { }), Client = client, TimeoutSeconds = timeout }, token);
             result.EnsureSuccess(); return result;
         }
         async Task<JsonElement> State(int client = 1)
@@ -34,16 +36,104 @@ static class Recipes
         if (File.Exists(name))
         {
             var recipe = TestJson.Read<RecipeDefinition>(name);
+            if (recipe.InitialScenario is null && recipe.ResetBefore) throw new ArgumentException("Replay reset requires an initial scenario.");
+            if (recipe.ResetBefore)
+            {
+                await Send(TestAction.SwitchScenario, recipe.InitialScenario);
+                manifest = TestJson.Read<SessionManifest>(Path.Combine(manifest.Root, "session.json"));
+            }
+            int stepIndex = 0;
             foreach (var step in recipe.Steps)
             {
-                await Send(step.Action, step.Data, step.Client, step.TimeoutSeconds);
+                TestJson.Write(Path.Combine(manifest.Root, "recipe-progress.json"), new { recipe = recipe.Name, step = stepIndex++, action = step.Action, expected = step.Data });
+                var current = await State(step.Client);
+                var resolved = ReplayExport.Transform(step.Data, TestJson.Element(new { }), true, current);
+                if (step.Action == TestAction.Input && resolved.TryGetProperty("controlId", out var controlId))
+                {
+                    var clock = Stopwatch.StartNew();
+                    while (true)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        var view = await Send(TestAction.Observe, new { sections = new[] { "ui" } }, step.Client);
+                        var ui = view.Data.GetProperty("observation").GetProperty("ui");
+                        if (ui.GetProperty("controls").EnumerateArray().Any(c => c.GetProperty("id").GetString() == controlId.GetString()))
+                        {
+                            var fields = resolved.EnumerateObject().ToDictionary(p => p.Name, p => p.Value);
+                            fields["uiRevision"] = ui.GetProperty("revision"); resolved = TestJson.Element(fields); break;
+                        }
+                        if (clock.Elapsed.TotalSeconds >= step.TimeoutSeconds) throw new TimeoutException("Replay control not visible: " + controlId);
+                        await Task.Delay(50, token);
+                    }
+                }
+                await Send(step.Action, resolved, step.Client, step.TimeoutSeconds);
                 if (step.Action is TestAction.ResetScenario or TestAction.SwitchScenario) manifest = TestJson.Read<SessionManifest>(Path.Combine(manifest.Root, "session.json"));
             }
             return;
         }
         if (!Names.Contains(name)) throw new ArgumentException("Unknown recipe: " + name);
+        if(name=="npc-follow-buildings"){await FollowBuildings(manifest,token,controller,dispatch);return;}
         switch (name)
         {
+            case "npc-lifecycle":
+            {
+                if(manifest.Options.Scenario!="sandbox")throw new ArgumentException("NPC checks require Sandbox.");
+                await Send(TestAction.Teleport,new{station="props"});
+                var state=await State();var player=state.GetProperty("player").Deserialize<PlayerState>(TestJson.Options);
+                var spawned=await Send(TestAction.Npc,new{command=new NpcCommand(Guid.NewGuid(),"spawn",Point:player.Position+new Vector3(-3,-.1f,3))});
+                var npc=spawned.Data.Deserialize<NpcReply>(TestJson.Options)!.Target;
+                await Until(s=>s.GetProperty("npcs").GetProperty("records").EnumerateArray().Any(n=>n.GetProperty("id").GetGuid()==npc));
+                if(manifest.ClientPids.Length<2)await Send(TestAction.AddClient);
+                await Until(s=>s.GetProperty("npcs").GetProperty("records").EnumerateArray().Any(n=>n.GetProperty("id").GetGuid()==npc),2);
+                await Send(TestAction.Npc,new{command=new NpcCommand(Guid.NewGuid(),"order",npc,new(NpcOrderKind.Follow,[],player.Id))});
+                await Until(s=>s.GetProperty("npcs").GetProperty("records").EnumerateArray().Any(n=>n.GetProperty("id").GetGuid()==npc&&n.GetProperty("order").GetProperty("kind").GetString()=="follow"));
+                await Task.Delay(150,token); // Respect the authoritative command rate limit.
+                await Send(TestAction.Npc,new{command=new NpcCommand(Guid.NewGuid(),"remove",npc)});
+                await Until(s=>!s.GetProperty("npcs").GetProperty("records").EnumerateArray().Any(n=>n.GetProperty("id").GetGuid()==npc),2);
+                break;
+            }
+            case "npc-navigation":
+            {
+                if(manifest.Options.Scenario!="sandbox")throw new ArgumentException("NPC navigation comparisons require Sandbox.");
+                await Send(TestAction.Teleport,new{station="movement"});
+                var state=await State();var navigationChanges=state.GetProperty("changes").Deserialize<WorldChanges>(TestJson.Options)!;
+                var navigationDoor=navigationChanges.Pieces.First(BuildingPrefabs.IsDoor);
+                var root=DoorGeometry.Root(navigationChanges.Structures.Single(s=>s.Id==navigationDoor.StructureId),navigationDoor);
+                var navigationBounds=BuildingGeometry.Bounds(BuildingGeometry.Mesh(navigationChanges,navigationDoor with{Open=false}));
+                var navigationCentre=(navigationBounds.Min+navigationBounds.Max)*.5f;navigationCentre.Y=navigationBounds.Min.Y+.05f;
+                var normal=Vector3.Normalize(Vector3.TransformNormal(Vector3.UnitZ,root));
+                var houseBounds=BuildingGeometry.Bounds(navigationChanges.Pieces.Where(p=>p.StructureId==navigationDoor.StructureId)
+                    .SelectMany(p=>BuildingGeometry.Mesh(navigationChanges,p)).ToArray());
+                float houseMidZ=(houseBounds.Min.Z+houseBounds.Max.Z)*.5f;
+                var probes=new[]{
+                    (Name:"flat",From:new Vector3(-24,.05f,17),To:new Vector3(-17,.05f,17)),
+                    (Name:"both-stair-flights",From:new Vector3(-23.3f,.05f,6.9f),To:new Vector3(-21.7f,3.35f,8.1f)),
+                    (Name:"door-clearance",From:navigationCentre-normal*2,To:navigationCentre+normal*2),
+                    (Name:"house-obstacle",From:new Vector3(houseBounds.Min.X-2,.05f,houseMidZ),To:new Vector3(houseBounds.Max.X+2,.05f,houseMidZ))};
+                var report=new List<object>();
+                foreach(float cell in new[]{.1f,.15f,.2f})
+                {
+                    await Send(TestAction.Npc,new{command=new NpcCommand(Guid.NewGuid(),"configure",CellSize:cell),debug=true});
+                    foreach(var probe in probes)
+                    {
+                        NpcReply? answer=null;var watch=Stopwatch.StartNew();
+                        while(watch.Elapsed.TotalSeconds<180)
+                        {
+                            await Task.Delay(200,token);
+                            answer=(await Send(TestAction.Npc,new{command=new NpcCommand(Guid.NewGuid(),"probe",Origin:probe.From,Point:probe.To)})).Data.Deserialize<NpcReply>(TestJson.Options)!;
+                            if(answer.Navigation!=NavigationOutcome.PendingNavigation)break;
+                        }
+                        await Task.Delay(150,token);
+                        await Send(TestAction.Npc,new{command=new NpcCommand(Guid.NewGuid(),"debug"),debug=true});
+                        var diagnostics=(await State()).GetProperty("npcNavigation");
+                        report.Add(new{cell,probe.Name,probe.From,probe.To,outcome=answer?.Navigation,path=answer?.Path,reason=answer?.Reason,elapsedSeconds=watch.Elapsed.TotalSeconds,diagnostics});
+                    }
+                    await Send(TestAction.Camera,new{bookmark="movement"});
+                    await Send(TestAction.Capture,new{name=$"npc-navigation-{cell*100:0}cm.png"});
+                }
+                TestJson.Write(Path.Combine(manifest.Root,"npc-navigation-comparison.json"),report);
+                await Send(TestAction.Npc,new{command=new NpcCommand(Guid.NewGuid(),"configure",CellSize:NpcRules.NavigationCellSize),debug=false});
+                break;
+            }
             case "lantern-lighting":
             {
                 if (manifest.Options.Scenario != "sandbox") throw new ArgumentException("lantern-lighting requires Sandbox.");

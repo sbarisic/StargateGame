@@ -5,6 +5,7 @@ static class CheckGroups
         bool delayed = args.Contains("--delayed");
         switch (group)
         {
+            case "npcs": await NpcChecks.Run(); break;
             case "quick": DhdGlyphChecks.Run(); MovementPresentationChecks.Run(); AddressBookChecks.Run(); break;
             case "movement": MovementPresentationChecks.Run(); PhysicsChecks.Run(); await LatencyScenario.Run(); break;
             case "tactical-movement": TacticalMovementChecks.Run(); MovementPresentationChecks.Run(); break;

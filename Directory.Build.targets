@@ -1,15 +1,15 @@
 <Project>
   <!-- Exclusion is required at each consuming project, not just the physics library:
        NuGet otherwise reintroduces JoltPhysicsSharp's transitive stock runtimes. -->
-  <ItemGroup Condition="!$(MSBuildProjectDirectory.Contains('thirdparty')) and '$(MSBuildProjectName)' != 'StargateGame.Shared'">
+  <ItemGroup Condition="!$(MSBuildProjectDirectory.Contains('thirdparty')) and '$(MSBuildProjectName)' != 'StargateGame.TestHost' and '$(MSBuildProjectName)' != 'StargateGame.Shared'">
     <PackageReference Include="JoltPhysics.Native" Version="1.1.0" ExcludeAssets="all" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(OutputType)' == 'Exe' and !$(MSBuildProjectDirectory.Contains('thirdparty'))">
+  <PropertyGroup Condition="'$(OutputType)' == 'Exe' and !$(MSBuildProjectDirectory.Contains('thirdparty')) and '$(MSBuildProjectName)' != 'StargateGame.TestHost'">
     <JoltRid Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</JoltRid>
     <JoltRid Condition="'$(JoltRid)' == '' and $([MSBuild]::IsOSPlatform('Windows'))">win-x64</JoltRid>
     <JoltRid Condition="'$(JoltRid)' == ''">linux-x64</JoltRid>
   </PropertyGroup>
-  <ItemGroup Condition="'$(OutputType)' == 'Exe' and !$(MSBuildProjectDirectory.Contains('thirdparty'))">
+  <ItemGroup Condition="'$(OutputType)' == 'Exe' and !$(MSBuildProjectDirectory.Contains('thirdparty')) and '$(MSBuildProjectName)' != 'StargateGame.TestHost'">
     <Content Include="$(MSBuildThisFileDirectory)native/runtimes/$(JoltRid)/native/*" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="$(MSBuildThisFileDirectory)native/runtimes/$(JoltRid)/build.json" Link="jolt-build.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="$(MSBuildThisFileDirectory)vendor/LayerProcGen/LayerManager.cs" Link="licenses/LayerProcGen-source/LayerManager.cs" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
@@ -17,7 +17,7 @@
     <Content Include="$(MSBuildThisFileDirectory)native/licenses/*" Link="licenses/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
-  <Target Name="CheckJoltRuntime" BeforeTargets="BeforeBuild" Condition="'$(OutputType)' == 'Exe' and !$(MSBuildProjectDirectory.Contains('thirdparty'))">
+  <Target Name="CheckJoltRuntime" BeforeTargets="BeforeBuild" Condition="'$(OutputType)' == 'Exe' and !$(MSBuildProjectDirectory.Contains('thirdparty')) and '$(MSBuildProjectName)' != 'StargateGame.TestHost'">
     <Error Condition="'$(JoltRid)' != 'win-x64' and '$(JoltRid)' != 'linux-x64'" Text="StargateGame supports win-x64 and linux-x64 Jolt runtimes." />
     <Error Condition="!Exists('$(MSBuildThisFileDirectory)native/runtimes/$(JoltRid)/native')" Text="Missing packaged Jolt runtime. Initialize the checkout or run the native rebuild script." />
   </Target>
